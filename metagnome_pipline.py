@@ -34,13 +34,10 @@ class MetagenomePipline(object):
         global running_list
         running_list = self.out_dir + '.running_list'
 
-
-
     def _init_outdir_(self):
-        os.system('perl '+self.path['cii_home']+'create_dir_structure.pl '+self.out_dir)
-        for fq_path,new_id,direction in self.fq_info:
-            os.system(("ln {} "+self.out_dir + "Raw_fastq/{}_{}.fq.gz").format(fq_path,new_id,direction))
-
+        os.system('perl ' + self.path['cii_home'] + 'create_dir_structure.pl ' + self.out_dir)
+        for fq_path, new_id, direction in self.fq_info:
+            os.system(("ln {} " + self.out_dir + "Raw_fastq/{}_{}.fq.gz").format(fq_path, new_id, direction))
 
     def map_list(self, pattern, each, only_r1=False):
         out = []
@@ -52,7 +49,6 @@ class MetagenomePipline(object):
                 out.append(pattern.format(new_id, direction))
         out.sort()
         return split_list(out, each)
-
 
     def synchronize(func):
 
@@ -80,7 +76,7 @@ class MetagenomePipline(object):
         return "cd {}&&".format(home) + cmd
 
     @synchronize
-    def run_fastq(self, fq_list: list, processor=2):
+    def run_fastqc(self, fq_list: list, processor=2):
         """
         fq_list: 2 dimension list of fastq files
         processor: number of processor
@@ -94,3 +90,37 @@ class MetagenomePipline(object):
     @synchronize
     def run_filter(self, fq_list: list):
         os.system(self.homized_cmd("perl prinseq_wrapper.pl --aim Filter --single-end-fq-list {}".format(fq_list)))
+
+    @synchronize
+    def run_de_host(self, fq_list: list, processor=2):
+        os.system("perl " + self.path['de_host_path'] +
+                  ' --aim Host --config human --single-end-fq-list {} --threads {} -m N'.format(fq_list, str(processor)))
+
+    @synchronize
+    def run_merge_se_to_pe(self, fq_list: list):
+        os.system("perl " + self.path['merge_se_path'] + ' --paired-end-fq-list {}'.format(fq_list))
+
+    @synchronize
+    def run_kraken2(self, fq_list: list, processor=2):
+        os.system(self.homized_cmd("perl run_kraken2.pl {} {} {} PE".format(
+            fq_list, str(processor), self.path['kraken2_database'])))
+
+    @synchronize
+    def run_metaphlan2(self, fq_list: list, processor=2):
+        os.system(self.homized_cmd("perl run_metaphlan2.pl {} PE {}".format(
+            fq_list, str(processor))))
+
+    @synchronize
+    def run_humann(self, fq_list: list):
+        os.system(self.homized_cmd('perl run_humann.pl {} SE'.format(fq_list)))
+
+    def main(self, processor=2):
+        self.run_fastqc(self.raw_list, processor=processor)
+        self.run_trim(self.raw_list)
+        self.run_filter(self.trimmed_list)
+        self.run_fastq(self.filtered_list, processor=processor)
+        self.run_de_host(self.filtered_list, processor=processor)
+        self.run_merge_se_to_pe(self.de_host_r1_list)
+        self.run_kraken2(self.merged_pe_r1_list, processor=processor)
+        self.run_metaphlan2(self.merged_pe_r1_list, processor=processor)
+        self.run_humann(self.merged_pe_r1_list)

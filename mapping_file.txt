@@ -1,5 +1,0 @@
-#SampleID	Group1	Description
-SS1a	A	SS1a
-SS2b	A	SS2b
-SS4d	B	SS4d
-SS6f	B	SS6f
