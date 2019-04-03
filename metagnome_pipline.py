@@ -7,7 +7,14 @@ import json
 
 class MetagenomePipline(object):
     """
-    out_dir: the out results directory
+    arguments:
+        out_dir: the out results directory
+        run_size: control the max number of jobs submitted to sge each time
+        raw_fqs_dir: directory where the raw fastq file were stored
+        sample_regex: regular expression to match sample id (contained by brackets)
+        forward_regex: regular expression to match forward fastq files
+        reverse_regex: regular expression to match reverse fastq files
+        out_results_dir: where to store the results
     """
 
     def __init__(self, raw_fqs_dir, pre_mapping_file, run_size=4, sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_results_dir='/home/cheng/Projects/rll_testdir/test/'):
@@ -143,21 +150,22 @@ class MetagenomePipline(object):
             f.write(database)
         out = self.out_dir + out_dir + '/'
         for fq in fq_list:
-            cmd = "echo 'perl {}/FMAP_mapping.pl -p {} {} > {}.mapping.txt' | qsub -V -N {} -cwd -l h_vmem=3G -o {} -e {} -pe smp 4".format(
-                self.path['fmap_home'], str(processor), fq, out + os.path.basename(fq), fq, out, out)
+            cmd = "echo 'perl {}/FMAP_mapping.pl -p {} {} > {}.mapping.txt' | qsub -V -N {} -cwd -l h_vmem=24G -o {} -e {} -pe smp 4".format(
+                self.path['fmap_home'], str(processor), fq, out + os.path.basename(fq), os.path.basename(fq), out, out)
             print("submit:\n {}\n\n".format(cmd))
             os.system(cmd)
 
-    def quantify_fmap(self, out_dir='FMAP', all_name="all.txt"):
+    def quantify_fmap(self, out_dir='FMAP', all_name="all.txt",print_definition=False):
         out = self.out_dir + out_dir + '/'
+        p = "" if print_definition else "-n"
         file_pattern = out + "{}_R1.hg38.unmapped.{}.fastq.gz"
         info_list = self.map_list(only_r1=True)
         for new_id, direction in info_list:
             os.system("perl {}/FMAP_quantification.pl {}.mapping.txt > {}.abundance.txt".format(
-                self.path['fmap_home'], file_pattern.format(new_id, direction), out_dir + new_id))
-        args = ["{}={}.abundance.txt".format(new_id, out_dir + new_id) for new_id, direction in info_list]
-        os.system("perl {}/FMAP_table.pl {} > {}".format(
-            self.path['fmap_home'], " ".join(args), out + all_name))
+                self.path['fmap_home'], file_pattern.format(new_id, direction), out + new_id))
+        args = ["{}={}.abundance.txt".format(new_id, out + new_id) for new_id, direction in info_list]
+        os.system("perl {}/FMAP_table.pl {} {} > {}".format(
+            self.path['fmap_home'], p, " ".join(args), out + all_name))
 
     def fmap_wrapper(self, run_type="KEGG", processor=4):
         if run_type == "KEGG":
@@ -169,14 +177,17 @@ class MetagenomePipline(object):
                           processor=processor, out_dir="AMR")
             self.quantify_fmap(out_dir="AMR", all_name="All.AMR.abundance.txt")
 
-    def main(self, processor=4):
+    def run_pipline(self, processor=3):
         self.run_fastqc(fq_list=self.raw_list, processor=processor)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
-        self.run_fastq(fq_list=self.filtered_list, processor=processor)
+        self.run_fastqc(fq_list=self.filtered_list, processor=processor)
         self.run_de_host(fq_list=self.filtered_list, processor=processor)
         self.run_merge_se_to_pe(fq_list=self.de_host_r1_list)
         self.run_kraken2(fq_list=self.merged_pe_r1_list, processor=processor)
         self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=processor)
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
+        self.fmap_wrapper(run_type="KEGG",processor=processor*2)
+        self.fmap_wrapper(run_type="AMR",processor=processor*2)
+
