@@ -155,7 +155,7 @@ class MetagenomePipline(object):
             print("submit:\n {}\n\n".format(cmd))
             os.system(cmd)
 
-    def quantify_fmap(self, out_dir='FMAP', all_name="all.txt",print_definition=False):
+    def quantify_fmap(self, out_dir='FMAP', all_name="all.txt", print_definition=False):
         out = self.out_dir + out_dir + '/'
         p = "" if print_definition else "-n"
         file_pattern = out + "{}_R1.hg38.unmapped.{}.fastq.gz"
@@ -188,6 +188,5 @@ class MetagenomePipline(object):
         self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=processor)
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
-        self.fmap_wrapper(run_type="KEGG",processor=processor*2)
-        self.fmap_wrapper(run_type="AMR",processor=processor*2)
-
+        self.fmap_wrapper(run_type="KEGG", processor=processor * 2)
+        self.fmap_wrapper(run_type="AMR", processor=processor * 2)
