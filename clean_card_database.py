@@ -8,7 +8,7 @@ out_path = './' + base_name + '_cleaned.fasta'
 with open(db_path, 'r') as db, open(out_path, 'w') as odb:
     line_drop = []
     for num, line in enumerate(db):
-        if line.startwith('>'):
+        if re.search('^>',line):
             header = re.search('^ *[^ ]+', line).group()
             header = re.sub("[^\|]+$", '', header)
             tail = re.search('\[.+\]', line).group()
@@ -19,7 +19,7 @@ with open(db_path, 'r') as db, open(out_path, 'w') as odb:
             if body.find(' ') == -1:
                 odb.write(line)
             else:
-                gene1 = re.search('[A-Za-z]+[A-Z][A-Za-z]*', body)
+                gene1 = re.search('[A-Za-z\-0-9]+[A-Z][A-Za-z\-0-9]*', body)
                 gene2 = re.search('[A-Za-z]+[0-9]+[A-Za-z]*', body)
 
                 gene_hint = ""
@@ -34,7 +34,7 @@ with open(db_path, 'r') as db, open(out_path, 'w') as odb:
 
                 ipt == ipt.strip()
                 gene = ''
-                if any(ipt == 'y', ipt == '', ipt == '\n'):
+                if any((ipt == 'y', ipt == '', ipt == '\n')):
                     gene = gene_hint
                 elif not ipt == 'n':
                     gene = ipt
