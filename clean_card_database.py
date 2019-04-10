@@ -28,7 +28,7 @@ with open(db_path, 'r') as db, open(out_path, 'w') as odb:
                 elif body.count(' ') == 1:
                     gene_hint = re.sub(' ', '_', body)
 
-                print("Nonstandard gene name detected, the current gene definition is: '{}'".format(body))
+                print("Invlid gene name detected, the current gene definition is: '{}'; the bacteria name is {}".format(body, tail))
                 ipt = input(
                     "Input 'y' or '' to use '{}' (drop sequence if gene name ='') as gene name, input 'n' to drop this sequence from database, or input a gene name defined by yourself\n: ".format(gene_hint))
 
@@ -39,6 +39,7 @@ with open(db_path, 'r') as db, open(out_path, 'w') as odb:
                 elif not ipt == 'n':
                     gene = ipt
 
+                gene=gene.strip()
                 if gene:
                     odb.write(header + gene + ' ' + tail + '\n')
                 else:
