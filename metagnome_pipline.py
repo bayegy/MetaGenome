@@ -139,9 +139,15 @@ class MetagenomePipline(object):
             fq_list, str(processor), self.path['kraken2_database'])))
 
     def run_bracken(self):
+        global running_list
+        bracken_list = [l + '.bracken' for l in self.kracken2_reports_list]
         for report in self.kracken2_reports_list:
             os.system("python2 {} -i {} -k {} -l S -o {}.bracken".format(
                 self.path['bracken_path'], report, self.path['bracken_database'], report))
+        with open(running_list, 'w') as f:
+            f.write('\n'.join(bracken_list))
+        os.system(
+            "perl {}/Braken_to_OTUtable.pl {} {}".format(self.path['cii_home'], self.path['ncbi_taxaID_path'], running_list))
 
     @synchronize
     def run_metaphlan2(self, fq_list: list, processor=2):
@@ -206,6 +212,7 @@ class MetagenomePipline(object):
         self.run_de_host(fq_list=self.filtered_list, processor=processor)
         self.run_merge_se_to_pe(fq_list=self.de_host_r1_list)
         self.run_kraken2(fq_list=self.merged_pe_r1_list, processor=processor)
+        self.run_bracken()
         self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=processor)
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
