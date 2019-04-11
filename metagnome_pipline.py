@@ -105,7 +105,8 @@ class MetagenomePipline(object):
             print("######################" + str(func) + " done; time used: {} min".format(time_used))
         return wfunc
 
-    def homized_cmd(self, cmd, home="/home/cheng/pipelines/CII_meta/"):
+    def homized_cmd(self, cmd, home=False):
+        home = home if home else self.path['cii_home']
         return "cd {}&&".format(home) + cmd
 
     @synchronize
@@ -147,7 +148,7 @@ class MetagenomePipline(object):
         with open(running_list, 'w') as f:
             f.write('\n'.join(bracken_list))
         os.system(
-            "perl {}/Braken_to_OTUtable.pl {} {}".format(self.path['cii_home'], self.path['ncbi_taxaID_path'], running_list))
+            self.homized_cmd("perl Braken_to_OTUtable.pl {} {}".format(self.path['cii_home'], self.path['ncbi_taxaID_path'], running_list)))
 
     @synchronize
     def run_metaphlan2(self, fq_list: list, processor=2):
