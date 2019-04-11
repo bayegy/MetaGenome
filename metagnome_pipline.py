@@ -148,7 +148,7 @@ class MetagenomePipline(object):
         with open(running_list, 'w') as f:
             f.write('\n'.join(bracken_list))
         os.system(
-            self.homized_cmd("perl Braken_to_OTUtable.pl {} {}".format(self.path['cii_home'], self.path['ncbi_taxaID_path'], running_list)))
+            self.homized_cmd("perl Braken_to_OTUtable.pl {} {}".format(self.path['ncbi_taxaID_path'], running_list)))
 
     @synchronize
     def run_metaphlan2(self, fq_list: list, processor=2):
