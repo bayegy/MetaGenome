@@ -141,7 +141,7 @@ class MetagenomePipline(object):
     def run_bracken(self):
         for report in self.kracken2_reports_list:
             os.system("python2 {} -i {} -k {} -l S -o {}.bracken".format(
-                self.path['bracken_path'], report, self.path['kraken2_database'], report))
+                self.path['bracken_path'], report, self.path['bracken_database'], report))
 
     @synchronize
     def run_metaphlan2(self, fq_list: list, processor=2):
