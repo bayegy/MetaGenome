@@ -42,9 +42,9 @@ class MetagenomePipline(object):
         self.raw_list = self.map_list(raw_pattern, run_size)
         self.trimmed_list = self.map_list(trimmed_pattern, run_size)
         self.filtered_list = self.map_list(filtered_pattern, run_size)
-        self.de_host_r1_list = self.map_list(de_host_pattern, run_size, only_r1=True)
-        self.merged_pe_r1_list = self.map_list(self.merged_pe_pattern, run_size, only_r1=True)
-        self.kracken2_reports_list = self.map_list(kracken2_reports_pattern, only_r1=True)
+        self.de_host_r1_list = self.map_list(de_host_pattern, run_size, use_direction='R1')
+        self.merged_pe_r1_list = self.map_list(self.merged_pe_pattern, run_size, use_direction='R1')
+        self.kracken2_reports_list = self.map_list(kracken2_reports_pattern, use_direction='R1')
         global running_list
         running_list = self.out_dir + '.running_list'
 
@@ -53,14 +53,13 @@ class MetagenomePipline(object):
         for fq_path, new_id, direction in self.fq_info:
             os.system(("ln -s {} " + self.out_dir + "Raw_fastq/{}_{}.fq.gz").format(fq_path, new_id, direction))
 
-    def map_list(self, pattern=False, each=False, only_r1=False):
+    def map_list(self, pattern=False, each=False, use_direction="both"):
         out = []
         for fq_path, new_id, direction in self.fq_info:
             ele = pattern.format(new_id, direction) if pattern else [new_id, direction]
-            if direction == "R2":
-                if not only_r1:
-                    out.append(ele)
-            else:
+            if direction == "R2" and (use_direction == "both" or use_direction == "R2"):
+                out.append(ele)
+            elif direction == "R1" and (use_direction == "both" or use_direction == "R1"):
                 out.append(ele)
         out.sort()
         return split_list(out, each) if each else out
@@ -181,7 +180,7 @@ class MetagenomePipline(object):
 
         p = "" if print_definition else "-n"
         file_pattern = out + re.search("[^/]+$", self.merged_pe_pattern).group()
-        info_list = self.map_list(only_r1=True)
+        info_list = self.map_list(use_direction='R1')
         for new_id, direction in info_list:
             cmd = "perl {}/FMAP_quantification.pl {}.mapping.txt > {}.abundance.txt".format(
                 self.path['fmap_home'], file_pattern.format(new_id, direction), out + new_id)
@@ -204,6 +203,24 @@ class MetagenomePipline(object):
             self.run_fmap(fq_list=self.merged_pe_r1_list, database="ARDB.20180725064354",
                           processor=processor, out_dir="ARDB")
             self.quantify_fmap(out_dir="ARDB", all_name="All.ARDB.abundance.txt", print_definition=True)
+
+    def run_assembly(self, processor=50):
+        os.system(
+            "{} -1 {} -2 {} --min-contig-len 1000 -t {} -o {}Assembly/Assembly".format(
+                self.path['megahit_path'], ','.join(self.map_list(self.merged_pe_pattern, use_direction="R1")), ','.join(self.map_list(self.merged_pe_pattern, use_direction="R2")), processor, self.out_dir)
+        )
+        os.system(
+            "cd {}Assembly/Assembly&&prodigal -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff&&\
+            {} -i final.contigs.fa.fna -c 0.95 -G 0 -aS 0.9 -g 1 -d 0 -M 80000 -o final.contigs.fa.fna.out -T 0&&\
+            grep '>' final.contigs.fa.fna.out > final.contigs.fa.fna.out.header&&\
+            {}&&\
+            Rscript ORF_header_summary.R -i {}Assembly/Assembly/".format(
+                self.out_dir, self.path['cdhit_path'],
+                self.homized_cmd(
+                    "perl ORF_generate_input_stats_file.pl {}Assembly/Assembly/final.contigs.fa.fna.out.header".format(self.out_dir)),
+                self.out_dir
+            )
+        )
 
     def run_pipline(self, processor=3):
         self.run_fastqc(fq_list=self.raw_list, processor=processor)
