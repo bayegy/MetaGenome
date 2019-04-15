@@ -20,12 +20,11 @@ class VisualizeFunction(object):
         self.mapping_file = os.path.abspath(mapping_file)
         self.categories = [g.strip() for g in re.split(',', categories)]
         self.prefix = prefix if prefix else re.sub('\.[^\.]*$', '', os.path.basename(self.abundance_table)) + '_'
-        self.running_bash = self.out_dir + '.visualize_function.sh'
+        # self.running_bash = self.out_dir + 'visualize_function.sh'
 
     def visualiza_with_group(self):
         for g in self.categories:
-            with open(self.running_bash, 'w') as shscript:
-                print('''
+            os.system('''
 SCRIPTPATH=%s
 abundance_table=%s
 mapping_file=%s
@@ -43,5 +42,5 @@ base="${outdir}LEfSe/${prefix}${category}_lefse_LDA2"; format_input.py ${outdir}
 plot_res.py  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; plot_cladogram.py ${base}.LDA.txt --dpi 300 ${base}.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
 base="${outdir}LEfSe/${prefix}${category}_lefse_LDA4"; format_input.py ${outdir}LEfSe/${prefix}${category}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 4;
 plot_res.py  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; plot_cladogram.py ${base}.LDA.txt --dpi 300 ${base}.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
-source delefse''' % (self.path['bayegy_home'], self.abundance_table, self.mapping_file, g, self.out_dir, self.prefix), file=shscript)
-                os.system("bash {}".format(self.running_bash))
+source delefse''' % (self.path['bayegy_home'], self.abundance_table, self.mapping_file, g, self.out_dir, self.prefix))
+            # os.system("bash {}".format(self.running_bash))
