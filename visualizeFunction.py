@@ -6,7 +6,11 @@ import json
 
 
 class VisualizeFunction(object):
-    """docstring for VisualizaFunction"""
+    """
+    Sample usage:
+        from visualizeFunction import VisualizeFunction
+        v=VisualizeFunction('test/otu_table.Genus.relative.txt','test/mapping_file.txt','Group1')
+    """
 
     def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False):
         out_dir = out_dir if out_dir else os.path.dirname(abundance_table)
@@ -22,7 +26,7 @@ class VisualizeFunction(object):
         self.prefix = prefix if prefix else re.sub('\.[^\.]*$', '', os.path.basename(self.abundance_table)) + '_'
         # self.running_bash = self.out_dir + 'visualize_function.sh'
 
-    def visualiza_with_group(self):
+    def visualize_with_group(self):
         for g in self.categories:
             os.system('''
 SCRIPTPATH=%s
