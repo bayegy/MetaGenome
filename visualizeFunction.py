@@ -5,10 +5,11 @@ from circos import Circos
 import json
 
 
-class VisualizaFunction(object):
+class VisualizeFunction(object):
     """docstring for VisualizaFunction"""
 
-    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir='./'):
+    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False):
+        out_dir = out_dir if out_dir else os.path.dirname(abundance_table)
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
