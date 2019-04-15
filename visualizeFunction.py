@@ -36,8 +36,8 @@ Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -m $mapping_file -c $category -i
 Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category -n 20 -i $abundance_table -o ${outdir}Heatmaps -p ${prefix}${category}_nocluster_ -l F -t F;
 Rscript ${SCRIPTPATH}/abundance_heatmap.R -m $mapping_file -c $category  -n 20 -i $abundance_table -o ${outdir}Heatmaps -p ${prefix}${category}_clustered_ -l F -t F -u T;
 Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category -n 20 -i $abundance_table -o ${outdir}Heatmaps -p ${prefix}${category}_groupMean_ -l F -t T -b T;
-source lefse;
 Rscript ${SCRIPTPATH}/write_data_for_lefse.R -i  $abundance_table -m  $mapping_file -c  $category -o  ${outdir}LEfSe/${prefix}${category}_lefse.txt -u f;
+source lefse;
 base="${outdir}LEfSe/${prefix}${category}_lefse_LDA2"; format_input.py ${outdir}LEfSe/${prefix}${category}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 2;
 plot_res.py  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; plot_cladogram.py ${base}.LDA.txt --dpi 300 ${base}.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
 base="${outdir}LEfSe/${prefix}${category}_lefse_LDA4"; format_input.py ${outdir}LEfSe/${prefix}${category}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 4;
