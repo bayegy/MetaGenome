@@ -18,7 +18,7 @@ class MetagenomePipline(object):
     sample usage:
     from metagnome_pipline import MetagenomePipline
     m =MetagenomePipline('/home/cheng/Projects/rll_testdir/1.rawdata/','/home/cheng/Projects/rll_testdir/mapping_file.txt',out_results_dir="/home/cheng/Projects/rll_testdir/")
-    m.fmap_wrapper("AMR",8)
+    m.run_pipline()
     """
 
     def __init__(self, raw_fqs_dir, pre_mapping_file, run_size=4, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_results_dir='/home/cheng/Projects/rll_testdir/test/'):
@@ -159,7 +159,7 @@ class MetagenomePipline(object):
         os.system(self.homized_cmd('perl run_humann.pl {} SE'.format(fq_list)))
 
     @synchronize2
-    def run_fmap(self, fq_list, database="protein_fasta_protein_homolog_model", processor=4, out_dir='FMAP'):
+    def run_fmap(self, fq_list, database="protein_fasta_protein_homolog_model", processor=4, out_dir='AMR'):
         """
         arguments:
             database: database at FMAP_data
@@ -222,7 +222,7 @@ class MetagenomePipline(object):
             )
         )
 
-    def run_pipline(self, processor=3):
+    def run_pipline(self, processor=2):
         self.run_fastqc(fq_list=self.raw_list, processor=processor)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
@@ -236,3 +236,4 @@ class MetagenomePipline(object):
         self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
         self.fmap_wrapper(run_type="KEGG", processor=processor * 2)
         self.fmap_wrapper(run_type="AMR", processor=processor * 2)
+        self.run_assembly(processor=processor * 10)
