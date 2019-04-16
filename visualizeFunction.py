@@ -28,6 +28,10 @@ class VisualizeFunction(object):
 
     def visualize_with_group(self):
         for g in self.categories:
+            Circos(self.abundance_table, mapping_file=self.mapping_file,
+                   category=g, by_group_mean=False, prefix=g + '_', out_dir=self.out_dir + 'Circos').visualize()
+            Circos(self.abundance_table, mapping_file=self.mapping_file,
+                   category=g, by_group_mean=True, prefix=g + '_groupMean_', out_dir=self.out_dir + 'Circos').visualize()
             os.system('''
 SCRIPTPATH=%s
 abundance_table=%s

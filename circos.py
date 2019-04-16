@@ -9,19 +9,22 @@ from pyutils.tools import generate_span
 
 
 class Circos(object):
-    def __init__(self, table, number=10, mapping_file=None, category=None, by_group_mean=False, outpath="./", prefix=""):
+    def __init__(self, table, number=10, mapping_file=None, category=None, by_group_mean=False, out_dir="./", prefix=""):
         self.__base_path = re.sub('[^/]+$', "", __file__)
         self.__read_conf__()
         self.__numder = number
         self.__prefix = prefix
         self.__read_colors__()
-        self.__outpath = outpath + "/"
-        self.__outconf = self.__outpath + "circos_conf/"
+        self.__out_dir = out_dir + "/"
+        self.conf = self.__out_dir + "circos_conf"
+        self.__outconf = self.conf + "/"
         self.__init_data__(table, mapping_file, category, by_group_mean)
         self.__number_of_otu, self.__number_of_sample = self.data.shape
-        if not os.path.exists(self.__outpath):
-            os.makedirs(self.__outpath)
-        shutil.copytree(self.__base_path + "/circos_config", self.__outpath + 'circos_conf')
+        if not os.path.exists(self.__out_dir):
+            os.makedirs(self.__out_dir)
+        if os.path.exists(self.conf):
+            shutil.rmtree(self.conf)
+        shutil.copytree(self.__base_path + "/circos_config", self.conf)
         otu_col_index, sam_col_index = generate_span(self.data.shape)
         self.__otu_col = self.__colors[otu_col_index[0]:otu_col_index[1]]
         self.__sam_col = self.__colors[sam_col_index[0]:sam_col_index[1]]
@@ -110,12 +113,12 @@ class Circos(object):
 
     def __init__path__(self):
         with open(self.__outconf + "image.generic.conf", 'r', encoding='utf-8') as ci:
-            out = ci.read() % (self.__outpath, self.__prefix + 'circos.png')
+            out = ci.read() % (self.__out_dir, self.__prefix + 'circos.png')
 
         with open(self.__outconf + "image.generic.conf", 'w', encoding='utf-8') as co:
             co.write(out)
 
-    def plot_circos(self):
+    def visualize(self):
         self.write_karyotype()
         self.write_highlight()
         self.write_links()
@@ -143,5 +146,5 @@ if __name__ == '__main__':
                    help='The prefix of output files, default if null')
     options = p.parse_args()
     c = Circos(table=options.input, number=int(options.number), mapping_file=options.map,
-               category=options.group, by_group_mean=bool(options.by), outpath=options.output, prefix=options.prefix)
-    c.plot_circos()
+               category=options.group, by_group_mean=bool(options.by), out_dir=options.output, prefix=options.prefix)
+    c.visualize()
