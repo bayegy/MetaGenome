@@ -9,7 +9,7 @@ class VisualizeFunction(object):
     """
     Sample usage:
         from visualizeFunction import VisualizeFunction
-        v=VisualizeFunction('test/otu_table.Genus.relative.txt','test/mapping_file.txt','Group1')
+        v=VisualizeFunction('test/otu_table.Genus.absolute.txt','test/mapping_file.txt','Group1')
     """
 
     def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False):
