@@ -43,7 +43,7 @@ class Circos(object):
         otu = self.read_tsv(table)
         otu = otu if not otu.dtypes[-1] == np.dtype("O") else otu.drop(otu.columns[-1], axis=1)
         if mapping_file and category:
-            mapf = self.read_tsv(mapping_file)[category].dropna().sort_values(by=[category])
+            mapf = self.read_tsv(mapping_file)[category].dropna().sort_values()
             otu = otu.filter(items=mapf.index, axis=1)
         else:
             otu = otu.sort_index(axis=1)
