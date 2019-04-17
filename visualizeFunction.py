@@ -1,37 +1,24 @@
 #!usr/bin/python3
 import os
-import re
 from circos import Circos
-import json
+from visualize import Visualize
+import re
 
 
-class VisualizeFunction(object):
+class VisualizeFunction(Visualize):
     """
     Sample usage:
         from visualizeFunction import VisualizeFunction
         v=VisualizeFunction('test/otu_table.Genus.absolute.txt','test/mapping_file.txt','Group1')
     """
 
-    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False):
-        out_dir = out_dir if out_dir else os.path.dirname(abundance_table)
-        self.out_dir = os.path.abspath(out_dir) + '/'
-        if not os.path.exists(self.out_dir):
-            os.makedirs(self.out_dir)
-        self._base_dir = os.path.dirname(__file__) + '/'
-        with open(self._base_dir + "pipconfig/path.conf") as f:
-            self.path = json.load(f)
-        self.abundance_table = os.path.abspath(abundance_table)
-        self.mapping_file = os.path.abspath(mapping_file)
-        self.categories = [g.strip() for g in re.split(',', categories)]
-        self.prefix = prefix if prefix else re.sub('\.[^\.]*$', '', os.path.basename(self.abundance_table)) + '_'
-        # self.running_bash = self.out_dir + 'visualize_function.sh'
-
     def visualize_with_group(self):
-        for g in self.categories:
+        categories = [g.strip() for g in re.split(',', self.categories)]
+        for g in categories:
             Circos(self.abundance_table, mapping_file=self.mapping_file,
-                   category=g, by_group_mean=False, prefix=g + '_', out_dir=self.out_dir + 'Circos').visualize()
+                   category=g, by_group_mean=False, prefix=self.prefix + g + '_', out_dir=self.out_dir + 'Circos').visualize()
             Circos(self.abundance_table, mapping_file=self.mapping_file,
-                   category=g, by_group_mean=True, prefix=g + '_groupMean_', out_dir=self.out_dir + 'Circos').visualize()
+                   category=g, by_group_mean=True, prefix=self.prefix + g + '_groupMean_', out_dir=self.out_dir + 'Circos').visualize()
             os.system('''
 SCRIPTPATH=%s
 abundance_table=%s
@@ -52,3 +39,14 @@ base="${outdir}LEfSe/${prefix}${category}_lefse_LDA4"; format_input.py ${outdir}
 plot_res.py  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; plot_cladogram.py ${base}.LDA.txt --dpi 300 ${base}.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
 source delefse''' % (self.path['bayegy_home'], self.abundance_table, self.mapping_file, g, self.out_dir, self.prefix))
             # os.system("bash {}".format(self.running_bash))
+
+    def visualize_without_group(self):
+        Circos(self.abundance_table, prefix=self.prefix, out_dir=self.out_dir + 'Circos').visualize()
+        os.system('''
+SCRIPTPATH=%s
+abundance_table=%s
+outdir=%s
+prefix=%s
+Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -i $abundance_table -o ${outdir}Barplots/ -p ${prefix} -b F;
+Rscript ${SCRIPTPATH}/abundance_heatmap.R -n 20 -i $abundance_table -o ${outdir}Heatmaps  -p ${prefix} -l F -t F -u T;
+''' % (self.path['bayegy_home'], self.abundance_table, self.out_dir, self.prefix))

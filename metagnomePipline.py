@@ -1,9 +1,9 @@
 import os
 import time
-from pyutils.tools import split_list
-from pyutils.tools import parse_premap
+from pyutils.tools import split_list, parse_premap
 import json
 import re
+from visualizeFunction import VisualizeFunction
 
 
 class MetagenomePipline(object):
@@ -16,12 +16,12 @@ class MetagenomePipline(object):
         reverse_regex: regular expression to match reverse fastq files
         out_dir: where to store the results
     sample usage:
-    from metagnome_pipline import MetagenomePipline
+    from metagnomePipline import MetagenomePipline
     m =MetagenomePipline('/home/cheng/Projects/rll_testdir/1.rawdata/','/home/cheng/Projects/rll_testdir/mapping_file.txt',out_dir="/home/cheng/Projects/rll_testdir/")
     m.run_pipline()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, run_size=4, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='/home/cheng/Projects/rll_testdir/test/'):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=4, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='/home/cheng/Projects/rll_testdir/test/'):
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
@@ -31,7 +31,10 @@ class MetagenomePipline(object):
         self.parsed_map = parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex)
         self.fq_info = self.parsed_map['fastq'].values
         self._init_outdir_()
-        self.parsed_map['map'].to_csv(self.out_dir + 'mapping_file.txt', sep='\t', index=False)
+        self.mapping_file = self.out_dir + 'mapping_file.txt'
+        self.parsed_map['map'].to_csv(self.mapping_file, sep='\t', index=False)
+        self.categories = categories if categories else ','.join(
+            [g for g in self.parsed_map['map'].columns if not g.find('Group') == -1])
         raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
         trimmed_pattern = self.out_dir + "Primer_trimmed/{}_{}.fq.gz"
         filtered_pattern = self.out_dir + "Filtered/{}_{}.good.fastq.gz"
@@ -222,6 +225,19 @@ class MetagenomePipline(object):
             )
         )
 
+    def map_ko_annotation(self):
+        ko_file = self.out_dir + 'FMAP/All.Function.abundance.KeepID.KO.txt'
+        out = os.path.dirname(ko_file)
+        os.system('''
+SCRIPTPATH=%s
+ko_file=%s
+out_dir=%s
+perl ${SCRIPTPATH}/ConvergeKO2Module.pl $ko_file > ${out_dir}/All.Function.abundance.KeepID.Module.txt
+perl ${SCRIPTPATH}/ConvergeKO2Pathway.pl $ko_file > ${out_dir}/All.Function.abundance.KeepID.Pathway.txt
+perl ${SCRIPTPATH}/ConvergePathway2Level1.pl ${out_dir}/All.Function.abundance.KeepID.Pathway.txt > ${out_dir}/All.Function.abundance.KeepID.Pathway.Level1.txt
+perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.KeepID.Pathway.txt > ${out_dir}/All.Function.abundance.KeepID.Pathway.Level2.txt
+            ''' % (self.path['cii_home'], ko_file, out))
+
     def run_pipline(self, processor=2):
         self.run_fastqc(fq_list=self.raw_list, processor=processor)
         self.run_trim(fq_list=self.raw_list)
@@ -236,4 +252,7 @@ class MetagenomePipline(object):
         # self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
         self.fmap_wrapper(run_type="KEGG", processor=processor * 2)
         self.fmap_wrapper(run_type="AMR", processor=processor * 2)
+        self.map_ko_annotation()
         self.run_assembly(processor=processor * 10)
+        for abundance_table in [self.out_dir + 'FMAP/' + f for f in ('All.Function.abundance.KeepID.KO.txt', 'All.Function.abundance.KeepID.Module.txt', 'All.Function.abundance.KeepID.Pathway.txt', 'All.Function.abundance.KeepID.Pathway.Level1.txt', 'All.Function.abundance.KeepID.Pathway.Level2.txt')] + [self.out_dir + 'AMR' + '/All.AMR.abundance.txt']:
+            VisualizeFunction(abundance_table, self.mapping_file, self.categories).visualize()
