@@ -22,15 +22,17 @@ class Visualize(metaclass=ABCMeta):
         # self.running_bash = self.out_dir + 'visualize_function.sh'
 
     @abstractmethod
-    def visualize_with_group():
+    def __visualize_with_group__():
         pass
 
     @abstractmethod
-    def visualize_without_group():
+    def __visualize_without_group__():
         pass
 
     def visualize(self):
         if self.categories and self.mapping_file:
-            self.visualize_with_group()
+            print("Visualize using group info...")
+            self.__visualize_with_group__()
         else:
-            self.visualize_without_group()
+            print("No group info detected, visualize without group info")
+            self.__visualize_without_group__()

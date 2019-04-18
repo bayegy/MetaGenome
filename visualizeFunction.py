@@ -12,7 +12,7 @@ class VisualizeFunction(Visualize):
         v=VisualizeFunction('test/otu_table.Genus.absolute.txt','test/mapping_file.txt','Group1')
     """
 
-    def visualize_with_group(self):
+    def __visualize_with_group__(self):
         categories = [g.strip() for g in re.split(',', self.categories)]
         for g in categories:
             Circos(self.abundance_table, mapping_file=self.mapping_file,
@@ -40,7 +40,7 @@ plot_res.py  --max_feature_len 200 --orientation h --format pdf --left_space 0.3
 source delefse''' % (self.path['bayegy_home'], self.abundance_table, self.mapping_file, g, self.out_dir, self.prefix))
             # os.system("bash {}".format(self.running_bash))
 
-    def visualize_without_group(self):
+    def __visualize_without_group__(self):
         Circos(self.abundance_table, prefix=self.prefix, out_dir=self.out_dir + 'Circos').visualize()
         os.system('''
 SCRIPTPATH=%s

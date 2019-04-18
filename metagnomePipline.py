@@ -3,7 +3,8 @@ import time
 from pyutils.tools import split_list, parse_premap
 import json
 import re
-from visualizeFunction import VisualizeFunction
+from visualizeAll import VisualizeAll
+import pandas as pd
 
 
 class MetagenomePipline(object):
@@ -54,7 +55,9 @@ class MetagenomePipline(object):
     def _init_outdir_(self):
         os.system('perl ' + self.path['cii_home'] + 'create_dir_structure.pl ' + self.out_dir)
         for fq_path, new_id, direction in self.fq_info:
-            os.system(("ln -s {} " + self.out_dir + "Raw_fastq/{}_{}.fq.gz").format(fq_path, new_id, direction))
+            formated_fq = self.out_dir + "Raw_fastq/{}_{}.fq.gz".format(new_id, direction)
+            if not os.path.exists(formated_fq):
+                os.system("ln -s {} {}".format(fq_path, formated_fq))
 
     def map_list(self, pattern=False, each=False, use_direction="both"):
         out = []
@@ -157,9 +160,31 @@ class MetagenomePipline(object):
         os.system(self.homized_cmd("perl run_metaphlan2.pl {} PE {}".format(
             fq_list, str(processor))))
 
+    def clean_header(self, tb_name, pattern, skip=[]):
+        df = pd.read_csv(tb_name, sep='\t')
+        df.columns = [re.sub(pattern, '', c) for c in df.columns]
+        df.drop(index=skip).to_csv(tb_name, sep="\t", index=False)
+
+    def join_metaphlan(self):
+        tb_name = self.out_dir + 'Metagenome/Metaphlan/All.Metaphlan2.profile.txt'
+        os.system("python2 {}/merge_metaphlan_tables.py {}Metagenome/Metaphlan/*profile.txt > {}".format(
+            self.path['cii_home'], self.out_dir, tb_name))
+        self.clean_header(tb_name, pattern='_R1.metaphlan.profile$', skip=[0])
+
     @synchronize
     def run_humann(self, fq_list: list):
         os.system(self.homized_cmd('perl run_humann.pl {} SE'.format(fq_list)))
+
+    def join_humann(self):
+        os.system('''
+out_dir=%s
+ln -s ${out_dir}Metagenome/Humann/*/*genefamilies.tsv ${out_dir}Metagenome/Humann/*/*pathabundance.tsv ${out_dir}Metagenome/Humann/
+humann2_join_tables -i ${out_dir}Metagenome/Humann/ -o ${out_dir}Metagenome/Humann/All.Humann2.genefamilies.tsv --file_name genefamilies.tsv
+humann2_join_tables -i ${out_dir}Metagenome/Humann/ -o ${out_dir}Metagenome/Humann/All.Humann2.pathabundance.tsv --file_name pathabundance.tsv''' % (self.out_dir))
+        self.clean_header(self.out_dir + "Metagenome/Humann/All.Humann2.genefamilies.tsv",
+                          pattern='_R1\..*\.unmapped\.R1_Abundance-RPKs$')
+        self.clean_header(self.out_dir + "Metagenome/Humann/All.Humann2.pathabundance.tsv",
+                          pattern='_R1\..*\.unmapped.R1_Abundance$')
 
     @synchronize2
     def run_fmap(self, fq_list, database="protein_fasta_protein_homolog_model", processor=4, out_dir='AMR'):
@@ -238,6 +263,10 @@ perl ${SCRIPTPATH}/ConvergePathway2Level1.pl ${out_dir}/All.Function.abundance.K
 perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.KeepID.Pathway.txt > ${out_dir}/All.Function.abundance.KeepID.Pathway.Level2.txt
             ''' % (self.path['cii_home'], ko_file, out))
 
+    def run_quast(self):
+        os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
+            self.path['quast_path'], self.out_dir, self.out_dir))
+
     def run_pipline(self, processor=2):
         self.run_fastqc(fq_list=self.raw_list, processor=processor)
         self.run_trim(fq_list=self.raw_list)
@@ -248,11 +277,13 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
         self.run_kraken2(fq_list=self.merged_pe_r1_list, processor=processor)
         self.run_bracken()
         self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=processor)
+        self.join_metaphlan()
         self.run_humann(fq_list=self.merged_pe_r1_list)
+        self.join_humann()
         # self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
         self.fmap_wrapper(run_type="KEGG", processor=processor * 2)
         self.fmap_wrapper(run_type="AMR", processor=processor * 2)
         self.map_ko_annotation()
         self.run_assembly(processor=processor * 10)
-        for abundance_table in [self.out_dir + 'FMAP/' + f for f in ('All.Function.abundance.KeepID.KO.txt', 'All.Function.abundance.KeepID.Module.txt', 'All.Function.abundance.KeepID.Pathway.txt', 'All.Function.abundance.KeepID.Pathway.Level1.txt', 'All.Function.abundance.KeepID.Pathway.Level2.txt')] + [self.out_dir + 'AMR' + '/All.AMR.abundance.txt']:
-            VisualizeFunction(abundance_table, self.mapping_file, self.categories).visualize()
+        self.run_quast()
+        VisualizeAll(self.mapping_file, self.categories).visualize()

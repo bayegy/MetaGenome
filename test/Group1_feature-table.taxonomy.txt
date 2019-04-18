@@ -1,4 +1,3 @@
-# Constructed from biom file
 #OTU ID	HEA1	HEA10	HEA2	HEA3	HEA6	HEA8	PSD1	PSD10	PSD11	PSD12	PSD13	PSD14	PSD15	PSD16	PSD17	PSD18	PSD2	PSD20	PSD24	PSD25	PSD26	PSD27	PSD29	PSD3	PSD30	PSD31	PSD33	PSD4	PSD5	PSD6	PSD7	PSD8	PSD9	taxonomy
 e16db6f53c176ff3721c61e69953793b	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	301.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	k__Bacteria; p__Bacteroidetes; c__Bacteroidia; o__Bacteroidales; f__[Barnesiellaceae]; g__; s__
 372e32ab80d1ba86258384448cb5cf3f	0.0	0.0	0.0	0.0	0.0	32.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	k__Bacteria; p__Firmicutes; c__Clostridia; o__Clostridiales; f__; g__; s__

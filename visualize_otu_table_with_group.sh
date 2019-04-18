@@ -4,12 +4,19 @@
 #Please address any bugs to Cheng. 
 #Date 2017.11.31
 #########
-SCRIPTPATH=$1
-otu_table=$2
-mapping_file=$3
-category_set=${4//,/ }
-output_prefix=$5
-taxa_filtered=$6
+
+basedir="$( cd "$(dirname "$0")" ; pwd -P )"
+
+
+otu_table=$1
+mapping_file=$2
+category_set=${3//,/ }
+output_prefix=$4
+taxa_filtered=$5
+SCRIPTPATH=$6
+out_dir=$7
+
+
 
 frequency=1000
 depth=$(Rscript $SCRIPTPATH/min.R $otu_table)
@@ -33,7 +40,7 @@ tax_levels["7"]="Species"
 
 
 
-if [ -z "$3" ]; then
+if [ -z "$7" ]; then
 	echo "\n\n"
 
 	echo "Please provide following input parameters
@@ -42,6 +49,7 @@ if [ -z "$3" ]; then
 		3) Group of interest from the meta file to be shown in the heatmaps.
 		4) Output directory prefix name. (Required when filtered taxonomy will be specified)
 		5) Taxonomy to be filtered, in the format of "tax1,tax2,tax3". (Optional)
+		6) Home of Bayegy
 
 		Sample Usage:
 		sh $0 /share/data/IlluminaData/LYM/OTU_tables/Report/LYM_RTS.megablast.OTU_taxonomySummaryCounts.minHitCount_5.Bacteria.txt /share/data/IlluminaData/LYM/OTU_tables/Report/LYM_RTS_metadata.txt Group FilteredwithP_F_A Proteobacteria,Firmicutes,Actinobacteria
@@ -100,12 +108,12 @@ MAIN() {
 	echo -e "\n#Setting up the directory structure"
 	echo -e "\n#The output directory prefix is $output_prefix"
 	sample_name=`echo $(basename $otu_table) | sed -e 's/\.txt$//'`
-	output_dir=$(dirname $otu_table)/${sample_name}_Qiime2_output_${output_prefix}/
+	output_dir=${out_dir}/${output_prefix}taxa_visualization/
 	check_dir $output_dir
 
 
 
-
+	source ${basedir}/path/clean_path.sh
 	echo "##############################################################\n#Generate the figure for the percentage of annotated level"
 	cp $otu_table ${output_dir}/
 	perl ${SCRIPTPATH}/stat_otu_tab.pl -unif min $otu_table -prefix ${output_dir}/Relative/otu_table --even ${output_dir}/Relative/otu_table.even.txt -spestat ${output_dir}/Relative/classified_stat_relative.xls
@@ -118,12 +126,16 @@ MAIN() {
 	biom convert -i $otu_table -o ${output_dir}/${sample_name}.taxonomy.biom --to-hdf5 --table-type="OTU table" --process-obs-metadata taxonomy
 	#biom convert -i $otu_table -o ${output_dir}/${sample_name}.taxonomy.biom --table-type="OTU table" --process-obs-metadata taxonomy
 
-	source activate qiime2-2019.1
+	#source $SCRIPTPATH/path/restore_path.sh
+	source ${basedir}/path/activate_qiime2.sh
+
+
 	echo -e "\n#Generate Qiime2 artifacts"
 	qiime tools import   --input-path ${output_dir}/${sample_name}.taxonomy.biom --type 'FeatureTable[Frequency]'   --input-format BIOMV210Format   --output-path ${output_dir}/${sample_name}.count.qza
 	qiime tools import   --input-path ${output_dir}/${sample_name}.taxonomy.biom --type "FeatureData[Taxonomy]"   --input-format BIOMV210Format   --output-path ${output_dir}/${sample_name}.taxonomy.qza
 
 	echo -e "\n#Filter OTU table by taxonomy"
+	qiime taxa filter-table   --i-table ${output_dir}/${sample_name}.count.qza --i-taxonomy ${output_dir}/${sample_name}.taxonomy.qza --p-exclude $taxa_filtered --o-filtered-table ${output_dir}/${sample_name}.count.filtered.temp.qza
 	qiime taxa filter-table   --i-table ${output_dir}/${sample_name}.count.qza --i-taxonomy ${output_dir}/${sample_name}.taxonomy.qza --p-exclude $taxa_filtered --o-filtered-table ${output_dir}/${sample_name}.count.filtered.temp.qza
 	qiime feature-table filter-features --i-table ${output_dir}/${sample_name}.count.filtered.temp.qza --p-min-frequency 10 --o-filtered-table ${output_dir}/${sample_name}.count.filtered.qza
 
@@ -153,17 +165,6 @@ MAIN() {
 		#done;
 	done;
 
-	for n in 2 3 4 5 6 7;
-		do echo $n; 
-		for category_1 in $category_set;
-			do echo $category_1;
-			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -l T -t F;
-			Rscript ${SCRIPTPATH}/abundance_heatmap.R -m $mapping_file -c $category_1  -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20_clustered/${n}/ -l T -t F -u T;
-			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -b T -l T -p 'group_mean_' -t T;
-		done;
-	done;
-
-
 
 	echo "ANCOM analaysis for differential OTU"
 	mkdir ${output_dir}/ANCOM
@@ -171,7 +172,9 @@ MAIN() {
 		do echo $n2;
 		for category_1 in $category_set;
 			do echo $category_1;
-				Rscript ${SCRIPTPATH}/clean_na_of_inputs.R -m $mapping_file --group $category_1 -t ${output_dir}/collapsed/${sample_name}-l${n}.qza -o media_files
+				# source $SCRIPTPATH/path/restore_path.sh
+				/usr/bin/Rscript ${SCRIPTPATH}/clean_na_of_inputs.R -m $mapping_file --group $category_1 -t ${output_dir}/collapsed/${sample_name}-l${n}.qza -o media_files
+				# source $SCRIPTPATH/path/clean_path.sh
 				qiime composition add-pseudocount   --i-table media_files/filtered_feature_table.qza  --o-composition-table ${output_dir}/ANCOM/composition.${tax_levels[${n2}]}.qza;
 				qiime composition ancom  --i-table ${output_dir}/ANCOM/composition.${tax_levels[${n2}]}.qza --m-metadata-file media_files/cleaned_map.txt --m-metadata-column $category_1 --o-visualization ${output_dir}/ANCOM/${category_1}-ANCOM-${tax_levels[${n2}]}.qzv;
 			done;
@@ -188,7 +191,8 @@ MAIN() {
 	echo -e "\n############################################Generate the distance matrix and visulization artifact (rarefraction depth = $depth)."
 	#qiime diversity core-metrics --i-table ${output_dir}/${sample_name}.count.filtered.qza --p-sampling-depth $depth --m-metadata-file $mapping_file --output-dir ${output_dir}/diversity
 	echo -e "\n############################################Exit Qiime2 enviroment"
-	conda deactivate
+	#conda deactivate
+	
 
 	mv ${output_dir}/Relative/otu_table.p.relative.mat ${output_dir}/Relative/otu_table.Phylum.relative.txt
 	mv ${output_dir}/Relative/otu_table.c.relative.mat ${output_dir}/Relative/otu_table.Class.relative.txt
@@ -203,6 +207,20 @@ MAIN() {
 	mv ${output_dir}/Absolute/otu_table.f.absolute.mat ${output_dir}/Absolute/otu_table.Family.absolute.txt
 	mv ${output_dir}/Absolute/otu_table.g.absolute.mat ${output_dir}/Absolute/otu_table.Genus.absolute.txt
 	mv ${output_dir}/Absolute/otu_table.s.absolute.mat ${output_dir}/Absolute/otu_table.Species.absolute.txt
+
+	source ${basedir}/path/deactivate_qiime2.sh
+	source ${basedir}/path/restore_path.sh
+
+
+	for n in "Phylum" "Class" "Order" "Family" "Genus" "Species";
+		do echo $n; 
+		for category_1 in $category_set;
+			do echo $category_1;
+			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -l T -t F;
+			Rscript ${SCRIPTPATH}/abundance_heatmap.R -m $mapping_file -c $category_1  -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20_clustered/${n}/ -l T -t F -u T;
+			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -b T -l T -p 'group_mean_' -t T;
+		done;
+	done;
 
 
 	echo "##############################################################\n#Barplot according to group mean"
@@ -220,7 +238,7 @@ MAIN() {
 	do echo $category_1;
 		for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species"; 
 			do echo $n7;
-			/usr/bin/Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -m $mapping_file -c $category_1 -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/taxa-bar-plots-top20-group-ordered/ -p ${n7}_${category_1}_ordered_ -b F;
+			/usr/bin/Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -m $mapping_file -c $category_1 -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/taxa-bar-plots-top20-group-ordered/ -p ${n7}_${category_1}_ -b F;
 			/usr/bin/Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -m $mapping_file -c $category_1 -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/Barplot-of-Group-Mean/ -p ${category_1}_${n7}_mean_ -b T;
 		done;
 	done;
@@ -229,7 +247,7 @@ MAIN() {
 
 
 	echo "#####################Run Lefse for taxa abundance";
-	source activate lefse
+	source lefse
 	cd ${output_dir}/
 	mkdir Lefse/
 	for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
@@ -247,8 +265,7 @@ MAIN() {
 				done;
 			cd ../../
 		done;
-	conda deactivate
-
+	source delefse
 
 	echo "############################################Additional R related plot "
 	sed 's/taxonomy/Consensus Lineage/' < $otu_table | sed 's/ConsensusLineage/Consensus Lineage/' > ${output_dir}/feature-table.ConsensusLineage.txt
@@ -256,7 +273,7 @@ MAIN() {
 		do echo $category_1;
 		Rscript ${SCRIPTPATH}/clean_na_of_inputs.R -m $mapping_file --group $category_1 -o media_files
 		map="./media_files/cleaned_map.txt"
-		Rscript ${SCRIPTPATH}/venn_and_flower_plot.R  -i $otu_table -m $mapping_file -c $category_1 -o ${output_dir}/VennAndFlower;
+		Rscript ${SCRIPTPATH}/venn_and_flower_plot.R -s F  -i $otu_table -m $mapping_file -c $category_1 -o ${output_dir}/VennAndFlower;
 		Rscript ${SCRIPTPATH}/pcoa_and_nmds.R  -i ${output_dir}/feature-table.ConsensusLineage.txt -m $map -c $category_1 -o ${output_dir}/PCoA-NMDS;
 		done;
 
