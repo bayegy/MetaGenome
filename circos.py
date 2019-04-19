@@ -6,6 +6,7 @@ import re
 import os
 import shutil
 from pyutils.tools import generate_span
+# import pdb
 
 
 class Circos(object):
@@ -42,6 +43,8 @@ class Circos(object):
     def __init_data__(self, table, mapping_file, category, by_group_mean):
         otu = self.read_tsv(table)
         otu = otu if not otu.dtypes[-1] == np.dtype("O") else otu.drop(otu.columns[-1], axis=1)
+        # pdb.set_trace()
+        otu.index = [i.replace(' ', '_').replace(';', '') for i in otu.index]
         if mapping_file and category:
             mapf = self.read_tsv(mapping_file)[category].dropna().sort_values()
             otu = otu.filter(items=mapf.index, axis=1)

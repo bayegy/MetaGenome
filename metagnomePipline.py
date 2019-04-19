@@ -4,6 +4,7 @@ from pyutils.tools import split_list, parse_premap
 import json
 import re
 from visualizeAll import VisualizeAll
+from mapInfo import MapInfo
 import pandas as pd
 
 
@@ -19,7 +20,7 @@ class MetagenomePipline(object):
     sample usage:
     from metagnomePipline import MetagenomePipline
     m =MetagenomePipline('/home/cheng/Projects/rll_testdir/1.rawdata/','/home/cheng/Projects/rll_testdir/mapping_file.txt',out_dir="/home/cheng/Projects/rll_testdir/")
-    m.run_pipline()
+    m.run()
     """
 
     def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=4, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='/home/cheng/Projects/rll_testdir/test/'):
@@ -221,7 +222,7 @@ humann2_join_tables -i ${out_dir}Metagenome/Humann/ -o ${out_dir}Metagenome/Huma
     def fmap_wrapper(self, run_type="KEGG", processor=4):
         if run_type == "KEGG":
             self.run_fmap(fq_list=self.merged_pe_r1_list,
-                          database="orthology_uniref90_2_2157_4751.20180725040837", processor=processor, out_dir="FMAP")
+                          database="orthology_uniref90_2_2157_4751.20190412161853", processor=processor, out_dir="FMAP")
             self.quantify_fmap(out_dir="FMAP", all_name="All.Function.abundance.KeepID.KO.txt")
         elif run_type == "AMR":
             self.run_fmap(fq_list=self.merged_pe_r1_list, database="protein_fasta_protein_homolog_model_cleaned",
@@ -263,11 +264,21 @@ perl ${SCRIPTPATH}/ConvergePathway2Level1.pl ${out_dir}/All.Function.abundance.K
 perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.KeepID.Pathway.txt > ${out_dir}/All.Function.abundance.KeepID.Pathway.Level2.txt
             ''' % (self.path['cii_home'], ko_file, out))
 
+    def map_func_definition(self):
+        datas = [self.out_dir + "FMAP/" + f for f in ["All.Function.abundance.KeepID.KO.txt",
+                                                      "All.Function.abundance.KeepID.Module.txt", "All.Function.abundance.KeepID.Pathway.txt"]]
+        mapping_sources = [self.path['fmap_home'] + '/FMAP_data/' +
+                           f for f in ["KEGG_orthology.txt", "KEGG_module.txt", "KEGG_pathway.txt"]]
+        for data, mapping_source in zip(datas, mapping_sources):
+            MapInfo(data, mapping_source).mapping()
+        MapInfo(self.out_dir + 'AMR/All.AMR.abundance.txt', self.path['fmap_home'] + '/FMAP_data/aro.csv').mapping(
+            pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True)
+
     def run_quast(self):
         os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
             self.path['quast_path'], self.out_dir, self.out_dir))
 
-    def run_pipline(self, processor=2):
+    def run(self, processor=2):
         self.run_fastqc(fq_list=self.raw_list, processor=processor)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
@@ -281,9 +292,10 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.join_humann()
         # self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
-        self.fmap_wrapper(run_type="KEGG", processor=processor * 2)
-        self.fmap_wrapper(run_type="AMR", processor=processor * 2)
+        self.fmap_wrapper(run_type="KEGG", processor=processor * 4)
+        self.fmap_wrapper(run_type="AMR", processor=processor * 4)
         self.map_ko_annotation()
-        self.run_assembly(processor=processor * 10)
+        self.map_func_definition()
+        self.run_assembly(processor=processor * 20)
         self.run_quast()
         VisualizeAll(self.mapping_file, self.categories).visualize()

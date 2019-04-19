@@ -18,7 +18,10 @@ class Visualize(metaclass=ABCMeta):
         self.abundance_table = os.path.abspath(abundance_table)
         self.mapping_file = os.path.abspath(mapping_file) if mapping_file else ''
         self.categories = categories if categories else ""
-        self.prefix = prefix if prefix else re.sub('\.[^\.]*$', '', os.path.basename(self.abundance_table)) + '_'
+        p_prefix = re.sub('\.[^\.]*$', '', os.path.basename(self.abundance_table))
+        p_prefix = re.sub('^.*abundance\.KeepID\.', '', p_prefix)
+        p_prefix = p_prefix.replace('All.', '').replace('.abundance', '')
+        self.prefix = prefix if prefix else p_prefix + '_'
         # self.running_bash = self.out_dir + 'visualize_function.sh'
 
     @abstractmethod

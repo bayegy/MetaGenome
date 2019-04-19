@@ -4,7 +4,11 @@ from visualizeFunction import VisualizeFunction
 
 
 class VisualizeAll(VisualizeSpecies):
-    """docstring for VisualizeAll"""
+    """
+    Sample usage:
+        from visualizeAll import VisualizeAll
+        VisualizeAll("/home/cheng/Projects/rll_testdir/mapping_file.txt","Group1").visualize()
+    """
 
     def __init__(self, mapping_file, categories=False, out_dir=False, exclude_species="UNREALTAX"):
         super(VisualizeAll, self).__init__("multi_table", mapping_file,
