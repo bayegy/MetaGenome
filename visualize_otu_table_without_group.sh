@@ -234,7 +234,7 @@ COMMENT
 
     for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species"; 
         do echo $n7;
-        /usr/bin/Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/taxa-bar-plots-top20-group-ordered/ -p ${n7}_ -b F;
+        /usr/bin/Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/Taxa-bar-plots-top20/ -p ${n7}_ -b F;
         #/usr/bin/Rscript ${SCRIPTPATH}/abundance_barplot.R -n 20 -m $mapping_file -c $category_1 -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/Barplot-of-Group-Mean/ -p ${category_1}_${n7}_mean_ -b T;
     done;
 

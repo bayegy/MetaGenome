@@ -40,7 +40,8 @@ class MetagenomePipline(object):
         raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
         trimmed_pattern = self.out_dir + "Primer_trimmed/{}_{}.fq.gz"
         filtered_pattern = self.out_dir + "Filtered/{}_{}.good.fastq.gz"
-        de_host_pattern = self.out_dir + "Host_subtracted/bowtie/%s/{}_{}.%s.unmapped.fastq.gz" % (host_type, host_type)
+        de_host_pattern = self.out_dir + \
+            "Host_subtracted/bowtie/%s/{}_{}.%s.unmapped.fastq.gz" % (host_type, host_type)
         kracken2_reports_pattern = self.out_dir + "Kraken2/{}_{}.report"
         self.merged_pe_pattern = self.out_dir + \
             "Host_subtracted/bowtie/%s/{}_R1.%s.unmapped.{}.fastq.gz" % (host_type, host_type)
@@ -133,12 +134,13 @@ class MetagenomePipline(object):
 
     @synchronize
     def run_de_host(self, fq_list: list, processor=2):
-        os.system("perl " + self.path['de_host_path'] +
-                  ' --aim Host --config human --single-end-fq-list {} --threads {} -m N'.format(fq_list, str(processor)))
+        os.system(self.homized_cmd('perl host_subtraction_wrapper.pl --aim Host --config human --single-end-fq-list {} --threads {} -m N'.format(
+            fq_list, str(processor)), home=self.path['de_host_home']))
 
     @synchronize
     def run_merge_se_to_pe(self, fq_list: list):
-        os.system("perl " + self.path['merge_se_path'] + ' --paired-end-fq-list {}'.format(fq_list))
+        os.system(self.homized_cmd(
+            'perl merge_se_into_pe_fastq_wrapper.pl --paired-end-fq-list {}'.format(fq_list), home=self.path['merge_se_home']))
 
     @synchronize
     def run_kraken2(self, fq_list: list, processor=2):
@@ -291,7 +293,6 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
         self.join_metaphlan()
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.join_humann()
-        # self.run_fmap(fq_list=self.merged_pe_r1_list, processor=processor)
         self.fmap_wrapper(run_type="KEGG", processor=processor * 4)
         self.fmap_wrapper(run_type="AMR", processor=processor * 4)
         self.map_ko_annotation()

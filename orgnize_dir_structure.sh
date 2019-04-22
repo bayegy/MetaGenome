@@ -66,20 +66,18 @@ mkdir -p Result_Metagenomics/8-FiguresTablesForReport \
     Result_Metagenomics/7-AdvancedAnalysis/2-PHI \
     Result_Metagenomics/7-AdvancedAnalysis/3-VFDB \
     Result_Metagenomics/5-FuctionAnalysis/2-Metacyc_Humann2 \
-    Result_Metagenomics/5-FuctionAnalysis/1-KEGG/LEfSe \
+    Result_Metagenomics/5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis \
     Result_Metagenomics/3-Assembly/quast_results \
-    Result_Metagenomics/6-AMRAnalysis/1-Summary \
-    Result_Metagenomics/6-AMRAnalysis/2-Heatmaps \
-    Result_Metagenomics/6-AMRAnalysis/3-SignificanceAnalysis \
+    Result_Metagenomics/6-AMRAnalysis/4-SignificanceAnalysis \
     Result_Metagenomics/8-FiguresTablesForReport
 
 cp $mapping_file Result_Metagenomics/
 cp QC_report/*html Result_Metagenomics/1-QCStats/1-QC_report_Rawfastq/
 mv Result_Metagenomics/1-QCStats/1-QC_report_Rawfastq/*good* Result_Metagenomics/1-QCStats/2-QC_report_Filtered/
 
-cp Kraken2/*/Relative/Classified_stat_relative.png Kraken2/*/feature-table.taxonomy.biom Kraken2/*/feature-table.taxonomy.txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/
+cp Kraken2/*/Relative/Classified_stat_relative.png Kraken2/*/All.Taxa.OTU.taxonomy.biom Kraken2/*/All.Taxa.OTU.txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/
 cp Kraken2/*/Relative/*relative.txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/1-RelativeAbundance/
-cp -rp Kraken2/*/All.Taxa.taxa-bar-plots Kraken2/*/All.Taxa.taxa-bar-plots.1000  Kraken2/*/Barplot-of-Group-Mean Kraken2/*/taxa-bar-plots-top20-group-ordered Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/
+cp -rp Kraken2/*/All.Taxa.OTU.taxa-bar-plots Kraken2/*/All.Taxa.OTU.taxa-bar-plots.1000  Kraken2/*/Barplot-of-Group-Mean Kraken2/*/Taxa-bar-plots-top20  Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/
 cp -r Kraken2/*/Heatmap/* Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps/
 cp -r Metagenome/Metaphlan/All*txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/4-Abundance_Metaphlan2/
 
@@ -88,25 +86,37 @@ cp -r Kraken2/*/ANCOM/*ANCOM* Result_Metagenomics/2-TaxaAundanceAnalysis/2-Abund
 cp -r Kraken2/*/Lefse/* Result_Metagenomics/2-TaxaAundanceAnalysis/2-AbundanceComparison/LEfSe/
 
 cp -r Kraken2/*/VennAndFlower/*  Result_Metagenomics/2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/
+# Kraken2/*/core-metrics/alpha
+cp -rp  Kraken2/*/core-metrics/bray_curtis_emperor Kraken2/*/PCoA-NMDS/* Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/
+#rm -r Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/chao1 \
+#    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/observed_otus \
+#    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/shannon
 
-cp -rp Kraken2/*/core-metrics/alpha Kraken2/*/core-metrics/bray_curtis_emperor Kraken2/*/PCoA-NMDS/* Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/
-rm -r Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/chao1 \
-    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/observed_otus \
-    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/shannon
+cp AMR/All.AMR.abundance.txt Result_Metagenomics/6-AMRAnalysis/
+  
+cp -rp AMR/Barplots    Result_Metagenomics/6-AMRAnalysis/1-Barplots 
+cp -rp AMR/Heatmaps    Result_Metagenomics/6-AMRAnalysis/2-Heatmaps
+cp -rp AMR/Circos   Result_Metagenomics/6-AMRAnalysis/3-Circos
+rm -r Result_Metagenomics/6-AMRAnalysis/3-Circos/circos_conf
+cp AMR/LEfSe/* Result_Metagenomics/6-AMRAnalysis/4-SignificanceAnalysis/
 
-cp AMR/All.AMR.abundance.txt AMR/All.AMR.abundance_barplot.pdf Result_Metagenomics/6-AMRAnalysis/1-Summary/
-cp AMR/All*heatmap* Result_Metagenomics/6-AMRAnalysis/2-Heatmaps/
-cp AMR/All*lefse* Result_Metagenomics/6-AMRAnalysis/3-SignificanceAnalysis/
+
+cp FMAP/All*.txt Result_Metagenomics/5-FuctionAnalysis/1-KEGG/
+cp -rp FMAP/Barplots    Result_Metagenomics/5-FuctionAnalysis/1-KEGG/1-Barplots
+cp -rp FMAP/Heatmaps    Result_Metagenomics/5-FuctionAnalysis/1-KEGG/2-Heatmaps
+cp -rp FMAP/Circos    Result_Metagenomics/5-FuctionAnalysis/1-KEGG/3-Circos
+rm -r Result_Metagenomics/5-FuctionAnalysis/1-KEGG/3-Circos/circos_conf
+cp  FMAP/LEfSe/*    Result_Metagenomics/5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/
+
+
+#mv Result_Metagenomics/5-FuctionAnalysis/1-KEGG/*lefse* Result_Metagenomics/5-FuctionAnalysis/1-KEGG/LEfSe/
+cp Metagenome/Humann/All.*tsv Result_Metagenomics/5-FuctionAnalysis/2-Metacyc_Humann2/
 
 
 cp Assembly/Assembly/ORF* Result_Metagenomics/4-ORFPrediction/
 cp -r Assembly/Assembly/quast_results/quast_results/* Result_Metagenomics/3-Assembly/quast_results/
 #cp Assembly/Assembly/final.contigs.fa Result_Metagenomics/3-Assembly/
 
-
-cp FMAP/All*.pdf FMAP/All*.txt Result_Metagenomics/5-FuctionAnalysis/1-KEGG/
-mv Result_Metagenomics/5-FuctionAnalysis/1-KEGG/*lefse* Result_Metagenomics/5-FuctionAnalysis/1-KEGG/LEfSe/
-cp Metagenome/Humann/All.*tsv Result_Metagenomics/5-FuctionAnalysis/2-Metacyc_Humann2/
 
 
 ################################################make FiguresTablesForReport
@@ -115,16 +125,17 @@ cp ${SCRIPTPATH}/Report/结题报告.html Result_Metagenomics/
 
 cd Result_Metagenomics/8-FiguresTablesForReport
 cp ../2-TaxaAundanceAnalysis/1-AbundanceSummary/Classified_stat_relative.png Figure4-1.png
-cp ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/taxa-bar-plots-top20-group-ordered/Phylum_${category_1}_ordered_barplot.pdf Figure4-2.pdf
-#cp  Figure4-3.pdf
-cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/${category_1}_Venn_plot.png Figure4-4.png
+cp ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/Taxa-bar-plots-top20/Phylum_${category_1}_barplot.pdf Figure4-2.pdf
+cp ../2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps/Heatmap_top20_clustered/Phylum/heatmap.pdf  Figure4-3.pdf
+cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/LEfSe/Genus/Group1_Genus_lefse_LDA2.pdf  Figure4-4.pdf
+cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/${category_1}_Venn_plot.png Figure4-5.png
 cp ../4-ORFPrediction/ORF_summary.pdf Figure6-1.pdf
-cp ../5-FuctionAnalysis/1-KEGG/All.Function.abundance.KeepID.Pathway.Level1.pdf Figure7-1.pdf
-#cp   Figure7-2.pdf
-cp ../6-AMRAnalysis/1-Summary/All.AMR.abundance_barplot.pdf Figure8-1.pdf
-cp ../6-AMRAnalysis/2-Heatmaps/All.AMR.abundance_${category_1}_heatmap.pdf Figure8-2.pdf
+cp ../5-FuctionAnalysis/1-KEGG/1-Barplots/Pathway.Level1_${category_1}_barplot.pdf Figure7-1.pdf
+cp ../5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/Pathway_Group1_lefse_LDA2.pdf   Figure7-2.pdf
+cp ../6-AMRAnalysis/1-Barplots/AMR_${category_1}_barplot.pdf Figure8-1.pdf
+cp ../6-AMRAnalysis/2-Heatmaps/AMR_${category_1}_nocluster_heatmap.pdf Figure8-2.pdf
 
-cp -r ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.taxa-bar-plots page4-2
+cp -r ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots page4-2
 cp -r ../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor page4-5
 cp -r ../3-Assembly/quast_results page5-1
 

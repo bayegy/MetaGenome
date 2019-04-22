@@ -359,11 +359,11 @@
 			<p class="pra">
 				<br>为了研究不同样品间的相似性，还可以通过对样品进行聚类分析从而构建样品的聚类。选取关注分类水平的物种（默认选取物种绝对丰度大于1000）实现样品聚类（纵向聚类），以此考察不同样品或者分组间的相似或差异性（此处为门水平分类的热图），并从分类信息和样品间差异两个层面进行横向聚类，寻找物种或样本的聚集规律。<sup>[31-33]</sup>
 			</p>
-			
-			<p align="center"><strong><a href="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps">门分类水平的热图聚类结果（点击此处打开新窗口查看）</a></strong></p>
 
+			<img src="../../Figure4-3.png">
+			<p align="center"><strong>图 4-3 门分类水平的热图聚类结果 </strong></p>
 			<dd align="center" style="font-size:80%;">
-				说明：纵向为样品名称信息，同时也包括了分组信息。横向为OTU在该分类水平注释名称。图中上方的聚类树为OTU的系统发生关系及其物种注释，左侧的聚类树为样品聚类树，中间的热图是OTU的相对丰度热图，颜色与相对丰度的关系见图上方的刻度尺。</a>其他分类等级完整的热图聚类结果请参见结果部分<a href="../../../2-AbundanceAnalysis/1-AbundanceSummary/4-Heatmaps/">./2-AundanceAnalysis/1-AbundanceSummary/4-Heatmaps/</a>。
+				说明：纵向为样品名称信息，同时也包括了分组信息。横向为OTU在该分类水平注释名称。图中上方的聚类树为OTU的系统发生关系及其物种注释，左侧的聚类树为样品聚类树，中间的热图是OTU的相对丰度热图，颜色与相对丰度的关系见图上方的刻度尺。</a>其他分类等级完整的热图聚类结果请参见结果部分<a href="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps/">./2-AundanceAnalysis/1-AbundanceSummary/4-Heatmaps/</a>。
 			</dd>
 			
 			<br><br>
@@ -380,11 +380,11 @@
 			</dd>
 
 			<p class="pra">
-				LEfSe寻找每一个分组的特征微生物（默认为LDA>2的微生物）<sup>[19]</sup>，也就是相对于其他分组，在这个组中丰度较高的微生物（如图4-3。完整的差异性分析结果请见结果部分<a href="../../../2-AbundanceAnalysis/2-AbundanceComparison/">./2-AundanceAnalysis/2-AbundanceComparison/</a>。
+				LEfSe寻找每一个分组的特征微生物（默认为LDA>2的微生物）<sup>[19]</sup>，也就是相对于其他分组，在这个组中丰度较高的微生物（如图4-4。完整的差异性分析结果请见结果部分<a href="../../../2-TaxaAundanceAnalysis/2-AbundanceComparison/">./2-AundanceAnalysis/2-AbundanceComparison/</a>。
 			</p>
 
-			<p align="center"><img src="../../Figure4-3.png" width="800" height="800"></p>
-			<p align="center"><strong>图4-3 LEfSe分析LDA柱形图</strong></p>
+			<p align="center"><img src="../../Figure4-4.png" width="800" height="800" alt="没有在分组间差异显著的微生物"></p>
+			<p align="center"><strong>图4-4 LEfSe分析LDA柱形图</strong></p>
 			<dd align="center" style="font-size:80%;">
 				说明：每一横向柱形体代表一个物种，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应该物种是哪个分组的特征微生物，特征微生物表示在对应分组中的丰度相对较高。
 			</dd>		
@@ -392,15 +392,15 @@
 		 	<br>
 			<h3><a id="a4.3"></a>4.3 样品共有物种分析</h3>
 			<p class="pra">
-				对于样本间，根据OTU是否存在来寻找样本之间的特有或共有的OTU，对于分组较少（小于等于5）的实验方案，我们绘制韦恩图（Venn diagram）分析不同样品组之间特有或共有的OTU，用于统计多个样本中所共有和独有的OTU数目，可以比较直观的表现样本在OTU水平上的组成相似性及重叠情况（图4-3）。对于分组较多的（大于等于3），我们绘制了花瓣图，花瓣图中，花瓣里是对应分组特有的OTU数目，中心是所有分组共有的OTU数目。同时也给出了特有和共有的OTU种类，注释情况及丰度，丰度较高且特有的OTU具有重要分析价值，请参见<a href="../../../2-AbundanceAnalysis/3-VennAndFlower"> ./2-AbundanceAnalysis/3-VennAndFlower</a>
+				对于样本间，根据OTU是否存在来寻找样本之间的特有或共有的OTU，对于分组较少（小于等于5）的实验方案，我们绘制韦恩图（Venn diagram）分析不同样品组之间特有或共有的OTU，用于统计多个样本中所共有和独有的OTU数目，可以比较直观的表现样本在OTU水平上的组成相似性及重叠情况（图4-5）。对于分组较多的（大于等于3），我们绘制了花瓣图，花瓣图中，花瓣里是对应分组特有的OTU数目，中心是所有分组共有的OTU数目。同时也给出了特有和共有的OTU种类，注释情况及丰度，丰度较高且特有的OTU具有重要分析价值，请参见<a href="../../../2-TaxaAundanceAnalysis/3-VennAndFlower"> ./2-TaxaAundanceAnalysis/3-VennAndFlower</a>
 			</p>
 
-			<p align="center"><img src="../../Figure4-4.png" width="600" height="600"></p>
-			<p align="center"><strong>图4-4 共有或特有物种韦恩图展示（当分组数目小于等于5时）</strong></p>
-			<dd align="center" style="font-size:80%;">说明：韦恩图显示的是不同分组间共有或特有的OTU数量,每个椭圆代表一个分组。<a href="../../../2-AbundanceAnalysis/3-VennAndFlower">请点击打开新窗口查看韦恩图/花瓣图</a></dd>
+			<p align="center"><img src="../../Figure4-5.png" width="600" height="600"></p>
+			<p align="center"><strong>图4-5 共有或特有物种韦恩图展示（当分组数目小于等于5时）</strong></p>
+			<dd align="center" style="font-size:80%;">说明：韦恩图显示的是不同分组间共有或特有的OTU数量,每个椭圆代表一个分组。<a href="../../../2-TaxaAundanceAnalysis/3-VennAndFlower">请点击打开新窗口查看韦恩图/花瓣图</a></dd>
 			
 			<p>
-				查看各分类水平的物种在各个样本的分布情况请点击<a href="../../../2-AbundanceAnalysis/1-AbundanceSummary/1-AbundanceTable/3-CollapsedStats">./2AundanceAnalysis/1-AbundanceSummary/1-AbundanceTable/3-CollapsedStats/</a>。  
+				查看各分类水平的物种在各个样本的分布情况请点击<a href="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/1-AbundanceTable/3-CollapsedStats">./2AundanceAnalysis/1-AbundanceSummary/1-AbundanceTable/3-CollapsedStats/</a>。  
 			</p>
 
 			<h3><a id="a4.4"></a>4.4 样品多样性指数分析</h3>
@@ -416,7 +416,7 @@
 				<iframe src="../../page4-5/Summary_请点此文件查看.html" width="1000" height="600"></iframe>
 			</p>
 
-			<p align="center"><strong>图4-5 基于Bray Curtis距离矩阵的的PCoA 3D图</strong><a href="../../page4-5/Summary_请点此文件查看.html">（点击此处打开新窗口查看图片可拖动旋转，可调色）</a></p>
+			<p align="center"><strong>图4-6 基于Bray Curtis距离矩阵的的PCoA 3D图</strong><a href="../../page4-5/Summary_请点此文件查看.html">（点击此处打开新窗口查看图片可拖动旋转，可调色）</a></p>
 
 			<dd align="center" style="font-size:80%;">
 				说明：横坐标（Axis 1）表示第一主成分，百分比则表示第一主成分对样品差异的贡献值；纵坐标（Axis  2）表示第二主成分，百分比表示第二主成分对样品差异的贡献值；Axis 3坐标表示第三主成分，百分比表示第三主成分对样品差异的贡献值。客户可以根据元数据的分组信息可以个性化展示其他分类的距离关系。举例：可在右边设置区域的Select a Color Category下拉单选择分组信息，则同一个组的样品使用同一种颜色表示。
@@ -531,15 +531,15 @@
 			</p>
 
 			<p align="center">
-				<img src="../../Figure7-2.png" width="600" height="600">
+				<img src="../../Figure7-2.png" width="600" height="600" alt="没有在分组间差异显著的代谢通路">
 			</p>
-			<p align="center"><strong>图7-2 KEGG的基本代谢通路LEfSe分析LDA柱形图<a href="../../../5-FuctionAnalysis/1-KEGG/LEfSe/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
+			<p align="center"><strong>图7-2 KEGG的基本代谢通路LEfSe分析LDA柱形图<a href="../../../5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
 			<dd align="center" style="font-size:80%;">
-				说明：每一横向柱形体代表一个物种，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应代谢通路ID是哪个分组的特征通路，特征微生物表示在对应分组中的丰度相对较高。
+				说明：每一横向柱形体代表一个通路，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应代谢通路ID是哪个分组的特征通路，特征微生物表示在对应分组中的丰度相对较高。
 			</dd>	
 
 			<p class="pra">
-				为了方便客户查看样本在不同KEGG功能分类水平上的丰度，用户可以通过点击<a href="../../../5-FuctionAnalysis/1-KEGG/LEfSe/">./5-FuctionAnalysis/1-KEGG/LEfSe/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）这三个层面上在各个不同分组间的结果，并绘制了相应的LDA柱形图。
+				为了方便客户查看样本在不同KEGG功能分类水平上的丰度，用户可以通过点击<a href="../../../5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）这三个层面上在各个不同分组间的结果，并绘制了相应的LDA柱形图。
 			</p>
 
 			<hr>
@@ -590,7 +590,7 @@
 			<p class="pra">
 				CCA/RDA(DCA判断用哪一种分析)分析是基于对应分析发展的一种排序方法，将对应分析与多元回归分析相结合，每一步计算均与环境因子进行回归，又称多元直接梯度分析。RDA是基于线性模型，CCA是基于单峰模型（图8-1）。该分析<a>主要用来反映菌群与</a>环境因子之间的关系，可以检测环境因子、样品、菌群三者之间的关系或者两两之间的关系，可得到影响样品分布的重要环境驱动因子。 <sup>[42]</sup>
 			</p>
-			<p align="center"><iframe src="../../Figure9-1.png" width="700" height="500"></iframe></p>
+			<p align="center"><img src="../../Figure9-1.png" width="700" height="500" alt="未进行RDA分析"></img></p>
 			<h3 align="center">图9-1 属水平物种CCA/RDA排序图</h3>
 			<dd align="center" style="font-size:80%;">
 				说明：在CCA/RDA物种排序图内，环境因子用箭头表示，箭头连线的长度代表某个环境因子与群落分布和种类分布间相关程度的大小（解释方差的大小），箭头越长，说明相关性越大，反之越小。箭头连线和排序轴的夹角代表某个环境因子与排序轴的相关性大小，夹角越小，相关性越高；反之越低。环境因子之间的夹角为锐角时表示两个环境因子之间呈正相关关系，钝角时呈负相关关系。每个点代表一个物种，点越大，对应物种丰度越高，灰色点代表丰度较低的物种，未在图中注释物种名称，将物种投影到各个环境因子，对应的值即为该物种倾向于存在的环境（喜欢的环境）。或者说，将物种点与原点连线，物种间，物种与环境因子间，环境因子间的夹角的余弦值近似于相关系数，至于有多近似，就要看RDA1/CCA1和RDA2/CCA2两个坐标轴的解释方差百分比有多大，越大越近似。对于样本排序图（请查看<a href="../../../7-AdvancedAnalysis/1-AssociationAnalysis/">./7-AdvancedAnalysis/1-AssociationAnalysis/</a>），样本点之间的距离近似于菌群结构差异程度，样本点投影到环境因子对应的值近似于该样本真实的环境因子值。
