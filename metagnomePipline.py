@@ -11,19 +11,32 @@ import pandas as pd
 class MetagenomePipline(object):
     """
     arguments:
-        run_size: control the max number of jobs submitted to sge each time
-        raw_fqs_dir: directory where the raw fastq file were stored
-        sample_regex: regular expression to match sample id (contained by brackets)
-        forward_regex: regular expression to match forward fastq files
-        reverse_regex: regular expression to match reverse fastq files
-        out_dir: where to store the results
+        pre_mapping_file: The first column of pre_mapping_file should be smaple id in raw fastq files, the last column of pre_mapping_file should be new id (or the same) of samples.
+        
+        categories: Categories seprated by ',' , optional, if not passed, the categories names should have the pattern of 'Group.*'
+        
+        host_type: Will control the de_host step.
+        
+        run_size: Control the max number of jobs submitted to sge each time
+        
+        raw_fqs_dir: Directory where the raw fastq file were stored
+        
+        sample_regex: Regular expression to match sample id (contained by brackets)
+        
+        forward_regex: Regular expression to match forward fastq files
+        
+        reverse_regex: Regular expression to match reverse fastq files
+        
+        out_dir: Where to store the results
+    
     sample usage:
+    
     from metagnomePipline import MetagenomePipline
     m =MetagenomePipline('/home/cheng/Projects/rll_testdir/1.rawdata/','/home/cheng/Projects/rll_testdir/mapping_file.txt',out_dir="/home/cheng/Projects/rll_testdir/")
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=4, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='/home/cheng/Projects/rll_testdir/test/'):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='/home/cheng/Projects/rll_testdir/test/'):
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
@@ -37,6 +50,7 @@ class MetagenomePipline(object):
         self.parsed_map['map'].to_csv(self.mapping_file, sep='\t', index=False)
         self.categories = categories if categories else ','.join(
             [g for g in self.parsed_map['map'].columns if not g.find('Group') == -1])
+        print("The detected categories are: \n    {}\n".format(self.categories))
         raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
         trimmed_pattern = self.out_dir + "Primer_trimmed/{}_{}.fq.gz"
         filtered_pattern = self.out_dir + "Filtered/{}_{}.good.fastq.gz"
