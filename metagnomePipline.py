@@ -12,25 +12,25 @@ class MetagenomePipline(object):
     """
     arguments:
         pre_mapping_file: The first column of pre_mapping_file should be smaple id in raw fastq files, the last column of pre_mapping_file should be new id (or the same) of samples.
-        
+
         categories: Categories seprated by ',' , optional, if not passed, the categories names should have the pattern of 'Group.*'
-        
+
         host_type: Will control the de_host step.
-        
+
         run_size: Control the max number of jobs submitted to sge each time
-        
+
         raw_fqs_dir: Directory where the raw fastq file were stored
-        
+
         sample_regex: Regular expression to match sample id (contained by brackets)
-        
+
         forward_regex: Regular expression to match forward fastq files
-        
+
         reverse_regex: Regular expression to match reverse fastq files
-        
+
         out_dir: Where to store the results
-    
+
     sample usage:
-    
+
     from metagnomePipline import MetagenomePipline
     m =MetagenomePipline('/home/cheng/Projects/rll_testdir/1.rawdata/','/home/cheng/Projects/rll_testdir/mapping_file.txt',out_dir="/home/cheng/Projects/rll_testdir/")
     m.run()
@@ -281,14 +281,23 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
             ''' % (self.path['cii_home'], ko_file, out))
 
     def map_func_definition(self):
-        datas = [self.out_dir + "FMAP/" + f for f in ["All.Function.abundance.KeepID.KO.txt",
-                                                      "All.Function.abundance.KeepID.Module.txt", "All.Function.abundance.KeepID.Pathway.txt"]]
-        mapping_sources = [self.path['fmap_home'] + '/FMAP_data/' +
+        FMAP_data = self.path['fmap_home'] + '/FMAP_data/'
+        FMAP = self.out_dir + "FMAP/"
+        mi = MapInfo()
+        mi.mapping(FMAP + 'All.Function.abundance.KeepID.Pathway.txt', [FMAP_data + f for f in ['KEGG_Pathway2Level1.txt', 'KEGG_Pathway2Level2.txt', 'KEGG_pathway.txt']],
+                   out_file=FMAP + 'All.Function.abundance.Pathway.full_info.txt', mapped_headers=["Level1", "Level2", "Level3"])
+        mi.mapping(FMAP + 'All.Function.abundance.KeepID.KO.txt', ['/home/cheng/softwares/FMAP/FMAP_data/KEGG_orthology.txt'],
+                   out_file=FMAP + 'All.Function.abundance.KO.full_info.txt', adjust_func=mi.ajust_ko_info, mapped_headers=['Gene_name\tEnzyme_number\tDefinition'])
+        mi.mapping(FMAP + 'All.Function.abundance.KO.full_info.txt', [FMAP_data + f for f in [
+                   'KEGG_orthology2module.txt', 'KEGG_orthology2pathway.txt']], mapped_headers=["Module", "KEGG Pathway"], add=True)
+        datas = [FMAP + f for f in ["All.Function.abundance.KeepID.KO.txt",
+                                    "All.Function.abundance.KeepID.Module.txt", "All.Function.abundance.KeepID.Pathway.txt"]]
+        mapping_sources = [FMAP_data +
                            f for f in ["KEGG_orthology.txt", "KEGG_module.txt", "KEGG_pathway.txt"]]
         for data, mapping_source in zip(datas, mapping_sources):
-            MapInfo(data, mapping_source).mapping()
-        MapInfo(self.out_dir + 'AMR/All.AMR.abundance.txt', self.path['fmap_home'] + '/FMAP_data/aro.csv').mapping(
-            pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True)
+            mi.mapping(data, [mapping_source])
+        mi.mapping(self.out_dir + 'AMR/All.AMR.abundance.txt', [FMAP_data + '/aro.csv'],
+                   pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True)
 
     def run_quast(self):
         os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
