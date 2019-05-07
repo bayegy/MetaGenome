@@ -74,6 +74,8 @@ mkdir -p Result_Metagenomics/8-FiguresTablesForReport \
 cp $mapping_file Result_Metagenomics/
 cp QC_report/*html Result_Metagenomics/1-QCStats/1-QC_report_Rawfastq/
 mv Result_Metagenomics/1-QCStats/1-QC_report_Rawfastq/*good* Result_Metagenomics/1-QCStats/2-QC_report_Filtered/
+cp Report/reads_summary.txt Result_Metagenomics/1-QCStats/
+
 
 cp Kraken2/*/Relative/Classified_stat_relative.png Kraken2/*/All.Taxa.OTU.taxonomy.biom Kraken2/*/All.Taxa.OTU.txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/
 cp Kraken2/*/Relative/*relative.txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-AbundanceSummary/1-RelativeAbundance/
@@ -118,7 +120,6 @@ cp -r Assembly/Assembly/quast_results/quast_results/* Result_Metagenomics/3-Asse
 #cp Assembly/Assembly/final.contigs.fa Result_Metagenomics/3-Assembly/
 
 
-
 ################################################make FiguresTablesForReport
 cp -rp ${SCRIPTPATH}/Report/src Result_Metagenomics/8-FiguresTablesForReport/
 cp ${SCRIPTPATH}/Report/结题报告.html Result_Metagenomics/
@@ -138,5 +139,8 @@ cp ../6-AMRAnalysis/2-Heatmaps/AMR_${category_1}_nocluster_heatmap.pdf Figure8-2
 cp -r ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots page4-2
 cp -r ../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor page4-5
 cp -r ../3-Assembly/quast_results page5-1
+
+python3 ${SCRIPTPATH}/convert_to_html_table.py -i ../1-QCStats/reads_summary.txt -o src/pages/main_cleaned.html -t txt -k '{{table1}}'
+
 
 if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do echo $pdfs; base=$(basename $pdfs .pdf); convert  -density 300 -quality 80 $pdfs ${base}.png; rm $pdfs;done;fi;

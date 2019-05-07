@@ -51,7 +51,7 @@ class MetagenomePipline(object):
         self.categories = categories if categories else ','.join(
             [g for g in self.parsed_map['map'].columns if not g.find('Group') == -1])
         print("The detected categories are: \n    {}\n".format(self.categories))
-        raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
+        self.raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
         trimmed_pattern = self.out_dir + "Primer_trimmed/{}_{}.fq.gz"
         filtered_pattern = self.out_dir + "Filtered/{}_{}.good.fastq.gz"
         de_host_pattern = self.out_dir + \
@@ -59,7 +59,7 @@ class MetagenomePipline(object):
         kracken2_reports_pattern = self.out_dir + "Kraken2/{}_{}.report"
         self.merged_pe_pattern = self.out_dir + \
             "Host_subtracted/bowtie/%s/{}_R1.%s.unmapped.{}.fastq.gz" % (host_type, host_type)
-        self.raw_list = self.map_list(raw_pattern, run_size)
+        self.raw_list = self.map_list(self.raw_pattern, run_size)
         self.trimmed_list = self.map_list(trimmed_pattern, run_size)
         self.filtered_list = self.map_list(filtered_pattern, run_size)
         self.de_host_r1_list = self.map_list(de_host_pattern, run_size, use_direction='R1')
@@ -127,7 +127,7 @@ class MetagenomePipline(object):
         return wfunc
 
     def homized_cmd(self, cmd, home=False):
-        home = home if home else self.path['cii_home']
+        home = home or self.path['cii_home']
         return "cd {}&&".format(home) + cmd
 
     @synchronize
@@ -150,6 +150,14 @@ class MetagenomePipline(object):
     def run_de_host(self, fq_list: list, processor=2):
         os.system(self.homized_cmd('perl host_subtraction_wrapper.pl --aim Host --config human --single-end-fq-list {} --threads {} -m N'.format(
             fq_list, str(processor)), home=self.path['de_host_home']))
+
+    def generate_summary(self):
+        os.system("mv {}Host_subtracted/bowtie/QC_report/* {}QC_report/".format(self.out_dir, self.out_dir))
+        global running_list
+        with open(running_list, 'w') as f:
+            f.write('\n'.join(self.map_list(self.raw_pattern, use_direction="R1")))
+        os.system(self.homized_cmd(
+            "perl generate_summary_wrapper.pl --aim Host --file-list {}".format(running_list)))
 
     @synchronize
     def run_merge_se_to_pe(self, fq_list: list):
@@ -304,12 +312,14 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
             self.path['quast_path'], self.out_dir, self.out_dir))
 
     def run(self, processor=2):
-        self.run_fastqc(fq_list=self.raw_list, processor=processor)
+        self.run_fastqc(fq_list=self.raw_list, processor=processor, first_check=5)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
-        self.run_fastqc(fq_list=self.filtered_list, processor=processor)
+        self.run_fastqc(fq_list=self.filtered_list, processor=processor, first_check=5)
         self.run_de_host(fq_list=self.filtered_list, processor=processor)
         self.run_merge_se_to_pe(fq_list=self.de_host_r1_list)
+        self.run_fastqc(fq_list=self.de_host_r1_list, processor=processor, first_check=5)
+        self.generate_summary()
         self.run_kraken2(fq_list=self.merged_pe_r1_list, processor=processor)
         self.run_bracken()
         self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=processor)

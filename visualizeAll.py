@@ -19,6 +19,9 @@ class VisualizeAll(VisualizeSpecies):
         self._base_dir = os.path.dirname(__file__) + '/'
 
     def visualize(self):
+        os.system("{}/piputils/write_colors_plan.py -i {} -c {} -p {}/piputils/group_color.list -o {}colors_plan.json".format(
+            self.path['bayegy_home'], self.mapping_file, self.categories, self.path['bayegy_home'], self.out_dir))
+        os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
         for abundance_table in [self.out_dir + 'FMAP/' + f for f in ('All.Function.abundance.KeepID.KO.txt', 'All.Function.abundance.KeepID.Module.txt', 'All.Function.abundance.KeepID.Pathway.txt', 'All.Function.abundance.KeepID.Pathway.Level1.txt', 'All.Function.abundance.KeepID.Pathway.Level2.txt')] + [self.out_dir + 'AMR' + '/All.AMR.abundance.txt']:
             VisualizeFunction(abundance_table, self.mapping_file, self.categories).visualize()
         VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,

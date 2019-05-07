@@ -234,69 +234,7 @@
 			<p class="pra">2) 去除 N 碱基达到一定比例的 reads（默认设为10bp）；<br></p>
 			<p class="pra">3) 去除与 Adapter 之间 overlap 超过一定阈值（默认设为 15bp）的 reads；<br></p>
 
-<table class="gy">
-  <tr>
-    <th class="tg-0lax">Sample</th>
-    <th class="tg-0lax">Raw Reads</th>
-    <th class="tg-0lax">Clean Reads</th>
-    <th class="tg-0lax">Raw Base(G)</th>
-    <th class="tg-0lax">Clean Base(G)</th>
-    <th class="tg-0lax">Effective Rate(%)</th>
-    <th class="tg-0lax">Error Rate(%)</th>
-    <th class="tg-0lax">Q20(%)</th>
-    <th class="tg-0lax">Q30(%)</th>
-    <th class="tg-0lax">GC Content(%)</th>
-  </tr>
-  <tr>
-    <td class="tg-0lax">SS1a</td>
-    <td class="tg-0lax">24,563,840</td>
-    <td class="tg-0lax">24,521,817</td>
-    <td class="tg-0lax">7.37</td>
-    <td class="tg-0lax">7.36</td>
-    <td class="tg-0lax">99.83</td>
-    <td class="tg-0lax">0.04</td>
-    <td class="tg-0lax">95.41</td>
-    <td class="tg-0lax">88.72</td>
-    <td class="tg-0lax">43.06</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">SS2b</td>
-    <td class="tg-0lax">22,797,872</td>
-    <td class="tg-0lax">22,688,129</td>
-    <td class="tg-0lax">6.84</td>
-    <td class="tg-0lax">6.81</td>
-    <td class="tg-0lax">99.52</td>
-    <td class="tg-0lax">0.03</td>
-    <td class="tg-0lax">96.52</td>
-    <td class="tg-0lax">91.26</td>
-    <td class="tg-0lax">42.16</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">SS4d</td>
-    <td class="tg-0lax">31,875,207</td>
-    <td class="tg-0lax">31,810,969</td>
-    <td class="tg-0lax">9.56</td>
-    <td class="tg-0lax">9.54</td>
-    <td class="tg-0lax">99.8</td>
-    <td class="tg-0lax">0.03</td>
-    <td class="tg-0lax">96.94</td>
-    <td class="tg-0lax">91.83</td>
-    <td class="tg-0lax">43.19</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">SS6f</td>
-    <td class="tg-0lax">24,768,253</td>
-    <td class="tg-0lax">24,741,220</td>
-    <td class="tg-0lax">7.43</td>
-    <td class="tg-0lax">7.42</td>
-    <td class="tg-0lax">99.89</td>
-    <td class="tg-0lax">0.03</td>
-    <td class="tg-0lax">95.94</td>
-    <td class="tg-0lax">89.56</td>
-    <td class="tg-0lax">46.55</td>
-  </tr>
-</table>
-
+			<p align="center" style="font-size: 80%">{{table1}}</p>
 			<p align="center"><strong>表3-1 数据产出质量情况一览表</strong></p>
 			<dd align="center" style="font-size:80%;">说明：Sample: 样品名; Raw reads：测序Raw reads的数量; Clean reads：过滤后获得的Clean reads 数量; Raw bases：测序原始数据的总碱基数，即为Raw reads数量乘以测序长度算得，以G为单位; Clean bases：过滤后数据的总碱基数，以G为单位; Error：平均碱基测序错误率; Q20、Q30：Phred 数值大于20、30的碱基占总体碱基的百分比; GC：G/C碱基数占总碱基数量的百分比。
 			</dd>

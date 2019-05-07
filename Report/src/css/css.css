@@ -52,7 +52,7 @@ img{max-width:900px;height:auto;}
 /*表格样式*/
  table {width:90%;background:#ccc; margin: 10px auto;border-collapse:collapse;}
 /*border-collapse:collapse合并内外边距(去除表格单元格默认的2个像素内外边距*/
- th, td {height:25px;line-height:25px;text-align:center;border:1px solid #ccc;}
+ th, td {height:25px;line-height:25px;text-align:center;border:1px solid #ccc; font-size: 80%}
  th {background:#4244C9;font-weight:normal;}
  tr {background:#EAF2D3;}
  tr:hover {background:#cc0;}
