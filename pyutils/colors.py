@@ -1,5 +1,4 @@
 import re
-import string
 
 
 def hex2color(hex_color, saturability=255):

@@ -2,6 +2,22 @@ import numpy as np
 import re
 import os
 import pandas as pd
+import time
+
+
+def dupply(array, func, **kwargs):
+    """This func will conside only the first and second dimension of array"""
+    shape = array.shape
+    return np.array([[func(array[i, j], **kwargs) for j in range(shape[1])] for i in range(shape[0])])
+
+
+def time_counter(func):
+    def wrapper(*args, **kwargs):
+        t1 = time.time()
+        out = func(*args, **kwargs)
+        print("Time used: {}".format(str(time.time() - t1)))
+        return out
+    return wrapper
 
 
 def generate_span(number_list: []) -> []:
