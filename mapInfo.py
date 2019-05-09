@@ -14,6 +14,13 @@ class MapInfo(object):
 
     def load_map(self, mapping_source, header=False, adjust_func=False):
         self.map = {}
+
+        def add(fid, ldef):
+            try:
+                self.map[fid].append(ldef)
+            except KeyError:
+                self.map[fid] = [ldef]
+
         with open(mapping_source, 'r') as f:
             for number, line in enumerate(f):
                 li = re.split('\t', line.strip())
@@ -23,9 +30,9 @@ class MapInfo(object):
                 if number == 0:
                     self.mapped_header = fdef if header else False
                     if not header:
-                        self.map[fid] = ldef
+                        add(fid, ldef)
                 else:
-                    self.map[fid] = ldef
+                    add(fid, ldef)
 
     @staticmethod
     def ajust_ko_info(info):
@@ -51,7 +58,8 @@ class MapInfo(object):
                     sid = re.search(pattern, li[0]).group() if pattern else li[0].strip()
                     li[0] = re.search(first_pattern, li[0]).group() if first_pattern else sid
                     try:
-                        li.append("{}: {}\n".format(sid, self.map[sid]) if add_sid_to_info else self.map[sid] + '\n')
+                        mdef = ', '.join(self.map[sid])
+                        li.append("{}: {}\n".format(sid, mdef) if add_sid_to_info else mdef + '\n')
                     except Exception as e:
                         li.append("{}: {}\n".format(sid, "")
                                   if add_sid_to_info else "" + '\n')
