@@ -15,7 +15,7 @@ output_prefix=$4
 taxa_filtered=$5
 SCRIPTPATH=$6
 out_dir=$7
-
+not_rda=${8//\;/ }
 
 
 frequency=1000
@@ -25,6 +25,9 @@ echo "Selected depth was $depth"
 
 echo "Check wheather your categories are the following:"
 for i in $category_set;do echo $i;done
+
+echo "Check CorrelationAnalysis config:"
+for i in $not_rda;do echo $i;done
 
 
 declare -A tax_aa;
@@ -40,7 +43,7 @@ tax_levels["7"]="Species"
 
 
 
-if [ -z "$7" ]; then
+if [ -z "$8" ]; then
 	echo "\n\n"
 
 	echo "Please provide following input parameters
@@ -57,7 +60,7 @@ if [ -z "$7" ]; then
 	exit 0
 else
 	echo "################
-	Running: sh $0 $1 $2 $3 $4 $5"
+	Running: bash $0 $1 $2 $3 $4 $5 $6 $7 $8"
 fi
 
 
@@ -221,6 +224,29 @@ MAIN() {
 			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -b T -l T -p 'group_mean_' -t T;
 		done;
 	done;
+
+
+
+	test=${not_rda// */}
+	if [ ! $test == "all" ];then
+		echo "##############################################################\nCorrelation heatmap analysis"
+		for nrda in $not_rda;
+			do echo $nrda;
+			prefix=${nrda//,/_}_excluded_;
+			prefix=${prefix//none_excluded_/};
+			prefix=${prefix//\//-};
+			prefix=${prefix//\\/-};
+			prefix=${prefix//\(/};
+			prefix=${prefix//\)/};
+			prefix=${prefix//\%/};
+			for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
+				do echo $n7;
+				Rscript ${SCRIPTPATH}/cor_heatmap.R -i ${output_dir}/Relative/otu_table.${n7}.relative.txt -o ${output_dir}/CorrelationAnalysis/CorrelationHeatmap/${n7}/ -n 25 -m $mapping_file -e $nrda -p "$prefix";
+				for category_1 in $category_set;do echo $category_1;Rscript ${SCRIPTPATH}/RDA.R -i ${output_dir}/Absolute/otu_table.${n7}.absolute.txt -m $mapping_file -c $category_1 -o ${output_dir}/CorrelationAnalysis/RDA/${n7} -n 25 -e $nrda -p "$prefix";done;
+			done;
+		done;
+	fi;
+
 
 
 	echo "##############################################################\n#Barplot according to group mean"

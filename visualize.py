@@ -32,10 +32,10 @@ class Visualize(metaclass=ABCMeta):
     def __visualize_without_group__():
         pass
 
-    def visualize(self):
+    def visualize(self, exclude='all'):
         if self.categories and self.mapping_file:
             print("Visualize using group info...")
-            self.__visualize_with_group__()
+            self.__visualize_with_group__(exclude)
         else:
             print("No group info detected, visualize without group info")
             self.__visualize_without_group__()

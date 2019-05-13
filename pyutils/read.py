@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import re
+# import matplotlib.pyplot as plt
 
 
 def read_abundance(file_path, index_col=0, return_sum=-1, return_mean=-1):
@@ -15,3 +17,37 @@ def read_abundance(file_path, index_col=0, return_sum=-1, return_mean=-1):
     df = pd.read_csv(file_path, sep="\t", index_col=index_col)
     df = df.loc[:, df.dtypes != np.object]
     return df.sum(axis=return_sum) if not return_sum == -1 else (df if return_mean == -1 else df.mean(axis=return_mean))
+
+
+def read_to_html_table(file_path):
+    file_type = re.search('[^\.]+$', file_path).group()
+    if file_type == 'txt' or file_type == 'csv':
+        out_df = pd.read_csv(file_path, sep='\t')
+    elif file_type == "html":
+        out_df = pd.read_html(file_path)[0]
+    return out_df.to_html(index=False)
+
+
+def get_kingdom_ratio(species_abundance_table):
+    df = read_abundance(species_abundance_table, index_col=-1, return_sum=1)
+    kingdom = [re.search('^[^;]+', s).group().replace('k__', '') for s in df.index]
+    # pdb.set_trace()
+    df = df.groupby(kingdom).sum()
+    del df['Environmentalsamples']
+
+    def series_to_str(series, value_format=':.4f'):
+        return ', '.join([('{}({%s})' % (value_format)).format(k, v) for k, v in series.items()])
+
+    # max_abundance = max(df)
+    # explode = [0.1 if i == max_abundance else 0 for i in df]
+    # plt.pie(df, explode=explode, labels=df.index, labeldistance=1.1,
+    #         autopct='%2.2f%%', shadow=False, startangle=90, pctdistance=0.6)
+    # plt.show()
+    return "您样本中，检测到的物种有：{}; 物种占比情况：{}。".format(series_to_str(df, value_format=''), series_to_str(df / df.sum()))
+
+
+def replace_kword_in_file(old, new, file_path):
+    with open(file_path, 'r') as f:
+        out = f.read().replace(old, new)
+    with open(file_path, 'w') as f:
+        f.write(out)

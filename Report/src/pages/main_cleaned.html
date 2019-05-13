@@ -103,64 +103,46 @@
 				</div>
 			</div>
 			
-			<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#analysis">五 宏基因组组装</a></li></div>
-				<div class="AccordionPanelContent">
-					<li><a href="#a5.1">5.1 宏基因组组装基本步骤</a></li>
-					<li><a href="#a5.2">5.2 Contigs基本信息统计</a></li>
-				</div>
-			</div>
-
-			<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#analysis">六 基因预测及丰度分析</a></li></div>
-				<div class="AccordionPanelContent">
-					<li><a href="#a6.1">6.1 基因预测及丰度分析基本步骤</a></li>
-					<li><a href="#a6.2">6.2 预测基因基本信息统计</a></li>
-				</div>
-			</div>
 			
 			 <div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#analysis">七 KEGG功能数据库注释</a></li></div>
+				<div class="AccordionPanelTab"><li><a href="#analysis">五 KEGG功能数据库注释</a></li></div>
 				<div class="AccordionPanelContent">
-					<li><a href="#a7.1">7.1 KEGG数据库介绍</a></li>
-					<li><a href="#a7.2">7.2 功能注释基本步骤</a></li>
-					<li><a href="#a7.3">7.3 功能相对丰度概况</a></li>
-					<li><a href="#a7.4">7.4 功能相对差异性分析</a></li>
+					<li><a href="#a7.1">5.1 KEGG数据库介绍</a></li>
+					<li><a href="#a7.2">5.2 功能注释基本步骤</a></li>
+					<li><a href="#a5.3">5.3 功能相对丰度概况</a></li>
+					<li><a href="#a5.4">5.4 功能相对差异性分析</a></li>
 				</div>
 			</div>
 			
 				<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#analysis">八 抗性基因注释</a></li></div>
+				<div class="AccordionPanelTab"><li><a href="#analysis">六 抗性基因注释</a></li></div>
 				<div class="AccordionPanelContent">
-					<li><a href="#a8.1">8.1 抗性基因注释基本步骤</a></li>
-					<li><a href="#a8.2">8.2 抗性基因丰度概况</a></li>
-					<li><a href="#a8.3">8.3 组间抗性基因差异性分析</a></li>
+					<li><a href="#a8.1">6.1 抗性基因注释基本步骤</a></li>
+					<li><a href="#a8.2">6.2 抗性基因丰度概况</a></li>
+					<li><a href="#a8.3">6.3 组间抗性基因差异性分析</a></li>
 				</div>
 			</div>
 			
 			<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#analysis">九 高级分析</a></li></div>
+				<div class="AccordionPanelTab"><li><a href="#analysis">七 相关性分析</a></li></div>
 				<div class="AccordionPanelContent">
-					<li><a href="#a9.1">9.1 CCA/RDA分析</a></li>
-					<li><a href="#a9.2">9.2 预测功能PCA分析</a></li>
-					<li><a href="#a9.3">9.3 组间功能差异性分析</a></li>
-					<li><a href="#a8.4">9.4 Source tracker分析</a></li>
-					<li><a href="#a8.5">8.5 AYASDI拓扑数据分析</a></li>
+					<li><a href="#a9.1">7.1 CCA/RDA分析</a></li>
+					<li><a href="#a9.2">7.2 相关性Heatmap图分析</a></li>
 				</div>
 			</div>
 
 			</div>
 			
 			<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#a10">十 参考文献</a></li></div>
+				<div class="AccordionPanelTab"><li><a href="#a10">八 参考文献</a></li></div>
 			</div>
 
 			<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#a11">十一 交付结果目录结构</a></li></div>
+				<div class="AccordionPanelTab"><li><a href="#a11">九 交付结果目录结构</a></li></div>
 			</div>
 			
 			<div class="AccordionPanel">
-				<div class="AccordionPanelTab"><li><a href="#a12">十二 联系我们</a></li></div>
+				<div class="AccordionPanelTab"><li><a href="#a12">十 联系我们</a></li></div>
 			</div>
 
 			<script type="text/javascript">
@@ -208,12 +190,10 @@
 			<p class="pra">1) 数据质控：测序得到的原始数据会存在一定比例的低质量数据，为了保证后续信息分析结果的准确可靠，首先要对原始数据进行质控及宿主过滤，得到有效数据。分析中将使用Cutadapt去除原始数据中为彻底清除的Illumina接头序列，再用PrinSEQ去除低质量的序列片段和个别序列。每一步质控前和分析结束后，都会用FastQC来检测质控的合理性和效果。<sup>[7，8]</sup><br></p>
 			<p class="pra">2) 去除宿主：质控处理后的数据通过bowtie2比对到宿主的基因组，没有比对到的序列被保留下来做后续分析。<br></p>
 			<p class="pra">3）物种注释：使用Kraken2和自建的细菌数据库来鉴别样本中所含有的物种，再用Bracken来对样本中物种的实际相对丰度进行预测。相对于基于组装的物种注释，基于序列的宏基因组物种注视方法会比较准确。<sup>[9-12]</sup><br></p>
-			<p class="pra">4) 宏基因组组装：从各样品质控并除宿主后的序列出发，用Megahit进行宏基因组组装，并将各样品未被利用上的序列放在一起进行混合组装，以期发现样品中的低丰度物种信息。<sup>[13-15]</sup><br></p>
-			<p class="pra">5) 基因预测：从单样品和混合组装后的contigs出发，采用Prodigal进行基因预测得到ORF序列，并将各样品和混合组装预测产生的基因放在一起，用CD-HIT进行去冗余，构建所有样本预测基因的代表序列。从预测基因代表序列出发，综合各样品的去处宿主后的序列，可获得所有预测基因在在各样品中的丰度信息。<sup>[16-18]</sup><br></p>
-			<p class="pra">6) 常用功能数据库注释：从预测基因的代表序列出发，进行代谢通路(KEGG)的功能注释和丰度分析。<sup>[19-21]</sup><br></p>
-			<p class="pra">7) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析，样品聚类分析；当有分组信息时，可以进行LEfSe多元统计分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
-			<p class="pra">8) 抗性基因注释：利用预测基因的代表序列与抗生素抗性基因数据库CARD进行注释，可以获得抗性基因丰度分布情况以及这些抗性基因的物种归属和抗性机制。<sup>[24-25]</sup><br></p>
-			<p class="pra">9) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 CCA/RDA 分析，肠型分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
+			<p class="pra">4) 常用功能数据库注释：从去除宿主基因的reads出发，使用FMAP软件（github: https://github.com/jiwoongbio/FMAP.git），各个样本的reads比对到FMAP作者整理的UniRef90（orthology_uniref90_2_2157_4751.20190412161853）数据库，进行代谢通路(KEGG)的功能注释和丰度分析。<sup>[19-21]</sup><br></p>
+			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析，样品聚类分析；当有分组信息时，可以进行LEfSe多元统计分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
+			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的clean reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况以及这些抗性基因的物种归属和抗性机制。<sup>[24-25]</sup><br></p>
+			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 CCA/RDA 分析，肠型分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
 			</p>
 
 			<p align="center"><img src="../image/2-2.png" width="649" height="800"></p>
@@ -256,6 +236,10 @@
 			</p>
 			<p class="pra">
 				基于Bracken结果的绝对丰度及注释信息，对每个样品在一共7个分类水平界门纲目科属种(Kingdom,Phylum,Class,Order,Family,Genus,Species)上的序列数目占总序列数的比例进行统计，可以有效的评估样本的物种注释分辨率（注释到属/种的比例越高表示样本的注释效果越好），图4-1展示了每个样本中在各分类水平注释的相对程度:
+			</p>
+
+			<p class="pra">
+				经过分析和统计，{{species_ratio}}
 			</p>
 
 			<p align="center"><img src="../../Figure4-1.png" width="800" height="400"></p>
@@ -363,179 +347,116 @@
 			<p class="pra">		
 				目前适用于生态学研究的降维分析主要是主成分分析 (PCA，Principal Component Analysis)和无度量多维标定法（NMDS，Non-Metric Multi-Dimensional Scaling）分析。其中，PCA是基于线型模型的一种降维分析，它应用方差分解的方法对多维数据进行降维，从而提取出数据中最主要的元素和结构；PCA 能够提取出最大程度反映样品间差异的两个坐标轴，从而将多维数据的差异反映在二维坐标图上，进而揭示复杂数据背景下的简单规律。而NMDS是非线性模型，其目的是为了克服线性模型的缺点，更好地反映生态学数据的非线性结构，应用NMDS分析，根据样本中包含的物种信息，以点的形式反映在多维空间上，而不同样本间的差异程度则是通过点与点间的距离体现，能够反映样本的组间或组内差异等。 基于不同分类层级的物种丰度表，我们进行了PCA和NMDS分析，如果样品的物种组成越相似，则它们在PCA和NMDS图中的距离则越接近。<sup>[37]</sup>详细的数值可以查看结果目录<a href="../../../2-TaxaAundanceAnalysis/3-DiversityAnalysis/PCoA-NMDS">./2-TaxaAundanceAnalysis/3-DiversityAnalysis/PCoA-NMDS</a>。完整的差异性分析结果请见结果部分。
 			</p>
-
 			<br><hr><br>
+
 			<h2>
-				五 宏基因组组装(<a href="../../../3-Assembly">3-Assembly</a>目录)
+				五 KEGG功能数据库注释(<a href="../../../3-FuctionAnalysis">3-FuctionAnalysis</a>目录)
 			</h2>
-			<h3><a id="a5.1"></a>5.1 宏基因组组装基本步骤</h3>
-			<p class="pra">	
-				宏基因组的组装的目的就是对这些短的序列进行组装、拼接，最终尽可能的恢复样本中微生物物种的基因组图谱。组装一般分为三个层次，contig, scaffold和chromosomes. contig表示从大规模测序得到的短读(reads)中找到的一致性序列。组装的第一步就是从短片段(pair-end)文库中组装出contig。进一步基于不同长度的大片段(mate-pair)文库，将原本孤立的contig按序前后连接，其中会调整contig方向以及contig可能会存在开口(gap,用N表示)，这一步会得到scaffolds,就相当于supercontigs和meatacontigs。最后基于遗传图谱或光学图谱将scaffold合并调整，形成染色体级别的组装(chromosome)。宏基因组样本中，因为存在成百上千的微生物物种，在现有的测序深度下，通常很难得到完整的基因组。本流程使用Megahit来组装拼接contigs用于后续的基因功能分析。
-			</p>
-			<p class="pra">	
-				1）经过预处理后得到R1和R2序列，通过脚本找到仍然匹配的序列，使用 Megahit 组装软件进行paired-end组装分析；<br>
-			</p>
-			<p class="pra">	
-				2）将不匹配的序列以及没有用于第一轮组装的序列混合组装。<br>
-			</p>
-			<p class="pra">	
-				3）对于单样品和混合组装生成的Contigs，过滤掉 1000bp以下的片段，并进行统计分析和后续基因预测；<br>
-			</p>
-			<p class="pra">	
-				4）用QUAST来对组装后的Contigs进行评估。<sup>[38]</sup><br>
-			</p>
-
-			<h3><a id="a5.2"></a>5.2 Contigs基本信息统计</h3>
-
-			<p align="center">
-				<iframe src="../../page5-1/report.html" width="800" height="600"></iframe>
-			</p>
-			<p align="center"><a href="../../page5-1/report.html"><strong>图5-1 QUAST结果展示 (点击打开新窗口查看)</strong></a></p>
-			<p class="pra">更多组装所得的Contigs序列信息以及相关统计信息可以通过点击此处在<a href="../../../3-Assembly/">结果./3-Assembly/文件夹中</a>查看</p><br>
-
-			<hr>
-			<h2>
-				六 基因预测及丰度分析(<a href="../../../4-ORFPrediction">4-ORFPrediction</a>目录)
-			</h2>
-			<h3><a id="a6.1"></a>6.1 基因预测及丰度分析基本步骤</h3>
-		
-			<p class="pra">	
-				基因预测是通过识别DNA序列上的具有生物学特征的片段来预测基因在染色体或DNA片段上的位置。基因识别的对象主要是蛋白质编码基因，也包括其他具有一定生物学功能的因子，如RNA基因和调控因子。基因识别是基因组研究的基础。
-			</p>
-			<p class="pra">	
-				1）从各样品及混合组装的 Scaftigs（>=1000bp）出发，采用 Prodigal 进行 ORF (Open Reading Frame) 预测，并从预测结果出发，过滤掉长度小于 100nt的信息。prodigal的全称是ProkaryoticDynamic Programming Genefinding Algorithm，原核的动态编程基因查找算法，prodigal主要应用于细菌和古生菌的基因预测，如果要对meta样品做基因预测，prodigal还专门提供了meta的版本。<sup>[39]</sup><br>
-			</p>
-			<p class="pra">	
-				2）对各样品及混合组装的 ORF 预测结果，采用 CD-HIT软件进行去冗余，以获得非冗余的预测基因序列，默认以 identity 95%, coverage 90% 进行聚类，并选取最长的序列为代表性序列。<br>
-			</p>
-			<p class="pra">	
-				3）采用 BWA，将各样品的有效序列比对至初始预测基因的代表序列，计算得到基因在各样品中比对上的序列数目，得到相对丰度值；<br>
-			</p>
-			<p class="pra">	
-				4）基于中各基因在各样品中的丰度信息，进行基本信息统计，core-pan 基因分析，样品间相关性分析，及基因数目韦恩图分析。<br>
-			</p>
-
-			<h3><a id="a6.2"></a>6.2 预测基因基本信息统计</h3>
-			<p align="center">
-				<img src="../../Figure6-1.png" width="900" height="600">
-			</p>
-			<p align="center"><strong>图6-1 预测基因基本信息</strong></p>
-			<dd align="center" style="font-size:80%;">
-				说明：左上为预测基因的长度分布柱形图；右上为预测基因GC比例的分布柱形图；左下为预测基因起始位点饼图；右下为预测基因完整性饼图。
-			</dd>	
-
-			<hr>
-			<h2>
-				七 KEGG功能数据库注释(<a href="../../../5-FuctionAnalysis">5-FuctionAnalysis</a>目录)
-			</h2>
-			<h3><a id="a7.1"></a>7.1 KEGG数据库介绍</h3>
+			<h3><a id="a7.1"></a>5.1 KEGG数据库介绍</h3>
 			<p class="pra">
 				KEGG 数据库于 1995 年由 Kanehisa Laboratories 推出 0.1 版，目前发展为一个综合性数据库，其中最核心的为 KEGG PATHWAY 和 KEGG ORTHOLOGY 数据库。在 KEGG ORTHOLOGY 数据库中，将行使相同功能的基因聚在一起，称为 Ortholog Groups (KO entries)，每个 KO 包含多个基因信息，并在一至多个 pathway 中发挥作用。而在 KEGG PATHWAY 数据库中，将生物代谢通路划分为 6 类，分别为：细胞过程（Cellular Processes）、环境信息处理（Environmental Information Processing）、遗传信息处理（Genetic Information Processing）、人类疾病（Human Diseases）、新陈代谢（Metabolism）、生物体系统（Organismal Systems），其中每类又被系统分类为二、三、四层。第二层目前包括有 57个种子 pathway；第三层即为其代谢通路图；第四层为每个代谢通路图的具体注释信息。<sup>[40]</sup><br>
 			</p>
 
-			<h3><a id="a7.2"></a>7.2 功能注释基本步骤</h3>
+			<h3><a id="a7.2"></a>5.2 功能注释基本步骤</h3>
 			<p class="pra">
-				1）使用DIAMOND软件将预测基因序列与各功能数据库进行比对（blastp，evalue ≤ 1e-5）；<br>
+				1）使用FMAP软件（基于DIAMOND）将clean reads(质控和去宿主之后的序列)与各功能数据库进行比对；<br>
 			</p>
 			<p class="pra">
-				2）比对结果过滤：对于每一条序列的 比对结果，选取 score 最高的比对结果（one HSP > 60 bits）进行后续分析；<br>
+				2）过滤掉比对失败的reads；<br>
 			</p>
 			<p class="pra">
-				3）从比对结果出发，统计不同功能层级的相对丰度（各功能层级的相对丰度等于注释为该功能层级的基因的相对丰度之和。<br>
+				3）从比对结果出发，统计不同功能层级的相对丰度（各功能层级的相对丰度等于注释为该功能层级的reads的相对丰度之和)。<br>
 			</p>
 			<p class="pra">
-				4）从功能注释结果及基因丰度表出发，获得各个样品在各个分类层级上的基因数目表，对于某个功能在某个样品中的基因数目，等于在注释为该功能的基因中，丰度不为 0 的基因数目；<br>
-			</p>
-			<p class="pra">
-				5）从各个分类层级上的丰度表出发，进行注释基因数目统计，相对丰度概况展示，丰度聚类热图展示，PCA和NMDS降维分析，代谢通路比较分析，组间功能差异的LEfSe分析。<br>
+				4）从各个分类层级上的丰度表出发，进行相对丰度概况展示，丰度聚类热图展示，代谢通路比较分析，组间功能差异的LEfSe分析。<br>
 			</p>
 
-			<h3><a id="a7.2"></a>7.3 功能相对丰度概况</h3>
+			<h3><a id="a5.3"></a>5.3 功能相对丰度概况</h3>
 			<p class="pra">
 				根据各个数据库的注释结果，绘制了样品（组）在各个数据库中对应层级上的相对丰度统计图。 以各样品在各个数据库中level1 层级上的相对丰度统计图为例展示。其余层级为相对丰度前10的注释结果。<br>
 			</p>
 
 			<p align="center">
-				<img src="../../Figure7-1.png" width="800" height="800">
+				<img src="../../Figure5-1.png" width="800" height="800">
 			</p>
-			<p align="center"><strong>图7-1 KEGG的Level1分类的代谢通路丰度柱形图<a href="../../Figure7-1.png">（点击此处打开新窗口查看)</strong></a></p>
+			<p align="center"><strong>图5-1 KEGG的Level1分类的代谢通路丰度柱形图<a href="../../Figure7-1.png">（点击此处打开新窗口查看)</strong></a></p>
 			<dd align="center" style="font-size:80%;">
 				说明：不同的颜色代表不同的KEGG分类。
 			</dd>	
 
-			<h3><a id="a7.2"></a>7.4 功能相对差异性分析</h3>
+			<h3><a id="a5.4"></a>5.4 功能相对差异性分析</h3>
 			<p class="pra">
 				根据各个数据库的注释结果，绘制了样品（组）在各个数据库中对应层级上的相对丰度统计图。 以各样品在各个数据库中level1 层级上的相对丰度统计图为例展示。其余层级为相对丰度前10的注释结果。<br>
 			</p>
 
 			<p align="center">
-				<img src="../../Figure7-2.png" width="600" height="600" alt="没有在分组间差异显著的代谢通路">
+				<img src="../../Figure5-2.png" width="600" height="600" alt="没有在分组间差异显著的代谢通路">
 			</p>
-			<p align="center"><strong>图7-2 KEGG的基本代谢通路LEfSe分析LDA柱形图<a href="../../../5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
+			<p align="center"><strong>图5-2 KEGG的基本代谢通路LEfSe分析LDA柱形图<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
 			<dd align="center" style="font-size:80%;">
 				说明：每一横向柱形体代表一个通路，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应代谢通路ID是哪个分组的特征通路，特征微生物表示在对应分组中的丰度相对较高。
 			</dd>	
 
 			<p class="pra">
-				为了方便客户查看样本在不同KEGG功能分类水平上的丰度，用户可以通过点击<a href="../../../5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./5-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）这三个层面上在各个不同分组间的结果，并绘制了相应的LDA柱形图。
+				为了方便客户查看样本在不同KEGG功能分类水平上的丰度，用户可以通过点击<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）这三个层面上在各个不同分组间的结果，并绘制了相应的LDA柱形图。
 			</p>
 
 			<hr>
 			<h2>
-				八 抗性基因注释(<a href="../../../6-AMRAnalysis">6-AMRAnalysis</a>目录)
+				六 抗性基因注释(<a href="../../../4-AMRAnalysis">4-AMRAnalysis</a>目录)
 			</h2>
-			<h3><a id="a8.1"></a>8.1  抗性基因注释基本步骤</h3>
+			<h3><a id="a8.1"></a>6.1  抗性基因注释基本步骤</h3>
 			<p class="pra">	
 				细菌抗生素耐药性是在人类为控制细菌生长而进行的大规模抗生素的使用的前提下, 细菌通过基因突变或者从环境有机体的基因水平转移而获得对特定抗生素的抗性，这些突变使抗生素作用靶位发生改变或不能再对其靶标施加作用。耐药性的获得通常涉及到基因/移动DNA元件及其细菌宿主之间复杂的相互作用。随着DNA测序成本的降低和分析速度的提高, 研究者能够获得大量病原体基因组以及土壤、海洋和人类相关宏基因组的数据信息。利用基因组序列数据与生物信息学方法, 可深度剖析细菌耐药机制, 确定新药靶点, 寻找新的抗生素。CARD数据库目前使用最广泛的抗性基因数据库，目前包括3997个抗性基因分类，并在线提供各个分类名称与PDB、NCBI等数据库的搜索接口，方便后续分析。<sup>[41]</sup>
 			</p>
 			<p class="pra">
-				1）使用CARD数据库提供的Resistance Gene Identifier (RGI)软件将预测基因代表序列与CARD数据库进行比对（RGI内置blastp，默认evalue ≤ 1e-30[42]）；<br>
+				1）使用FMAP软件将各样本质控和去宿主之后的序列与CARD数据库进行比对（基于DIAMOND）；<br>
 			</p>
 			<p class="pra">
-				2）根据RGI的比对结果，结合预测基因的丰度信息，统计出各ARO的相对丰度；<br>
+				2）根据比对结果，统计出每个样本比对到各ARO参考序列的reads数，从而计算相对丰度；<br>
 			</p>
 			<p class="pra">
-				3）从ARO的丰度出发，进行丰度柱形图展示，丰度聚类热图展示，丰度分布圈图展示，组间ARO差异分析，抗性基因（注释到ARO的unigenes）物种归属分析等（对部分名称较长的ARO，用其前三个单词与下划线缩写的形式展示）。<br>
+				3）从ARO的丰度出发，进行丰度柱形图展示，丰度聚类热图展示，丰度分布圈图展示，组间ARO差异分析。<br>
 			</p>
 
-			<h3><a id="a8.2"></a>8.2 抗性基因丰度概况</h3>
+			<h3><a id="a8.2"></a>6.2 抗性基因丰度概况</h3>
 			<p class="pra">	
 				从抗性基因的相对丰度表出发，计算各个样品中ARO的含量和百分比，筛选出最大丰度排名前20的ARO结果展示如下：<br>
-				<p align="center"><img src="../../Figure8-1.png" width="700" height="500"></p>
-				<p align="center"><strong>图8-1 各个样品抗性基因相对分布情况柱形图（相对丰度前10的基因）</strong></p>
+				<p align="center"><img src="../../Figure6-1.png" width="700" height="500"></p>
+				<p align="center"><strong>图6-1 各个样品抗性基因相对分布情况柱形图（相对丰度前10的基因）</strong></p>
 				<dd align="center" style="font-size:80%;">说明：图例中最多显示最优势的20个种类,余下的相对丰度较低的物种被归类为Other在图中展示。</dd>
 			</p>
 
 			<p class="pra">	
 				从抗性基因的相对丰度表出发，计算各个样品中ARO的含量和百分比，筛选出最大丰度排名前20的ARO结果展示如下：<br>
-				<p align="center"><img src="../../Figure8-2.png" width="700" height="500"></p>
-				<p align="center"><strong>图8-2 各个样品抗性基因聚类热图（相对丰度前20的基因）</strong></p>
+				<p align="center"><img src="../../Figure6-2.png" width="700" height="500"></p>
+				<p align="center"><strong>图6-2 各个样品抗性基因聚类热图（相对丰度前20的基因）</strong></p>
 				<dd align="center" style="font-size:80%;">说明：横轴代表样品/分组信息，竖轴的耐性基因基于欧式距离聚类。</dd>
 			</p>
 
 
-			<h3><a id="a8.3"></a>8.3 组间抗性基因差异性分析</h3>
+			<h3><a id="a8.3"></a>6.3 组间抗性基因差异性分析</h3>
 			<p class="pra">
-				结合分组信息，利用LEfSe分析了微生物抗性基因表达在组间是否有显著性差异。<a href="../../../6-AMRAnalysis/3-SignificanceAnalysis/">./6-AMRAnalysis/3-SignifcanceAnalysis/</a>点击此处查看功能差异性分析详细结果。
+				结合分组信息，利用LEfSe分析了微生物抗性基因表达在组间是否有显著性差异。<a href="../../../4-AMRAnalysis/4-SignificanceAnalysis/">./4-AMRAnalysis/4-SignificanceAnalysis/</a>点击此处查看功能差异性分析详细结果。
 			</p>
 
 			<hr>
 			<h2>
-				九 高级分析(<a href="../../../7-AdvancedAnalysis">7-AdvancedAnalysis</a>目录)
+				七 相关性分析
 			</h2>
-			<h2 style="color:#F00">温馨提示：高级分析部分属于VIP分析，如果没有，此部分内容仅为展示。</h2>
-			<h3 align="left"><a id="a9.1"></a>9.1 CCA/RDA分析</h3>
+		
+			<h3 align="left"><a id="a9.1"></a>7.1 CCA/RDA分析</h3>
 			<p class="pra">
 				CCA/RDA(DCA判断用哪一种分析)分析是基于对应分析发展的一种排序方法，将对应分析与多元回归分析相结合，每一步计算均与环境因子进行回归，又称多元直接梯度分析。RDA是基于线性模型，CCA是基于单峰模型（图8-1）。该分析<a>主要用来反映菌群与</a>环境因子之间的关系，可以检测环境因子、样品、菌群三者之间的关系或者两两之间的关系，可得到影响样品分布的重要环境驱动因子。 <sup>[42]</sup>
 			</p>
-			<p align="center"><img src="../../Figure9-1.png" width="700" height="500" alt="未进行RDA分析"></img></p>
-			<h3 align="center">图9-1 属水平物种CCA/RDA排序图</h3>
+			<p align="center"><img src="../../Figure7-1.png" width="700" height="500" alt="没有环境因子，未进行RDA分析"></img></p>
+			<h3 align="center">图7-1 属水平物种CCA/RDA排序图</h3>
 			<dd align="center" style="font-size:80%;">
 				说明：在CCA/RDA物种排序图内，环境因子用箭头表示，箭头连线的长度代表某个环境因子与群落分布和种类分布间相关程度的大小（解释方差的大小），箭头越长，说明相关性越大，反之越小。箭头连线和排序轴的夹角代表某个环境因子与排序轴的相关性大小，夹角越小，相关性越高；反之越低。环境因子之间的夹角为锐角时表示两个环境因子之间呈正相关关系，钝角时呈负相关关系。每个点代表一个物种，点越大，对应物种丰度越高，灰色点代表丰度较低的物种，未在图中注释物种名称，将物种投影到各个环境因子，对应的值即为该物种倾向于存在的环境（喜欢的环境）。或者说，将物种点与原点连线，物种间，物种与环境因子间，环境因子间的夹角的余弦值近似于相关系数，至于有多近似，就要看RDA1/CCA1和RDA2/CCA2两个坐标轴的解释方差百分比有多大，越大越近似。对于样本排序图（请查看<a href="../../../7-AdvancedAnalysis/1-AssociationAnalysis/">./7-AdvancedAnalysis/1-AssociationAnalysis/</a>），样本点之间的距离近似于菌群结构差异程度，样本点投影到环境因子对应的值近似于该样本真实的环境因子值。
 			</dd>
 
 			<hr>
-			<h2><a id="a10"></a>十 参考文献</h2>
+			<h2><a id="a10"></a>八 参考文献</h2>
 			<p>
 				[1] Chen, K., Pachter, L. (2005). Bioinformatics for whole-genome shotgun sequencing of microbial communities. PLoS computational biology, 1(2), e24.<br>
 				[2] Handelsman, J., Rondon, M. R., Brady, S. F., Clardy, J., Goodman, R. M. (1998). Molecular biological access to the chemistry of unknown soil microbes: a new frontier for natural products. Chemistry and biology, 5(10), R245-R249.<br>
@@ -557,7 +478,7 @@
 				[18] Hyatt D., Chen, GL., et. Al., (2010) Prodigal: prokaryotic gene recognition and translation initiation site identification. BMC Bioinformatics, 11:119.<br>
 				[19] Segata,  N., et. al., (2011). Metagenomic biomarker discovery and explanation. Genome Biol.12,R60 .<br>
 				[20] Zhu, Wenhan, Alexandre Lomsadze, and Mark Borodovsky. (2012) Ab initio gene identification in metagenomic sequences. Nucleic acids research 38.12 : e132-e132<br>
-				[21] Li W, Godzik A: Cd-hit: a fast program for clustering and comparing large sets of protein or nucleotide sequences. Bioinformatics 2006, 22(13):1658-1659.<br>
+				[21] Kim J, Kim MS, Koh AY, Xie Y, Zhan X. "FMAP: Functional Mapping and Analysis Pipeline for metagenomics and metatranscriptomics studies" BMC Bioinformatics. 2016 Oct 10;17(1):420. PMID: 27724866.<br>
 				[22] Fu L, Niu B, Zhu Z, Wu S, Li W: (2012) CD-HIT: accelerated for clustering the next-generation sequencing data. Bioinformatics, 28(23):3150-3152.<br>
 				[23] Villar E, Farrant G K, Follows M, et al. (2015) Environmental characteristics of Agulhas rings affect interocean plankton transport[J]. Science,  348(6237): 1261447.<br>
 				[24] Jia et al. (2017). CARD 2017: expansion and model-centric curation of the Comprehensive Antibiotic Resistance Database. Nucleic Acids Research, 45, D566-573.<br>
@@ -585,22 +506,19 @@
 			</p>
 
 			<hr>
-			<h2><a id="a11"></a>十一 交付结果目录结构 </h2>
+			<h2><a id="a11"></a>九 交付结果目录结构 </h2>
 			<p>交付数据分为若干个子目录。详情可查看交付目录下的Result_README.pdf。 </p>
 			<p>
 				<strong>|</strong><strong>Result_AmpliconSequencing/  </strong><strong>[</strong><strong>主要的结果文件</strong><strong>]</strong><br>
 				|-- 1-QCStats / [序列预处理相关信息]<br>
 				|-- 2-TaxaAundanceAnalysis / [整体物种的注释与评估主要相关信息]<br>
-				|-- 3-Assembly / [宏基因组组装]<br>
-				|-- 4-ORFPrediction / [基因预测及丰度分析]<br>
-				|-- 5-KEGGFuctionAnalysis / [常用的功能数据库注释相关信息]<br>
-				|-- 6-AMRAnalysis / [抗性基因注释主要相关信息]<br>
-				|-- 7-AdvancedAnalysis / [高级分析主要相关信息]<br>
-				|-- 8-FiguresTablesForReport / [本报告的图表文件夹]<br>
+				|-- 3-FuctionAnalysis / [常用的功能数据库注释相关信息]<br>
+				|-- 4-AMRAnalysis / [抗性基因注释主要相关信息]<br>
+				|-- FiguresTablesForReport / [本报告的图表文件夹]<br>
 			</p>
 
 			<hr>
-			<h2><a id="a12"></a>十二 联系我们</h2>
+			<h2><a id="a12"></a>十 联系我们</h2>
 			<p>
 				地址：广东省深圳市南山区南海大道3688号 <br>
 				邮编：518060<br>

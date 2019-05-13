@@ -22,23 +22,23 @@ file_type = re.search('[^\.]+$', options.input).group() if options.type == "auto
 
 
 if file_type == 'txt' or file_type == 'csv':
-    out_df = pd.read_csv(options.input, sep='\t')
+  out_df = pd.read_csv(options.input, sep='\t')
 elif file_type == "html":
-    out_df = pd.read_html(options.input)[0]
+  out_df = pd.read_html(options.input)[0]
 else:
-    f = open(options.input, 'r')
-    raw_html = f.read()
-    tree = html.fromstring(raw_html)
-    jason = tree.xpath("//script[@id='data']/text()")[0]
-    json = pd.read_json(jason, typ='series')
-    columns = [i[0] for i in json['columns']]
-    out_df = pd.DataFrame(json['data'])
-    out_df.columns = columns
+  f = open(options.input, 'r')
+  raw_html = f.read()
+  tree = html.fromstring(raw_html)
+  jason = tree.xpath("//script[@id='data']/text()")[0]
+  json = pd.read_json(jason, typ='series')
+  columns = [i[0] for i in json['columns']]
+  out_df = pd.DataFrame(json['data'])
+  out_df.columns = columns
 
 table_html = out_df.to_html(index=False)
 
 with open(options.out, 'r') as f1:
-    target = f1.read()
-    target = target.replace(options.key, '\n' + table_html + '\n')
+  target = f1.read()
+  target = target.replace(options.key, '\n' + table_html + '\n')
 with open(options.out, 'w') as f2:
-    f2.write(target)
+  f2.write(target)

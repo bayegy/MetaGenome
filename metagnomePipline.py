@@ -311,7 +311,7 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
         os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
             self.path['quast_path'], self.out_dir, self.out_dir))
 
-    def run(self, processor=2):
+    def run(self, processor=2, base_on_assembly=False):
         self.run_fastqc(fq_list=self.raw_list, processor=processor, first_check=5)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
@@ -326,10 +326,12 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
         self.join_metaphlan()
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.join_humann()
-        self.fmap_wrapper(run_type="KEGG", processor=processor * 4)
-        self.fmap_wrapper(run_type="AMR", processor=processor * 4)
+        if base_on_assembly:
+            self.run_assembly(processor=processor * 20)
+            self.run_quast()
+        else:
+            self.fmap_wrapper(run_type="KEGG", processor=processor * 4)
+            self.fmap_wrapper(run_type="AMR", processor=processor * 4)
         self.map_ko_annotation()
         self.map_func_definition()
-        self.run_assembly(processor=processor * 20)
-        self.run_quast()
         VisualizeAll(self.mapping_file, self.categories).visualize()

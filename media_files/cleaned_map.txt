@@ -1,5 +1,5 @@
-#SampleID	Group1	Description
-SS1a	A	SS1a
-SS2b	A	SS2b
-SS4d	B	SS4d
-SS6f	B	SS6f
+#SampleID	Group1	fac1	fac2	Description
+SS1a	A	1	1	SS1a
+SS2b	A	2	1.2	SS2b
+SS4d	B	3	5	SS4d
+SS6f	B	4	2	SS6f

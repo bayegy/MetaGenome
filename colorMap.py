@@ -38,13 +38,13 @@ class ColorMap(object):
         to plot all maps with abundance showed in map:
 
             >>>from colorMap import ColorMap
-            >>>c=ColorMap("KO_Group1_lefse_LDA2.LDA.txt","All.Function.abundance.KeepID.KO.txt",out_dir="map_test")
+            >>>c=ColorMap("test/KO_Group1_lefse_LDA2.LDA.txt","test/All.Function.abundance.KeepID.KO.txt",out_dir="map_test")
             >>>c.plot_all()
 
         to plot a single map:
 
             >>>from colorMap import ColorMap
-            >>>c=ColorMap("KO_Group1_lefse_LDA2.LDA.txt")
+            >>>c=ColorMap("test/KO_Group1_lefse_LDA2.LDA.txt")
             >>>c.plot_map("map00010")
 
 
