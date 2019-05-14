@@ -36,7 +36,7 @@ class MetagenomePipline(object):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='/home/cheng/Projects/rll_testdir/test/'):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='./'):
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
@@ -49,7 +49,7 @@ class MetagenomePipline(object):
         self.mapping_file = self.out_dir + 'mapping_file.txt'
         self.parsed_map['map'].to_csv(self.mapping_file, sep='\t', index=False)
         self.categories = categories if categories else ','.join(
-            [g for g in self.parsed_map['map'].columns if not g.find('Group') == -1])
+            [g for g in self.parsed_map['map'].columns if not g.find('Category') == -1])
         print("The detected categories are: \n    {}\n".format(self.categories))
         self.raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
         trimmed_pattern = self.out_dir + "Primer_trimmed/{}_{}.fq.gz"
@@ -202,14 +202,13 @@ class MetagenomePipline(object):
 
     def join_humann(self):
         os.system('''
-out_dir=%s
-ln -s ${out_dir}Metagenome/Humann/*/*genefamilies.tsv ${out_dir}Metagenome/Humann/*/*pathabundance.tsv ${out_dir}Metagenome/Humann/
-humann2_join_tables -i ${out_dir}Metagenome/Humann/ -o ${out_dir}Metagenome/Humann/All.Humann2.genefamilies.tsv --file_name genefamilies.tsv
-humann2_join_tables -i ${out_dir}Metagenome/Humann/ -o ${out_dir}Metagenome/Humann/All.Humann2.pathabundance.tsv --file_name pathabundance.tsv''' % (self.out_dir))
+ln -s {out_dir}Metagenome/Humann/*/*genefamilies.tsv {out_dir}Metagenome/Humann/*/*pathabundance.tsv {out_dir}Metagenome/Humann/
+humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.Humann2.genefamilies.tsv --file_name genefamilies.tsv
+humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.Humann2.pathabundance.tsv --file_name pathabundance.tsv'''.format(out_dir=self.out_dir))
         self.clean_header(self.out_dir + "Metagenome/Humann/All.Humann2.genefamilies.tsv",
                           pattern='_R1\..*\.unmapped\.R1_Abundance-RPKs$')
         self.clean_header(self.out_dir + "Metagenome/Humann/All.Humann2.pathabundance.tsv",
-                          pattern='_R1\..*\.unmapped.R1_Abundance$')
+                          pattern='_R1\..*\.unmapped\.R1_Abundance$')
 
     @synchronize2
     def run_fmap(self, fq_list, database="protein_fasta_protein_homolog_model", processor=4, out_dir='AMR'):
@@ -279,14 +278,11 @@ humann2_join_tables -i ${out_dir}Metagenome/Humann/ -o ${out_dir}Metagenome/Huma
         ko_file = self.out_dir + 'FMAP/All.Function.abundance.KeepID.KO.txt'
         out = os.path.dirname(ko_file)
         os.system('''
-SCRIPTPATH=%s
-ko_file=%s
-out_dir=%s
-perl ${SCRIPTPATH}/ConvergeKO2Module.pl $ko_file > ${out_dir}/All.Function.abundance.KeepID.Module.txt
-perl ${SCRIPTPATH}/ConvergeKO2Pathway.pl $ko_file > ${out_dir}/All.Function.abundance.KeepID.Pathway.txt
-perl ${SCRIPTPATH}/ConvergePathway2Level1.pl ${out_dir}/All.Function.abundance.KeepID.Pathway.txt > ${out_dir}/All.Function.abundance.KeepID.Pathway.Level1.txt
-perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.KeepID.Pathway.txt > ${out_dir}/All.Function.abundance.KeepID.Pathway.Level2.txt
-            ''' % (self.path['cii_home'], ko_file, out))
+perl {SCRIPTPATH}/ConvergeKO2Module.pl {ko_file} > {out_dir}/All.Function.abundance.KeepID.Module.txt
+perl {SCRIPTPATH}/ConvergeKO2Pathway.pl {ko_file} > {out_dir}/All.Function.abundance.KeepID.Pathway.txt
+perl {SCRIPTPATH}/ConvergePathway2Level1.pl {out_dir}/All.Function.abundance.KeepID.Pathway.txt > {out_dir}/All.Function.abundance.KeepID.Pathway.Level1.txt
+perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.KeepID.Pathway.txt > {out_dir}/All.Function.abundance.KeepID.Pathway.Level2.txt
+            '''.format(SCRIPTPATH=self.path['cii_home'], ko_file=ko_file, out_dir=out))
 
     def map_func_definition(self):
         FMAP_data = self.path['fmap_home'] + '/FMAP_data/'
@@ -311,6 +307,9 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
         os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
             self.path['quast_path'], self.out_dir, self.out_dir))
 
+    def visualize(self, exclude='none'):
+        VisualizeAll(self.mapping_file, self.categories).visualize(exclude)
+
     def run(self, processor=2, base_on_assembly=False):
         self.run_fastqc(fq_list=self.raw_list, processor=processor, first_check=5)
         self.run_trim(fq_list=self.raw_list)
@@ -334,4 +333,4 @@ perl ${SCRIPTPATH}/ConvergePathway2Level2.pl ${out_dir}/All.Function.abundance.K
             self.fmap_wrapper(run_type="AMR", processor=processor * 4)
         self.map_ko_annotation()
         self.map_func_definition()
-        VisualizeAll(self.mapping_file, self.categories).visualize()
+        # self.visualize()

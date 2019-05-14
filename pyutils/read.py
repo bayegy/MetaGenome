@@ -35,7 +35,7 @@ def get_kingdom_ratio(species_abundance_table):
     df = df.groupby(kingdom).sum()
     del df['Environmentalsamples']
 
-    def series_to_str(series, value_format=':.4f'):
+    def series_to_str(series, value_format=':.2%'):
         return ', '.join([('{}({%s})' % (value_format)).format(k, v) for k, v in series.items()])
 
     # max_abundance = max(df)
@@ -43,11 +43,13 @@ def get_kingdom_ratio(species_abundance_table):
     # plt.pie(df, explode=explode, labels=df.index, labeldistance=1.1,
     #         autopct='%2.2f%%', shadow=False, startangle=90, pctdistance=0.6)
     # plt.show()
-    return "您样本中，检测到的物种有：{}; 物种占比情况：{}。".format(series_to_str(df, value_format=''), series_to_str(df / df.sum()))
+    return "您样本中，检测到的物种有：{}; 物种占比情况：{}。".format(series_to_str(df, value_format=':.0f'), series_to_str(df / df.sum()))
 
 
-def replace_kword_in_file(old, new, file_path):
+def format_file(file_path, **kwargs):
     with open(file_path, 'r') as f:
-        out = f.read().replace(old, new)
+        out = f.read()
+        for k, v in kwargs.items():
+            out = out.replace("{{%s}}" % (k), v)
     with open(file_path, 'w') as f:
         f.write(out)

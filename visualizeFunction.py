@@ -16,11 +16,10 @@ class VisualizeFunction(Visualize):
     def __visualize_with_group__(self, exclude='all'):
         categories = [g.strip() for g in re.split(',', self.categories)]
         for g in categories:
-            # pdb.set_trace()
             Circos(self.abundance_table, mapping_file=self.mapping_file, category=g, by_group_mean=False,
                    prefix=self.prefix + g + '_', out_dir=self.out_dir + 'Circos').visualize()
-            Circos(self.abundance_table, mapping_file=self.mapping_file, category=g, by_group_mean=True,
-                   prefix=self.prefix + g + '_groupMean_', out_dir=self.out_dir + 'Circos').visualize()
+            # Circos(self.abundance_table, mapping_file=self.mapping_file, category=g, by_group_mean=True,
+            #        prefix=self.prefix + g + '_groupMean_', out_dir=self.out_dir + 'Circos').visualize()
             os.system('''
 Rscript {SCRIPTPATH}/abundance_barplot.R -n 20 -m {mapping_file} -c {category} -i {abundance_table} -o {outdir}Barplots/ -p {prefix}{category}_ -b F;
 Rscript {SCRIPTPATH}/abundance_barplot.R -n 20 -m {mapping_file} -c {category} -i {abundance_table} -o {outdir}Barplots/ -p {prefix}{category}_groupMean_ -b T;
@@ -39,9 +38,10 @@ source delefse'''.format(base='{}LEfSe/{}{}_lefse_LDA'.format(self.out_dir, self
             if not exclude == 'all':
                 exclude = exclude.split(';')
                 for el in exclude:
-                    prefix = '' if el == 'none' else re.sub('\(|\)|%|\\|\/', "", el.replace(',', '_'))
+                    prefix = self.prefix if el == 'none' else self.prefix + \
+                        re.sub('\(|\)|%|\\|\/', "", el.replace(',', '_')) + '_'
                     os.system('''
-if [ ! -f {outdir}CorrelationAnalysis/CorrelationHeatmap/spearman_rank_correlation_matrix.txt ]; then Rscript {SCRIPTPATH}/cor_heatmap.R -i {abundance_table} -o {outdir}CorrelationAnalysis/CorrelationHeatmap -n 25 -m {mapping_file} -e {eld} -p "{prefix}";fi;
+if [ ! -f {outdir}CorrelationAnalysis/CorrelationHeatmap/{prefix}spearman_rank_correlation_matrix.txt ]; then Rscript {SCRIPTPATH}/cor_heatmap.R -i {abundance_table} -o {outdir}CorrelationAnalysis/CorrelationHeatmap -n 25 -m {mapping_file} -e {eld} -p "{prefix}";fi;
 Rscript {SCRIPTPATH}/RDA.R -i {abundance_table} -m {mapping_file} -c {category} -o {outdir}CorrelationAnalysis/RDA -n 25 -e {eld} -p "{prefix}";
 '''.format(SCRIPTPATH=self.path['bayegy_home'], abundance_table=self.abundance_table, mapping_file=self.mapping_file, category=g, outdir=self.out_dir, prefix=prefix, eld=el))
             # os.system("bash {}".format(self.running_bash))

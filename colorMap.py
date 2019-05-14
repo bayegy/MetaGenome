@@ -10,7 +10,7 @@ from pyutils.colors import rgb2hex, hex2color
 from pyutils.tools import dupply, time_counter
 from pyutils.read import read_abundance
 from mapInfo import MapInfo
-# import pdb
+import pdb
 
 
 class ColorMap(object):
@@ -63,11 +63,13 @@ class ColorMap(object):
         self.user_kos = pd.read_csv(ko_lefse_lda, sep='\t', header=None, index_col=0)[2]
         self.gps_colors = get_lefse_colors(category, mapping_file, ko_lefse_lda, return_dict=True) if (
             mapping_file and category) else {gp: color for gp, color in zip(list(set(self.user_kos[self.user_kos.notna()])), sns.color_palette('Accent', 12).as_hex())}
+        # pdb.set_trace()
         self.kos_colors = {ko: self.gps_colors[self.user_kos[ko]]
-                           if not self.user_kos[ko] is np.nan else "#666666" for ko in self.user_kos.index}
+                           if notna else "#999999" for ko, notna in zip(self.user_kos.index, self.user_kos.notna())}
         self.ko_abundance_table = ko_abundance_table
         maps = []
         mi = MapInfo()
+        self.prefix = prefix
         mi.load_map(self.path['fmap_home'] + '/FMAP_data/KEGG_orthology2pathway.txt')
         for ko in self.user_kos.index:
             try:
@@ -103,8 +105,8 @@ class ColorMap(object):
         self.color_data = []
         for coordinate, kos in self.coord_kos:
             colors = [self.kos_colors[ko] for ko in kos]
-            colors = list(set([c for c in colors if not c == "#666666"]))
-            color = colors[0] if len(colors) == 1 else "#666666"
+            colors = list(set([c for c in colors if not c == "#999999"]))
+            color = colors[0] if len(colors) == 1 else "#999999"
             self.color_data.append([coordinate, color])
 
     def __color_map__(self, override=True):
@@ -172,7 +174,7 @@ class ColorMap(object):
             draw.text(cord, text, font=font, fill=color)
 
     @time_counter
-    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=True):
+    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False):
         """
         To plot a single map:
 
@@ -187,9 +189,9 @@ class ColorMap(object):
         self.__color_map__()
         self.__cac_map_text__(use_text, show_abundance)
         self.__text_map__(position, color, fontsize)
-        self.plot.save("{}{}.png".format(self.out_dir, mapid))
+        self.plot.save("{}{}{}.png".format(self.out_dir, self.prefix, mapid))
 
-    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=True):
+    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False):
         """
         To plot all maps in map_abundance_table
 
