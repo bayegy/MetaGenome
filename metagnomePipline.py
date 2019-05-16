@@ -59,9 +59,9 @@ class MetagenomePipline(object):
         kracken2_reports_pattern = self.out_dir + "Kraken2/{}_{}.report"
         self.merged_pe_pattern = self.out_dir + \
             "Host_subtracted/bowtie/%s/{}_R1.%s.unmapped.{}.fastq.gz" % (host_type, host_type)
-        self.raw_list = self.map_list(self.raw_pattern, run_size)
-        self.trimmed_list = self.map_list(trimmed_pattern, run_size)
-        self.filtered_list = self.map_list(filtered_pattern, run_size)
+        self.raw_list = self.map_list(self.raw_pattern, run_size * 2)
+        self.trimmed_list = self.map_list(trimmed_pattern, run_size * 2)
+        self.filtered_list = self.map_list(filtered_pattern, run_size * 2)
         self.de_host_r1_list = self.map_list(de_host_pattern, run_size, use_direction='R1')
         self.merged_pe_r1_list = self.map_list(self.merged_pe_pattern, run_size, use_direction='R1')
         self.kracken2_reports_list = self.map_list(kracken2_reports_pattern, use_direction='R1')
@@ -242,17 +242,17 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
         os.system("perl {}/FMAP_table.pl {} {} > {}".format(
             self.path['fmap_home'], p, " ".join(args), out + all_name))
 
-    def fmap_wrapper(self, run_type="KEGG", processor=4):
+    def fmap_wrapper(self, fq_list, run_type="KEGG", processor=4):
         if run_type == "KEGG":
-            self.run_fmap(fq_list=self.merged_pe_r1_list,
+            self.run_fmap(fq_list=fq_list,
                           database="orthology_uniref90_2_2157_4751.20190412161853", processor=processor, out_dir="FMAP")
             self.quantify_fmap(out_dir="FMAP", all_name="All.Function.abundance.KeepID.KO.txt")
         elif run_type == "AMR":
-            self.run_fmap(fq_list=self.merged_pe_r1_list, database="protein_fasta_protein_homolog_model_cleaned",
+            self.run_fmap(fq_list=fq_list, database="protein_fasta_protein_homolog_model_cleaned",
                           processor=processor, out_dir="AMR")
             self.quantify_fmap(out_dir="AMR", all_name="All.AMR.abundance.txt")
         elif run_type == "ARDB":
-            self.run_fmap(fq_list=self.merged_pe_r1_list, database="ARDB.20180725064354",
+            self.run_fmap(fq_list=fq_list, database="ARDB.20180725064354",
                           processor=processor, out_dir="ARDB")
             self.quantify_fmap(out_dir="ARDB", all_name="All.ARDB.abundance.txt", print_definition=True)
 
@@ -301,7 +301,7 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.Kee
         for data, mapping_source in zip(datas, mapping_sources):
             mi.mapping(data, [mapping_source])
         mi.mapping(self.out_dir + 'AMR/All.AMR.abundance.txt', [FMAP_data + '/aro.csv'],
-                   pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True)
+                   pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True, map_column=-1)
 
     def run_quast(self):
         os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
@@ -311,6 +311,19 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.Kee
         VisualizeAll(self.mapping_file, self.categories).visualize(exclude)
 
     def run(self, processor=2, base_on_assembly=False):
+        """
+        电脑内存：250G
+
+        电脑逻辑CPU个数：72
+
+        目前:
+            kraken2每个样本需要内存：数据库大小（70G）
+
+            Metaphlan2每个样本需要内存：数据库大小（1.5G）
+
+            FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× processor 个数
+        """
+
         self.run_fastqc(fq_list=self.raw_list, processor=processor, first_check=5)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
@@ -319,18 +332,22 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.Kee
         self.run_merge_se_to_pe(fq_list=self.de_host_r1_list)
         self.run_fastqc(fq_list=self.de_host_r1_list, processor=processor, first_check=5)
         self.generate_summary()
-        self.run_kraken2(fq_list=self.merged_pe_r1_list, processor=processor)
+
+        self.run_kraken2(fq_list=self.map_list(self.merged_pe_pattern, 3, use_direction='R1'), processor=20)
         self.run_bracken()
-        self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=processor)
+
+        self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=7)
         self.join_metaphlan()
+
         self.run_humann(fq_list=self.merged_pe_r1_list)
         self.join_humann()
+
         if base_on_assembly:
-            self.run_assembly(processor=processor * 20)
+            self.run_assembly(processor=66)
             self.run_quast()
         else:
-            self.fmap_wrapper(run_type="KEGG", processor=processor * 4)
-            self.fmap_wrapper(run_type="AMR", processor=processor * 4)
+            self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="KEGG", processor=7)
+            self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="AMR", processor=7)
         self.map_ko_annotation()
         self.map_func_definition()
-        # self.visualize()
+        self.visualize()

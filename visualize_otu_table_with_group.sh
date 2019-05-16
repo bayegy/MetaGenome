@@ -115,7 +115,6 @@ MAIN() {
 	check_dir $output_dir
 
 
-
 	source ${basedir}/path/clean_path.sh
 	echo "##############################################################\n#Generate the figure for the percentage of annotated level"
 	cp $otu_table ${output_dir}/
@@ -176,7 +175,7 @@ MAIN() {
 		for category_1 in $category_set;
 			do echo $category_1;
 				# source $SCRIPTPATH/path/restore_path.sh
-				/usr/bin/Rscript ${SCRIPTPATH}/clean_na_of_inputs.R -m $mapping_file --group $category_1 -t ${output_dir}/collapsed/${sample_name}-l${n}.qza -o media_files
+				/usr/bin/Rscript ${SCRIPTPATH}/clean_na_of_inputs.R -m $mapping_file --group $category_1 -t ${output_dir}/collapsed/${sample_name}-l${n2}.qza -o media_files
 				# source $SCRIPTPATH/path/clean_path.sh
 				qiime composition add-pseudocount   --i-table media_files/filtered_feature_table.qza  --o-composition-table ${output_dir}/ANCOM/composition.${tax_levels[${n2}]}.qza;
 				qiime composition ancom  --i-table ${output_dir}/ANCOM/composition.${tax_levels[${n2}]}.qza --m-metadata-file media_files/cleaned_map.txt --m-metadata-column $category_1 --o-visualization ${output_dir}/ANCOM/${category_1}-ANCOM-${tax_levels[${n2}]}.qzv;
@@ -219,9 +218,9 @@ MAIN() {
 		do echo $n; 
 		for category_1 in $category_set;
 			do echo $category_1;
-			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -l T -t F;
-			Rscript ${SCRIPTPATH}/abundance_heatmap.R -m $mapping_file -c $category_1  -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20_clustered/${n}/ -l T -t F -u T;
-			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -b T -l T -p 'group_mean_' -t T;
+			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -l T -t F -p "${category_1}_";
+			Rscript ${SCRIPTPATH}/abundance_heatmap.R -m $mapping_file -c $category_1  -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20_clustered/${n}/ -l T -t F -u T -p "${category_1}_";
+			Rscript ${SCRIPTPATH}/abundance_heatmap.R  -m $mapping_file -c $category_1 -n 20 -i ${output_dir}/Absolute/otu_table.${n}.absolute.txt -o ${output_dir}/Heatmap/Heatmap_top20/${n}/ -b T -l T -p "${category_1}_group_mean_" -t T;
 		done;
 	done;
 
@@ -285,9 +284,9 @@ MAIN() {
 				do echo $category_1;
 					Rscript ${SCRIPTPATH}/write_data_for_lefse.R -i  otu_table.${n7}.relative.txt -m  $mapping_file -c  $category_1 -o  ${category_1}_${n7}_lefse.txt -u l;
 					base="${category_1}_${n7}_lefse_LDA2"; lefse-format_input.py ${category_1}_${n7}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 2;  
-					lefse-plot_res.py  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; lefse-plot_cladogram.py ${base}.LDA.txt --dpi 300 ${base}.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
+					${SCRIPTPATH}/mod_lefse-plot_res.py --category $category_1 --map $mapping_file --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; ${SCRIPTPATH}/mod_lefse-plot_cladogram.py ${base}.LDA.txt --category $category_1 --map $mapping_file --dpi 300 ${base}.cladogram.pdf --format pdf;
 					base="${category_1}_${n7}_lefse_LDA4"; lefse-format_input.py ${category_1}_${n7}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 4;  
-					lefse-plot_res.py   --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; lefse-plot_cladogram.py ${base}.LDA.txt --dpi 300 ${base}.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
+					${SCRIPTPATH}/mod_lefse-plot_res.py --category $category_1 --map $mapping_file  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; ${SCRIPTPATH}/mod_lefse-plot_cladogram.py ${base}.LDA.txt --category $category_1 --map $mapping_file --dpi 300 ${base}.cladogram.pdf --format pdf;
 				done;
 			cd ../../
 		done;

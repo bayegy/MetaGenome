@@ -10,7 +10,7 @@ from pyutils.colors import rgb2hex, hex2color
 from pyutils.tools import dupply, time_counter
 from pyutils.read import read_abundance
 from mapInfo import MapInfo
-import pdb
+# import pdb
 
 
 class ColorMap(object):
@@ -69,7 +69,6 @@ class ColorMap(object):
         self.ko_abundance_table = ko_abundance_table
         maps = []
         mi = MapInfo()
-        self.prefix = prefix
         mi.load_map(self.path['fmap_home'] + '/FMAP_data/KEGG_orthology2pathway.txt')
         for ko in self.user_kos.index:
             try:
@@ -189,7 +188,7 @@ class ColorMap(object):
         self.__color_map__()
         self.__cac_map_text__(use_text, show_abundance)
         self.__text_map__(position, color, fontsize)
-        self.plot.save("{}{}{}.png".format(self.out_dir, self.prefix, mapid))
+        self.plot.save("{}{}.png".format(self.out_dir, mapid))
 
     def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False):
         """

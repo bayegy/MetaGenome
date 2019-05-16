@@ -33,6 +33,7 @@ class Visualize(metaclass=ABCMeta):
         pass
 
     def visualize(self, exclude='all'):
+        print("Visualizing abundance table: {}".format(self.abundance_table))
         if self.categories and self.mapping_file:
             print("Visualize using group info...")
             self.__visualize_with_group__(exclude)
