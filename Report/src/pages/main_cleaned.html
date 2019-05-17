@@ -97,7 +97,7 @@
 				<div class="AccordionPanelTab"><li><a href="#analysis">四 物种的注释与评估</a></li></div>
 				<div class="AccordionPanelContent">
 					<li><a href="#a4.1">4.1 物种组成分析</a></li>
-					<li><a href="#a4.2">4.2 组间OTU差异显著性分析</a></li>
+					<li><a href="#a4.2">4.2 组间物种差异显著性分析</a></li>
 					<li><a href="#a4.3">4.3 样品共有物种分析</a></li>
 					<li><a href="#a4.4">4.4 样品多样性指数分析</a></li>
 				</div>
@@ -165,12 +165,12 @@
 				微生物世界是分子多样性最大的天然资源库，基于菌株水平的传统分离培养技术为人们认识微生物多样性提供了可能，但是据估计自然界中超过99%的微生物不能通过传统的分离培养技术获得其纯培养，从而导致环境微生物中的多样性基因资源难以被发现。许多重要的微生物我们还不能识别，随着微生物活性产物的广泛研究和深入开发利用，从环境微生物中筛选到新活性物质的几率将逐步下降。而如何开拓利用环境微生物新资源是微生物研究的重要课题。为此研究者们开发了多种以特定环境微生物为研究对象的高通量测序方法。<sup>[1-3]</sup>
 			</p>
 			<p class="pra">
-				宏基因组学(Metagenomics)，是一种直接对微生物群体中包含的全部基因组信息进行研究的手段。宏基因组学绕过对微生物个体进行分离培养，应用基因组学技术对自然环境中的微生物群落进行研究的一门学科。它规避了对样品中的微生物进行分离培养，提供了一种对不可分离培养的微生物进行研究的途径，更真实的反应样本中微生物组成、互作情况，同时在分子水平对其代谢通路、基因功能进行研究。近年来，随着测序技术和信息技术的快速发展，利用新一代测序技术(Next Generation Sequencing)研究 Metagenomics，能快速准确的得到大量生物数据和丰富的微生物研究信息，从而成为研究微生物多样性和群落特征的重要手段。细菌基因组相对较小，通常仅有一条环状DNA和质粒，通过高通量测序，可以了解其全部遗传信息。这也已经成为微生物研究的重要手段之一，为细菌的遗传进化、疾病预防与治疗、疫苗与抗生素的开发等提供重要的信息。如致力于研究微生物与人类疾病健康关系的人体微生物组计划(HMP, Human Microbiome Project, http://www.hmpdacc.org/ )，研究全球微生物组成和分布的全球微生物组计划(EMP, Earth Microbiome Project, http://www.earthmicrobiome.org/ )都主要利用高通量测序技术进行研究。<sup>[4-6]</sup>
+				宏基因组学(Metagenomics)，是一种直接对微生物群体中包含的全部基因组信息进行研究的手段。宏基因组学绕过对微生物个体进行分离培养，应用基因组学技术对自然环境中的微生物群落进行研究的一门学科。它规避了对样品中的微生物进行分离培养，提供了一种对不可分离培养的微生物进行研究的途径，更真实的反应样本中微生物组成、互作情况，同时在分子水平对其代谢通路、基因功能进行研究。近年来，随着测序技术和信息技术的快速发展，利用新一代测序技术(Next Generation Sequencing)研究 Metagenomics，能快速准确的得到大量微生物基因数据和丰富的微生物研究信息，从而成为研究微生物多样性和群落特征的重要手段。细菌基因组相对较小，通常仅有一条环状DNA和质粒，通过高通量测序，可以了解其全部遗传信息。这也已经成为微生物研究的重要手段之一，为细菌的遗传进化、疾病预防与治疗、疫苗与抗生素的开发等提供重要的信息。如致力于研究微生物与人类疾病健康关系的人体微生物组计划(HMP, Human Microbiome Project, http://www.hmpdacc.org/ )，研究全球微生物组成和分布的全球微生物组计划(EMP, Earth Microbiome Project, http://www.earthmicrobiome.org/ )都主要利用高通量测序技术进行研究。<sup>[4-6]</sup>
 			</p>
 
 			<hr>
 			<h2>
-				<strong><a name="flow" id="flow">二</a> 项目流程 </strong>
+				<strong><a name="flow" id="flow"></a>二 项目流程 </strong>
 			</h2>
 
 			<h3>
@@ -187,13 +187,14 @@
 			<p>
 				分析流程主要步骤(图2-2)：<br>
 			</p>
-			<p class="pra">1) 数据质控：测序得到的原始数据会存在一定比例的低质量数据，为了保证后续信息分析结果的准确可靠，首先要对原始数据进行质控及宿主过滤，得到有效数据。分析中将使用Cutadapt去除原始数据中为彻底清除的Illumina接头序列，再用PrinSEQ去除低质量的序列片段和个别序列。每一步质控前和分析结束后，都会用FastQC来检测质控的合理性和效果。<sup>[7，8]</sup><br></p>
+			<p class="pra">1) 数据质控：测序得到的原始数据会存在一定比例的低质量数据，为了保证后续信息分析结果的准确可靠，首先要对原始数据进行质控及宿主过滤，得到有效数据。分析中将使用Cutadapt彻底清除原始数据中的Illumina接头序列，再用PrinSEQ去除低质量的序列片段和个别序列。质控前和质控后，会用FastQC来检测质控的合理性和效果。<sup>[7，8]</sup><br></p>
 			<p class="pra">2) 去除宿主：质控处理后的数据通过bowtie2比对到宿主的基因组，没有比对到的序列被保留下来做后续分析。<br></p>
-			<p class="pra">3）物种注释：使用Kraken2和自建的细菌数据库来鉴别样本中所含有的物种，再用Bracken来对样本中物种的实际相对丰度进行预测。相对于基于组装的物种注释，基于序列的宏基因组物种注视方法会比较准确。<sup>[9-12]</sup><br></p>
-			<p class="pra">4) 常用功能数据库注释：从去除宿主基因的reads出发，使用FMAP软件（github: https://github.com/jiwoongbio/FMAP.git），各个样本的reads比对到数据库（KEGG Filtered UniProt），进行代谢通路(KEGG)的功能注释和丰度分析。<sup>[19-21]</sup><br></p>
-			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析，样品聚类分析；当有分组信息时，可以进行LEfSe多元统计分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
-			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的clean reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况以及这些抗性基因的物种归属和抗性机制。<sup>[24-25]</sup><br></p>
-			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 CCA/RDA 分析，肠型分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
+			<p class="pra">3）物种注释：使用Kraken2和自建的微生物数据库(从<a href="http://ccb.jhu.edu/software/kraken2/index.shtml?t=manual">Kraken官网</a>下载各个微生物数据库，合并后再加入哥伦比亚大学实验室研究中新发现的一些细菌基因组数据）来鉴别样本中所含有的物种，再用Bracken来对样本中物种的实际相对丰度进行预测。相较于基于组装的物种注释，基于序列的宏基因组物种注释方法更加全面和准确。<sup>[9-12]</sup><br></p>
+			<p class="pra">4) 常用功能数据库注释：从质控以及去除宿主基因的reads出发，使用FMAP软件（github: https://github.com/jiwoongbio/FMAP.git），将各个样本的reads比对到数据库（KEGG Filtered UniProt），进行代谢通路(KEGG)的功能注释和丰度分析。<sup>[19-21]</sup><br></p>
+			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析，样品聚类分析；当有分组信息时，可以进行LEfSe biomarker挖掘分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
+			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的质控以及去除宿主基因的reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况以及这些抗性基因的物种归属和抗性机制。<sup>[21,24-25]</sup><br></p>
+			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 CCA/RDA 分析，肠型分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>除CCA/RDA和相关性热图之外，其余高级分析为VIP分析。
+			
 			</p>
 
 			<p align="center"><img src="../image/2-2.png" width="649" height="800"></p>
@@ -216,10 +217,10 @@
 
 			<p align="center" style="font-size: 80%">{{table1}}</p>
 			<p align="center"><strong>表3-1 数据产出质量情况一览表</strong></p>
-			<dd align="center" style="font-size:80%;">说明：Sample ID: 样品名; InsertSize(bp): 把数据比对到基因组上，将read2的比对位点减去read1的比对位点，取绝对值后再加read2的长度就是insert size; SeqStrategy: 测序策略（一般为双端，各150bp）; RawReads(#)：测序Raw reads的数量; Raw Base(GB): 以GB为单位的Raw reads数量, 测序原始数据的总碱基数，即为Raw reads数量乘以测序长度算得; %GC：G/C碱基数占总碱基数量的百分比; Clean Reads(#)：过滤后获得的Clean reads 数量; Cleaned(%)：过滤后剩余的碱基数占Raw reads 的百分比; AfterHostRemoved Reads(#)：去除宿主基因后剩余的reads数量; HostRemoved(%)：去除的宿主reads占Clean Reads百分比。
+			<dd align="center" style="font-size:80%;">说明：Sample ID: 样品名; InsertSize(bp): 把数据比对到基因组上，将read2的比对位点减去read1的比对位点，取绝对值后再加read2的长度就是insert size，该长度是测序时设计好的长度，合适的InsertSize能避免测序接头污染; SeqStrategy: 测序策略（一般为双端，各150bp）; RawReads(#)：测序Raw reads的数量; Raw Base(GB): 以GB为单位的Raw reads数量, 测序原始数据的总碱基数，即为Raw reads数量乘以测序长度算得; %GC：G/C碱基数占总碱基数量的百分比; Clean Reads(#)：过滤后获得的Clean reads 数量; Cleaned(%)：过滤后剩余的碱基数占Raw reads 的百分比; AfterHostRemoved Reads(#)：去除宿主基因后剩余的reads数量; HostRemoved(%)：去除的宿主reads占Clean Reads百分比。
 			</dd>
 
-			<p class="pra">上述的处理步骤均是对 Read 1 和 Read 2 进行操作。在得到有效数据之后，为了确保序列的准确性，将使用Cutadapt为彻底清除数据中的Illumina接头序列（有效数据通常仍会含有部分比例的接头和低质量序列），再用PrinSEQ去除低质量的序列片段和个别序列。每一步质控前和分析结束后，都会用FastQC来检测质控的合理性和效果。样品通常存在宿主污染，因此会与宿主序列进行比对，过滤掉可能来源于宿主（采用Bowtie2）的序列；FastQC每一步的结果统计信息可以通过<a href="../../../1-QCStats/">点击此处打开新窗口查看</a>。
+			<p class="pra">上述的处理步骤均是对 Read 1 和 Read 2 进行操作。在得到有效数据之后，为了确保序列的准确性，将使用Cutadapt为彻底清除数据中的Illumina接头序列（有效数据通常仍会含有部分比例的接头和低质量序列），再用PrinSEQ去除低质量的序列片段和个别序列。质控前后，会用FastQC来检测质控的合理性和效果。样品通常存在宿主污染，因此会与宿主序列进行比对，过滤掉可能来源于宿主（采用Bowtie2）的序列；FastQC结果统计信息可以通过<a href="../../../1-QCStats/">点击此处打开新窗口查看</a>。
 			</p>
 
 			<hr>
@@ -265,7 +266,7 @@
 			</p>
 
 			<dd align="center" style="font-size:80%;">
-				说明：横坐标(Sample Name)是样品名，纵坐标(Relative Abundance)表示相对丰度。其他分类水平的物种相对丰度图也都可以通过交互式网页打开，并对样本或者OTU在图片中呈现的顺序根据元数据（包括分组信息）或者相对丰度的大小进行调节。Level 1，2，3，4，5，6，7依次代表分类水平界门纲目科属种。
+				说明：横坐标(Sample Name)是样品名，纵坐标(Relative Abundance)表示相对丰度。其他分类水平的物种相对丰度图也都可以通过交互式网页打开，并对样本或者物种在图片中呈现的顺序根据元数据（包括分组信息）或者相对丰度的大小进行调节。Level 1，2，3，4，5，6，7依次代表分类水平界门纲目科属种。
 			</dd>
 
 
@@ -278,61 +279,61 @@
 			</dd>
 
 			<p>
-				<strong>除了通过网页版报告，用户也可以通过本地文件夹查看结果。结果目录下的文件详细解释请参考<a href="../../../Result_README.pdf">./Result_README.pdf</a>文件。结果文件夹中包含的.qzv文件是Qiime2的专属可视化文件格式，可以通过网页<a href="https://view.qiime2.org/">https://view.qiime2.org/</a>进行交互性查看，也可以直接点开相应的qzv解压缩文件夹通过网页形式直接点开HTML文件&ldquo;Summary_请点此文件查看.html&rdquo;查看。网页报告只选取了部分代表性信息用于引导用户阅读，然而本地文件夹的结果目录中包含了大量其他有用的信息，请用户自行查看。</strong>
+				<strong>除了通过网页版报告，用户也可以通过本地文件夹查看结果。结果文件夹中包含的.qzv文件是Qiime2的专属可视化文件格式，可以通过网页<a href="https://view.qiime2.org/">https://view.qiime2.org/</a>进行交互性查看，也可以直接点开相应的qzv解压缩文件夹通过网页形式直接点开HTML文件&ldquo;Summary_请点此文件查看.html&rdquo;查看。网页报告只选取了部分代表性信息用于引导用户阅读，然而本地文件夹的结果目录中包含了大量其他有用的信息，请用户自行查看。</strong>
 			</p>
 
 			<p class="pra">
-				<br>为了研究不同样品间的相似性，还可以通过对样品进行聚类分析从而构建样品的聚类。选取关注分类水平的物种（默认选取物种绝对丰度大于1000）实现样品聚类（纵向聚类），以此考察不同样品或者分组间的相似或差异性（此处为门水平分类的热图），并从分类信息和样品间差异两个层面进行横向聚类，寻找物种或样本的聚集规律。<sup>[31-33]</sup>
+				<br>为了研究不同样品间的相似性，还可以通过对样品进行聚类分析从而构建样品的聚类。选取关注的物种（默认选取物种绝对丰度排名前20），根据样品的物种组成，实现样品聚类，以此考察不同样品或者分组间的相似或差异性（此处为门水平分类的热图）;也根据物种丰度在各样本的分布进行聚类，寻找物种或样本的聚集规律。<sup>[31-33]</sup>
 			</p>
 
 			<img src="../../Figure4-3.png">
 			<p align="center"><strong>图 4-3 门分类水平的热图聚类结果 </strong></p>
 			<dd align="center" style="font-size:80%;">
-				说明：纵轴为样品名称信息，同时也包括了分组信息。横轴为物种注释名称（本图为门水平）。图中上方的聚类树为物种在各样本中分布的相似度聚类，左侧的聚类树为样品聚类树，中间的热图是OTU的相对丰度热图，颜色与相对丰度的关系见图上方的刻度尺。</a>其他分类等级完整的热图聚类结果请参见结果部分<a href="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps/">./2-AundanceAnalysis/1-AbundanceSummary/4-Heatmaps/</a>。
+				说明：纵轴为样品名称信息，同时也包括了分组信息。横轴为物种注释名称（本图为门水平）。图中上方的聚类树为物种在各样本中分布的相似度聚类，左侧的聚类树为样品聚类树，中间的热图是物种的相对丰度热图，颜色与相对丰度的关系见图上方的刻度尺。</a>其他分类等级完整的热图聚类结果请参见结果部分<a href="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps/">./2-AundanceAnalysis/1-AbundanceSummary/4-Heatmaps/</a>。
 			</dd>
 			
 			<br><br>
-			<h3><a id="a4.2"></a>4.2 组间OTU差异显著性分析</h3>
+			<h3><a id="a4.2"></a>4.2 组间物种差异显著性分析</h3>
 
 			<p class="pra">
-				ANCOM(Analysis of composition of microbiomes)是专门用于比较微生物组学数据中物种在组间的显著性差异的分析方法。<sup>[34]</sup>ANCOM分析不依赖于数据的分布假设，并解决了在其他方法中相对丰度分析所带来的限制，从而能够有效降低结果的假阳性。从下面链接中我们可以得知属水平分类的物种在组间表现了丰度的显著差异：
+				ANCOM(Analysis of composition of microbiomes)是专门用于比较微生物组学数据中物种在组间的显著性差异的分析方法。<sup>[34]</sup>ANCOM分析不依赖于数据的分布假设，并解决了在其他方法中相对丰度分析所带来的限制，从而能够有效降低结果的假阳性。从下面链接中我们可以得知各分类水平的物种在组间表现的差异情况：
 			</p>
 
 			<p align="center"><strong><a href="../../../2-TaxaAundanceAnalysis/2-AbundanceComparison/ANCOM/">点击此处查看物种属水平分类的ANCOM丰度比较结果（点击此处打开新窗口查看）</a></strong></p>
 			
 			<dd align="center" style="font-size:80%;">
-				说明：在ANCOM分析中,W值是一个衡量组间差异显著性的统计量（类似F值，t值），W值越高，代表该物种在组间的差异显著性越高。图中的每一个点都代表了一个比较的物种，纵坐标代表W值，横坐标clr值代表组间样品丰度的差异程度，数字越高代表相对丰度差异越大。因此在图中的点越靠近右上角，则代表该物种与其他物种（大部分集中在左下角）相比更具有显著性差异。组间具有差异显著的物种被列在下面相应的表格中。
+				说明：在ANCOM分析中,W值是一个衡量组间差异显著性的统计量（类似F值，t值），W值越高，代表该物种在组间的差异显著性越高。图中的每一个点都代表了一个比较的物种，纵坐标代表W值，横坐标clr值代表组间样品丰度的差异程度，数字绝对值越高代表相对丰度差异越大。因此在图中的点越靠近右上角（或左上角），则代表该物种与其他物种（靠近横轴0位置的物种）相比更具有显著性差异。组间具有差异显著的物种被列在下面相应的表格中。
 			</dd>
 
 			<p class="pra">
-				LEfSe寻找每一个分组的特征微生物（默认为LDA>2的微生物）<sup>[19]</sup>，也就是相对于其他分组，在这个组中丰度较高的微生物（如图4-4。完整的差异性分析结果请见结果部分<a href="../../../2-TaxaAundanceAnalysis/2-AbundanceComparison/">./2-AundanceAnalysis/2-AbundanceComparison/</a>。
+				LEfSe寻找每一个分组的特征微生物（默认为LDA>2的微生物）<sup>[19]</sup>，也就是相对于其他分组，在这个组中丰度较高的微生物（如图4-4。完整的差异性分析结果请见结果部分<a href="../../../2-TaxaAundanceAnalysis/2-AbundanceComparison/LEfSe/">./2-AundanceAnalysis/2-AbundanceComparison/LEfSe/</a>。
 			</p>
 
 			<p align="center"><img src="../../Figure4-4.png" width="800" height="800" alt="没有在分组间差异显著的微生物"></p>
 			<p align="center"><strong>图4-4 LEfSe分析LDA柱形图</strong></p>
 			<dd align="center" style="font-size:80%;">
-				说明：每一横向柱形体代表一个物种，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应该物种是哪个分组的特征微生物，特征微生物表示在对应分组中的丰度相对较高。
+				说明：每一横向柱形体代表一个物种，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应该物种是那个分组的特征微生物，特征微生物（在对应分组中的丰度相对较高）。
 			</dd>		
 
 		 	<br>
 			<h3><a id="a4.3"></a>4.3 样品共有物种分析</h3>
 			<p class="pra">
-				对于样本间，根据OTU是否存在来寻找样本之间的特有或共有的OTU，对于分组较少（小于等于5）的实验方案，我们绘制韦恩图（Venn diagram）分析不同样品组之间特有或共有的OTU，用于统计多个样本中所共有和独有的OTU数目，可以比较直观的表现样本在OTU水平上的组成相似性及重叠情况（图4-5）。对于分组较多的（大于等于3），我们绘制了花瓣图，花瓣图中，花瓣里是对应分组特有的OTU数目，中心是所有分组共有的OTU数目。同时也给出了特有和共有的OTU种类，注释情况及丰度，丰度较高且特有的OTU具有重要分析价值，请参见<a href="../../../2-TaxaAundanceAnalysis/3-VennAndFlower"> ./2-TaxaAundanceAnalysis/3-VennAndFlower</a>
+				在样本中，根据物种是否存在来寻找分组之间的特有或共有的物种，对于分组较少（小于等于5）的实验方案，我们绘制韦恩图（Venn diagram）分析不同样品组之间特有或共有的物种（种水平），用于统计多个样本中所共有和独有的物种数目，可以比较直观地表现样本分组间物种组成相似性及重叠情况（图4-5）。对于分组较多的（大于等于3），我们绘制了花瓣图，花瓣图中，花瓣里是对应分组特有的物种数目，中心是所有分组共有的物种数目。同时也给出了特有和共有的taxa，丰度较高且特有的物种具有重要分析价值，请参见<a href="../../../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower"> ./2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower</a>
 			</p>
 
-			<p align="center"><img src="../../Figure4-5.png" width="600" height="600"></p>
+			<p align="center"><img src="../../Figure4-5.png" width="600" height="600" alt="分组数量大于5,无法画Venn图"></p>
 			<p align="center"><strong>图4-5 共有或特有物种韦恩图展示（当分组数目小于等于5时）</strong></p>
-			<dd align="center" style="font-size:80%;">说明：韦恩图显示的是不同分组间共有或特有的OTU数量,每个椭圆代表一个分组。<a href="../../../2-TaxaAundanceAnalysis/3-VennAndFlower">请点击打开新窗口查看韦恩图/花瓣图</a></dd>
+			<dd align="center" style="font-size:80%;">说明：韦恩图显示的是不同分组间共有或特有的物种数量,每个椭圆代表一个分组。<a href="../../../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower">请点击打开新窗口查看韦恩图/花瓣图</a></dd>
 			
 
 
 			<h3><a id="a4.4"></a>4.4 样品多样性指数分析</h3>
 			<p class="pra">		
-				目前适用于生态学研究的降维分析主要是主成分分析 (PCA，Principal Component Analysis)和无度量多维标定法（NMDS，Non-Metric Multi-Dimensional Scaling）分析。其中，PCA是基于线型模型的一种降维分析，它应用方差分解的方法对多维数据进行降维，从而提取出数据中最主要的元素和结构；PCA 能够提取出最大程度反映样品间差异的两个坐标轴，从而将多维数据的差异反映在二维坐标图上，进而揭示复杂数据背景下的简单规律。而NMDS是非线性模型，其目的是为了克服线性模型的缺点，更好地反映生态学数据的非线性结构，应用NMDS分析，根据样本中包含的物种信息，以点的形式反映在多维空间上，而不同样本间的差异程度则是通过点与点间的距离体现，能够反映样本的组间或组内差异等。 基于不同分类层级的物种丰度表，我们进行了PCA和NMDS分析，如果样品的物种组成越相似，则它们在PCA和NMDS图中的距离则越接近。<sup>[37]</sup>详细的数值可以查看结果目录<a href="../../../2-TaxaAundanceAnalysis/3-DiversityAnalysis/PCoA-NMDS">./2-TaxaAundanceAnalysis/3-DiversityAnalysis/PCoA-NMDS</a>。完整的差异性分析结果请见结果部分。
+				目前适用于生态学研究的降维分析主要是主成分分析 (PCA，Principal Component Analysis)和无度量多维标定法（NMDS，Non-Metric Multi-Dimensional Scaling）分析。其中，PCA是基于线型模型的一种降维分析，它应用方差分解的方法对多维数据进行降维，从而提取出数据中最主要的元素和结构；PCA 能够提取出最大程度反映样品间差异的两个坐标轴，从而将多维数据的差异反映在二维坐标图上，进而揭示复杂数据背景下的简单规律。而NMDS是非线性模型，其目的是为了克服线性模型的缺点，更好地反映生态学数据的非线性结构，应用NMDS分析，根据样本中包含的物种信息，以点的形式反映在多维空间上，而不同样本间的差异程度则是通过点与点间的距离体现，能够反映样本的组间或组内差异等。 基于不同分类层级的物种丰度表，我们进行了PCA和NMDS分析，如果样品的物种组成越相似，则它们在PCA和NMDS图中的距离则越接近。<sup>[37]</sup>详细的数值可以查看结果目录<a href="../../../2-TaxaAundanceAnalysis/3-DiversityAnalysis/">./2-TaxaAundanceAnalysis/3-DiversityAnalysis/</a>。
 			</p>
 
 			<p class="pra">
-				主坐标分析（PCoA），是一种与PCA类似的降维排序方法，从多维数据中提取出最主要元素和结构能够提取出最大程度反映样品间差异的三个坐标轴，从而将多维数据的差异反映在三维坐标图上，进而揭示复杂数据背景下的简单规律。区别在于PCA是基于样品的相似系数矩阵来寻找主坐标，而PCoA是基于距离矩阵来寻找主坐标。我们基于Bray Curtis距离来进行PCoA分析，并选取贡献率最大的主坐标组合进行作图展示，图中样品的距离越接近，表示样品的物种组成结构越相似。分析结果文件夹分别提供了PCoA的2D和3D图，方便选择使用。<sup>[35,36]</sup>
+				PCA是主坐标分析（PCoA）的一种特殊情况（基于欧式距离的PCoA就是PCA）。本报告利用PCoA分析方法，从多维数据中提取出最主要元素和能够最大程度反映样品间差异的三个坐标轴，从而将多维数据的差异反映在三维坐标图上，进而揭示复杂数据背景下的简单规律。我们基于Bray Curtis距离来进行PCoA分析，并选取贡献率最大的主坐标组合进行作图展示，图中样品的距离越接近，表示样品的物种组成结构越相似（图4-6）。分析结果文件夹分别提供了PCoA的2D和3D图，方便选择使用。<sup>[35,36]</sup>
 			</p>
 
 			<p align="center">
@@ -345,9 +346,6 @@
 				说明：横坐标（Axis 1）表示第一主成分，百分比则表示第一主成分对样品差异的贡献值；纵坐标（Axis  2）表示第二主成分，百分比表示第二主成分对样品差异的贡献值；Axis 3坐标表示第三主成分，百分比表示第三主成分对样品差异的贡献值。客户可以根据元数据的分组信息可以个性化展示其他分类的距离关系。举例：可在右边设置区域的Select a Color Category下拉单选择分组信息，则同一个组的样品使用同一种颜色表示。
 			</dd>
 
-			<p class="pra">		
-				目前适用于生态学研究的降维分析主要是主成分分析 (PCA，Principal Component Analysis)和无度量多维标定法（NMDS，Non-Metric Multi-Dimensional Scaling）分析。其中，PCA是基于线型模型的一种降维分析，它应用方差分解的方法对多维数据进行降维，从而提取出数据中最主要的元素和结构；PCA 能够提取出最大程度反映样品间差异的两个坐标轴，从而将多维数据的差异反映在二维坐标图上，进而揭示复杂数据背景下的简单规律。而NMDS是非线性模型，其目的是为了克服线性模型的缺点，更好地反映生态学数据的非线性结构，应用NMDS分析，根据样本中包含的物种信息，以点的形式反映在多维空间上，而不同样本间的差异程度则是通过点与点间的距离体现，能够反映样本的组间或组内差异等。 基于不同分类层级的物种丰度表，我们进行了PCA和NMDS分析，如果样品的物种组成越相似，则它们在PCA和NMDS图中的距离则越接近。<sup>[37]</sup>详细的数值可以查看结果目录<a href="../../../2-TaxaAundanceAnalysis/3-DiversityAnalysis/PCoA-NMDS">./2-TaxaAundanceAnalysis/3-DiversityAnalysis/PCoA-NMDS</a>。完整的差异性分析结果请见结果部分。
-			</p>
 			<br><hr><br>
 
 			<h2>
@@ -360,20 +358,20 @@
 
 			<h3><a id="a7.2"></a>5.2 功能注释基本步骤</h3>
 			<p class="pra">
-				1）将clean reads(质控和去宿主之后的序列)与功能数据库（KEGG Filtered UniProt，筛选出细菌，真菌，病毒的，且有KEGG分类信息的UniProt基因）进行比对（DIAMOND）；<br>
+				1）使用FMAP软件，将质控和去宿主之后的序列与功能数据库（KEGG Filtered UniProt，筛选出细菌，古菌，真菌（retain only bacteria, archaea or fungi sequences）的，且有KEGG分类信息，有UniRef90信息的UniProt基因）进行比对（基于DIAMOND）；<br>
 			</p>
 			<p class="pra">
 				2）过滤掉比对失败的reads（比对成功标准：e-value < 1e-3, percent identity > 80 %）；<br>
 			</p>
 			<p class="pra">
-				3）从比对结果出发，统计不同功能层级的相对丰度（RPKM ，reads per kilobase per million，校正测序量以及基因长度后的丰度)。<br>
+				3）从比对结果出发，统计不同功能层级的相对丰度（RPKM ，reads per kilobase per million，校正样本比对成功reads(mapped reads)以及基因长度后的丰度)。<br>
 			</p>
 			<p class="pra">
-				4）从各个分类层级上的丰度表出发，进行相对丰度概况展示，丰度聚类热图展示，代谢通路比较分析，组间功能差异的LEfSe分析，map图填色，功能与环境因子（或者其它组学数据）的相关性分析。<br>
+				4）从各个分类层级上的丰度表出发，进行相对丰度概况展示，丰度聚类热图展示，组间功能差异的LEfSe分析，map图填色，功能与环境因子（或者其它组学数据）的相关性分析。<br>
 			</p>
 
 			<p class="pra">
-				更多信息请查阅FMAP文献<sup>[21]。</sup><br>
+				更多信息请查阅FMAP文献<sup>[21]</sup>。<br>
 			</p>
 
 			<p class="pra">
@@ -383,7 +381,7 @@
 
 			<h3><a id="a5.3"></a>5.3 功能相对丰度概况</h3>
 			<p class="pra">
-				根据各个数据库的注释结果，绘制了各样品在各个功能层级上的相对丰度统计图为例展示（图5-1, 相对丰度前20）。<br>
+				根据数据库的注释结果，绘制了各样品在各个功能层级上的相对丰度统计图（图5-1, 相对丰度前20）。<br>
 			</p>
 
 			<p align="center">
@@ -391,12 +389,12 @@
 			</p>
 			<p align="center"><strong>图5-1 KEGG代谢通路的Level1层级丰度柱形图<a href="../../../3-FuctionAnalysis/1-KEGG/1-Barplots">（点击此处打开新窗口查看更多柱形图)</strong></a></p>
 			<dd align="center" style="font-size:80%;">
-				说明：不同的颜色代表不同的KEGG分类。
+				说明：不同的颜色代表不同的KEGG Pathway分类。
 			</dd>	
 
 			<h3><a id="a5.4"></a>5.4 功能相对差异性分析</h3>
 			<p class="pra">
-				LEfSe方法是非参数检验和线性判别分析的结合，适合功能丰度差异检验；LEfSe寻找每一个分组的biomarker 功能（LDA>阈值的功能,为了方便客户选择，我们在结果文件夹中分别提供了阈值为2和4的结果），也就是相对于其他分组，在这个组中丰度较高的功能（如图5-2）<br>
+				LEfSe方法是非参数检验和线性判别分析的结合，适合寻找各分组的biomarkers；LEfSe寻找每一个分组的biomarker 功能（LDA>阈值的功能,为了方便客户选择，我们在结果文件夹中分别提供了阈值为2和4的结果），也就是相对于其他分组，在这个组中丰度显著较高的功能（如图5-2）<br>
 			</p>
 
 			<p align="center">
@@ -410,14 +408,14 @@
 
 
 			<p class="pra">
-				为了方便客户查看样本在不同KEGG功能层级在分组间的差异，我们对各个功能层级进行LEfSe分析。用户可以通过点击<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）等层面上在各个不同分组间的LEfSe差异比较结果（LDA柱形图）。
+				为了方便客户了解不同KEGG功能层级上的组间差异，我们对各个功能层级进行LEfSe分析。用户可以通过点击<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）等层面的功能的LEfSe差异比较结果（LDA柱形图）。
 			</p>
 
 
 
 
 			<p class="pra">
-				根据KO (KEGG Orthologous groups) LEfSe功能组间差异比较结果，我们可以进一步给map（通路）图上色，在通路图中标注出检测到的基因，以及各个分组的特征基因（gene biomarkers）（图5-3）。<br>
+				根据KO (KEGG Orthologous groups) LEfSe组间差异比较结果，我们可以进一步给map（通路）图上色，在通路图中标注出检测到的基因，以及各个分组的特征基因（gene biomarkers）（图5-3）。<br>
 			</p>
 
 
@@ -443,7 +441,7 @@
 				1）使用FMAP软件将各样本质控和去宿主之后的序列与CARD数据库进行比对（基于DIAMOND），过滤掉比对失败的序列（比对成功标准：e-value < 1e-3, percent identity > 80 %）；<br>
 			</p>
 			<p class="pra">
-				2）根据比对结果，统计出每个样本比对到各ARO参考序列的reads数，从而计算相对丰度（RPKM ，reads per kilobase per million，校正测序量以及基因长度后的丰度)；<br>
+				2）根据比对结果，统计出每个样本比对到各ARO参考序列的reads数，从而计算相对丰度（RPKM ，reads per kilobase per million，校正样本比对成功reads(mapped reads)以及基因长度后的丰度)；<br>
 			</p>
 			<p class="pra">
 				3）从ARO的丰度出发，进行丰度柱形图展示，丰度聚类热图展示，丰度分布圈图展示，组间ARO差异分析，以及ARO和环境因子（或者其它组学数据）的相关性分析。<br>
@@ -463,7 +461,7 @@
 			</p>
 
 			<p class="pra">	
-				从抗性基因的相对丰度表出发，计算各个样品中ARO的含量和百分比，筛选出最大丰度排名前20的ARO结果展示如下：<br>
+				从抗性基因的相对丰度表出发，筛选出最大丰度排名前20的ARO，进行聚类和热图展示：<br>
 				<p align="center"><img src="../../Figure6-2.png" width="700" height="500"></p>
 				<p align="center"><strong>图6-2 各个样品抗性基因聚类热图（相对丰度前20的基因）</strong></p>
 				<dd align="center" style="font-size:80%;">说明：竖轴代表样品/分组信息，横轴的抗性基因基于欧式距离聚类。</dd>
@@ -482,7 +480,7 @@
 
 			<h3><a id="a8.3"></a>6.3 组间抗性基因差异性分析</h3>
 			<p class="pra">
-				结合分组信息，利用LEfSe分析了微生物抗性基因表达在组间是否有显著性差异。<a href="../../../4-AMRAnalysis/4-SignificanceAnalysis/">./4-AMRAnalysis/4-SignificanceAnalysis/</a>点击此处查看功能差异性分析详细结果。
+				结合分组信息，利用LEfSe分析了微生物抗性基因在组间是否有显著性差异。<a href="../../../4-AMRAnalysis/4-SignificanceAnalysis/">点击./4-AMRAnalysis/4-SignificanceAnalysis/查看功能差异性分析详细结果。</a>
 			</p>
 
 			<hr>
@@ -492,7 +490,7 @@
 		
 			<h3 align="left"><a id="a9.1"></a>7.1 CCA/RDA分析</h3>
 			<p class="pra">
-				CCA/RDA的分析主要依赖R语言VEGAN包，以及用ggplot2进行可视化。CCA/RDA(DCA判断用哪一种分析)分析是基于对应分析发展的一种排序方法，将对应分析与多元回归分析相结合，每一步计算均与环境因子进行回归，又称多元直接梯度分析。RDA是基于线性模型，CCA是基于单峰模型（图8-1）。本报告先进行DCA分析，看最大轴的值是否大于4,如果大于4.0，就选CCA，否则选RDA。该分析主要用来反映菌群与环境因子之间的关系，可以检测环境因子、样品、菌群(抗性基因，KEGG功能)三者之间的关系或者两两之间的关系，可得到影响样品分布的重要环境驱动因子。该分析给出的所有p值都是反映解释变量（连续的数值变量，或者分类变量）对微生物群落变异的解释程度是否显著（简单的说就是解释变量对微生物是否有影响是否显著），所有p值都是用R语言VEGAN包里的置换检验得出的（permutation test），Group×_features_location_plot图中的p值反映了所有连续的数值变量（环境因子）对微生物差异的解释程度（总的p值），表格Group×_RDA.envfit中的p值反映了每个环境因子对微生物差异的解释程度，Group1_RDA_sample_location_plot图中的p值反映了分组对微生物差异的解释程度，p&lt;0.05,解释方差显著。 
+				CCA/RDA的分析主要依赖R语言VEGAN包，以及用ggplot2进行可视化。CCA/RDA(DCA判断用哪一种分析)分析是基于对应分析发展的一种排序方法，将对应分析与多元回归分析相结合，每一步计算均与环境因子进行回归，又称多元直接梯度分析。RDA是基于线性模型，CCA是基于单峰模型（图8-1）。本报告先进行DCA分析，看最大轴的值是否大于4,如果大于4.0，就选CCA，否则选RDA。该分析主要用来反映菌群与环境因子之间的关系，可以检测环境因子、样品、菌群(抗性基因，KEGG功能)三者之间的关系或者两两之间的关系，可得到影响样品分布的重要环境驱动因子。该分析给出的所有p值都是反映解释变量（连续的数值变量，或者分类变量）对微生物群落变异的解释程度是否显著（简单的说就是解释变量对微生物群落是否有影响，影响是否显著），所有p值都是用R语言VEGAN包里的置换检验得出的（permutation test），Group×_features_location_plot图中的p值反映了所有连续的数值变量（环境因子）对微生物差异的解释程度（总的p值），表格Group×_RDA.envfit中的p值反映了每个环境因子对微生物差异的解释程度，Group1_RDA_sample_location_plot图中的p值反映了分组对微生物差异的解释程度，p&lt;0.05,解释方差显著。 
 			</p>
 			<p align="center"><img src="../../Figure7-1.png" width="700" height="500" alt="未提供环境因子，无法进行RDA分析"></img></p>
 			<h3 align="center">图7-1 属水平物种CCA/RDA排序图</h3>
