@@ -77,8 +77,18 @@ class ColorMap(object):
                 pass
         self.maps = list(set(maps))
 
-    def get_map_conf(self, mapid):
+    def get_map_conf(self, mapid, margin_right=60, clean_frame=True):
         self.current_mapid = mapid
+        plot = np.array(Image.open("{}/{}.png".format(self.path['map_conf'], self.current_mapid)).convert("RGB"))
+        if margin_right:
+            margin = np.zeros((plot.shape[0], margin_right, 3), dtype='uint8')
+            margin[:] = 255
+            if clean_frame:
+                plot[:, (0, plot.shape[1] - 1)] = [255, 255, 255]
+                plot[(0, plot.shape[0] - 1), :] = [255, 255, 255]
+            self.plot = np.concatenate((plot, margin), axis=1)
+        else:
+            self.plot = plot
         self.coord_kos, self.coord_gene_names, self.coord_enzyme, self.coord_reaction = [], [], [], []
         with open("{}/{}.conf".format(self.path['map_conf'], self.current_mapid), 'r') as f:
             for line in f:
@@ -102,29 +112,40 @@ class ColorMap(object):
 
     def __cac_map_colors__(self):
         self.color_data = []
+        color_used = set()
+        self.legend_data = []
         for coordinate, kos in self.coord_kos:
             colors = [self.kos_colors[ko] for ko in kos]
             colors = list(set([c for c in colors if not c == "#999999"]))
             color = colors[0] if len(colors) == 1 else "#999999"
             self.color_data.append([coordinate, color])
+            # for legend
+            if not color == "#999999":
+                color_used.add(color)
+        for clr in list(color_used):
+            for k, v in self.gps_colors.items():
+                if clr == v:
+                    self.legend_data.append([k, v])
+        self.legend_data.sort()
 
-    def __color_map__(self, override=True):
+    def __color_map__(self, color_data, override=True):
         """
             override: When Ture, override the enzyme name in map.png, this is faster.
         """
-        plot = np.array(Image.open("{}/{}.png".format(self.path['map_conf'], self.current_mapid)).convert("RGB"))
+        plot = np.array(self.plot) if not isinstance(self.plot, np.ndarray) else self.plot.copy()
+        # color_data = color_data or self.color_data
         if override:
-            for coordinate, color in self.color_data:
+            for coordinate, color in color_data:
                 x1, y1, x2, y2 = coordinate
                 # pdb.set_trace()
                 plot[y1:y2, x1:x2] = hex2color(color)
         else:
             plot = dupply(plot, rgb2hex)
-            for coordinate, color in self.color_data:
+            for coordinate, color in color_data:
                 x1, y1, x2, y2 = coordinate
                 plot[y1:y2, x1:x2][plot[y1:y2, x1:x2] == '#ffffff'] = color
             plot = np.uint8(dupply(plot, hex2color))
-        self.plot = Image.fromarray(plot)
+        self.plot = plot
 
     def __cac_map_text__(self, use_text="gene", show_abundance=True):
         """
@@ -153,27 +174,56 @@ class ColorMap(object):
         else:
             self.text_data = [[coordinate, texts[0] if texts else ""] for coordinate, texts in text_data]
 
-    def __text_map__(self, position="center", color="#000000", fontsize=9):
+    def __text_map__(self, text_data, position="center", color="#000000", fontsize=9):
         """
         aguments:
-            position: 'bottom' or 'center' or 'top'.
+            position: 'bottom' or 'center' or 'top' or 'left'.
+
+            text_data self-sapplied text data
         """
-        for coordinate, text in self.text_data:
+        plot = Image.fromarray(self.plot) if not isinstance(self.plot, Image.Image) else self.plot
+        # text_data = text_data or self.text_data
+        for coordinate, text in text_data:
             x1, y1, x2, y2 = coordinate
             font = ImageFont.truetype('arial.ttf', fontsize)
             width, height = font.getsize(text)
             offsetx, offsety = font.getoffset(text)
             w, h = width + offsetx, height + offsety
 
-            draw = ImageDraw.Draw(self.plot)
+            draw = ImageDraw.Draw(plot)
             # pdb.set_trace()
             cord = ((x1 + x2 - w) / 2, y2) if position == "bottom" else (((x1 + x2 - w) / 2, (y1 + y2 - h) / 2)
-                                                                         if position == "center" else ((x1 + x2 - w) / 2, y1 - h))
+                                                                         if position == "center" else (((x1 + x2 - w) / 2, y1 - h) if position == 'top' else (x1, (y1 + y2 - h) / 2)))
             # pdb.set_trace()
             draw.text(cord, text, font=font, fill=color)
+        self.plot = plot
+
+    def __cac_legend__(self, off_right=120, legend_data=False):
+        """
+        position: coordinate of the left top point of legend.
+
+        """
+        position = (np.array(self.plot).shape[1] - off_right, 20)
+        self.legend_color, self.legend_text = [], []
+        legend_data = legend_data or self.legend_data
+        rect = np.array([position, [position[0] + 46, position[1] + 17]])
+        for gp, color in legend_data:
+            rect_text = rect.copy()
+            rect_text[:, 0] += 56  # interval of text to rect
+            self.legend_color.append([rect.flatten().tolist(), color])
+            self.legend_text.append([rect_text.flatten().tolist(), gp])
+            rect[:, 1] += 25   # interval of rect to rect
+
+    def show(self):
+        plot = Image.fromarray(self.plot) if not isinstance(self.plot, Image.Image) else self.plot
+        plot.show()
+
+    def save(self, fp):
+        plot = Image.fromarray(self.plot) if not isinstance(self.plot, Image.Image) else self.plot
+        plot.save(fp)
 
     @time_counter
-    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False):
+    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120):
         """
         To plot a single map:
 
@@ -183,14 +233,17 @@ class ColorMap(object):
 
             see also plot_all
         """
-        self.get_map_conf(mapid)
+        self.get_map_conf(mapid, margin_right)
         self.__cac_map_colors__()
-        self.__color_map__()
         self.__cac_map_text__(use_text, show_abundance)
-        self.__text_map__(position, color, fontsize)
+        self.__cac_legend__(off_right=off_right)
+        self.__color_map__(self.color_data)
+        self.__color_map__(self.legend_color)
+        self.__text_map__(self.text_data, position, color, fontsize)
+        self.__text_map__(self.legend_text, 'left', "#000000", legend_fontsize)
         self.plot.save("{}{}.png".format(self.out_dir, mapid))
 
-    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False):
+    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120):
         """
         To plot all maps in map_abundance_table
 
@@ -201,9 +254,18 @@ class ColorMap(object):
 
                 show_abundance: if True, show abundance in plot
 
+                fontsize: font size in map
+
+                legend_fontsize: font size of legend text
+
+                margin_right: the margin at right
+
+                off_right: adjust the postion of legend
+
         """
         filter_maps = ["map01100", "map01110", "map01120", "map01130", "map00312"]
         for mapid in self.maps:
             if mapid not in filter_maps:
                 print(mapid)
-                self.plot_map(mapid, use_text, position, color, fontsize, show_abundance)
+                self.plot_map(mapid, use_text, position, color, fontsize,
+                              show_abundance, legend_fontsize, margin_right, off_right)
