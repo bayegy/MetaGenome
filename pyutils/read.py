@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import re
+import pdb
+from bs4 import BeautifulSoup
 # import matplotlib.pyplot as plt
 
 
@@ -53,3 +55,27 @@ def format_file(file_path, **kwargs):
             out = out.replace("{{%s}}" % (k), v)
     with open(file_path, 'w') as f:
         f.write(out)
+
+
+def format_html_properties(html_fp, format_dict, out_fp, filter_function=False, use_selector=False):
+    """
+    in a format_dict, you should never use '' or "" in a CSS selector
+    """
+    with open(html_fp, "r", encoding="utf-8") as file:
+        fcontent = file.read()
+    sp = BeautifulSoup(fcontent, 'lxml')
+    for k, v in format_dict.items():
+        # pdb.set_trace()
+        if use_selector:
+            label_list = sp.select(k)
+        else:
+            tag = re.search('^[^\[]+', k).group()
+            attrs = re.search('\[(.+)\]', k)
+            attrs = dict([attr.split('=') for attr in attrs.group(1).split('&')]) if attrs else {}
+            label_list = sp.findAll(tag, attrs=attrs)
+        for label in label_list:
+            for p, n in v.items():
+                if label.has_attr(p) and (filter_function(label[p]) if filter_function else True):
+                    label[p] = n.format(value=label[p])
+    with open(out_fp, "w", encoding="utf-8") as out:
+        out.write(sp.prettify())

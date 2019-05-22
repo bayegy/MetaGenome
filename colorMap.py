@@ -10,7 +10,8 @@ from pyutils.colors import rgb2hex, hex2color
 from pyutils.tools import dupply, time_counter
 from pyutils.read import read_abundance
 from mapInfo import MapInfo
-# import pdb
+from pyutils.read import format_html_properties
+import pdb
 
 
 class ColorMap(object):
@@ -39,7 +40,7 @@ class ColorMap(object):
 
             >>>from colorMap import ColorMap
             >>>c=ColorMap("test/KO_Group1_lefse_LDA2.LDA.txt","test/All.Function.abundance.KeepID.KO.txt",out_dir="map_test")
-            >>>c.plot_all()
+            >>>c.plot_all(show_abundance=True)
 
         to plot a single map:
 
@@ -61,8 +62,9 @@ class ColorMap(object):
         sys.path.append(self.path['bayegy_home'])
         from getColors import get_lefse_colors
         self.user_kos = pd.read_csv(ko_lefse_lda, sep='\t', header=None, index_col=0)[2]
+        self.annoted_kos = self.user_kos[self.user_kos.notna()]
         self.gps_colors = get_lefse_colors(category, mapping_file, ko_lefse_lda, return_dict=True) if (
-            mapping_file and category) else {gp: color for gp, color in zip(list(set(self.user_kos[self.user_kos.notna()])), sns.color_palette('Accent', 12).as_hex())}
+            mapping_file and category) else dict(zip(list(set(self.annoted_kos)), sns.color_palette('Accent', 12).as_hex()))
         # pdb.set_trace()
         self.kos_colors = {ko: self.gps_colors[self.user_kos[ko]]
                            if notna else "#999999" for ko, notna in zip(self.user_kos.index, self.user_kos.notna())}
@@ -76,6 +78,7 @@ class ColorMap(object):
             except KeyError:
                 pass
         self.maps = list(set(maps))
+        self.prefix = prefix
 
     def get_map_conf(self, mapid, margin_right=60, clean_frame=True):
         self.current_mapid = mapid
@@ -214,6 +217,27 @@ class ColorMap(object):
             self.legend_text.append([rect_text.flatten().tolist(), gp])
             rect[:, 1] += 25   # interval of rect to rect
 
+    def write_report(self, mapid, report_detail=True):
+        # pdb.set_trace()
+        link_data = {'img[name=pathwayimage]': {"src": '{}{}.png'.format(self.prefix, mapid)}}
+
+        out_report = "{}{}.html".format(self.out_dir, mapid)
+        in_report = "{}/{}.html".format(self.path['map_conf'], mapid)
+
+        # format_html_properties(in_report, link_data, out_report)
+        if report_detail:
+            tip_data = {
+                'area[coords={}]'.format(','.join([str(co) for co in coord])): {'title': '''{value}
+
+The following KOs were found in your samples[KO number(Group of feature)]:
+
+    %s''' % (', '.join([("{}({})".format(ko, self.annoted_kos[ko]) if ko in self.annoted_kos.index else ko) for ko in kos]))} for coord, kos in self.coord_kos
+            }
+
+            link_data.update(tip_data)
+
+        format_html_properties(in_report, link_data, out_report)
+
     def show(self):
         plot = Image.fromarray(self.plot) if not isinstance(self.plot, Image.Image) else self.plot
         plot.show()
@@ -223,7 +247,7 @@ class ColorMap(object):
         plot.save(fp)
 
     @time_counter
-    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120):
+    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120, report_detail=True):
         """
         To plot a single map:
 
@@ -242,8 +266,9 @@ class ColorMap(object):
         self.__text_map__(self.text_data, position, color, fontsize)
         self.__text_map__(self.legend_text, 'left', "#000000", legend_fontsize)
         self.plot.save("{}{}.png".format(self.out_dir, mapid))
+        self.write_report(mapid, report_detail)
 
-    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120):
+    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120, report_detail=True):
         """
         To plot all maps in map_abundance_table
 
@@ -262,10 +287,12 @@ class ColorMap(object):
 
                 off_right: adjust the postion of legend
 
+                report_detail: report details of KOs in map if True
+
         """
         filter_maps = ["map01100", "map01110", "map01120", "map01130", "map00312"]
         for mapid in self.maps:
             if mapid not in filter_maps:
                 print(mapid)
                 self.plot_map(mapid, use_text, position, color, fontsize,
-                              show_abundance, legend_fontsize, margin_right, off_right)
+                              show_abundance, legend_fontsize, margin_right, off_right, report_detail)
