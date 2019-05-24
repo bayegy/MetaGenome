@@ -258,11 +258,11 @@
 
 
 			<p align="center">
-				<iframe src="../../page4-2/Summary_请点此文件查看.html" width="700" height="500"></iframe>
+				<iframe src="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots/Summary_请点此文件查看.html" width="700" height="900"></iframe>
 			</p>
 
 			<p align="center">
-				<a href="../../page4-2/Summary_请点此文件查看.html"><strong>图 4-2 各个样本在各分类水平的物种相对分布情况的柱形图（全部物种，点击此处打开新窗口查看）</a></strong>
+				<a href="../../../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots/Summary_请点此文件查看.html"><strong>图 4-2 各个样本在各分类水平的物种相对分布情况的柱形图（全部物种，点击此处打开新窗口查看）</a></strong>
 			</p>
 
 			<dd align="center" style="font-size:80%;">
@@ -337,10 +337,10 @@
 			</p>
 
 			<p align="center">
-				<iframe src="../../page4-5/Summary_请点此文件查看.html" width="1000" height="600"></iframe>
+				<iframe src="../../../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor/Summary_请点此文件查看.html" width="1000" height="700"></iframe>
 			</p>
 
-			<p align="center"><strong>图4-6 基于Bray Curtis距离矩阵的的PCoA 3D图</strong><a href="../../page4-5/Summary_请点此文件查看.html">（点击此处打开新窗口查看图片可拖动旋转，可调色）</a></p>
+			<p align="center"><strong>图4-6 基于Bray Curtis距离矩阵的的PCoA 3D图</strong><a href="../../../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor/Summary_请点此文件查看.html">（点击此处打开新窗口查看图片可拖动旋转，可调色）</a></p>
 
 			<dd align="center" style="font-size:80%;">
 				说明：横坐标（Axis 1）表示第一主成分，百分比则表示第一主成分对样品差异的贡献值；纵坐标（Axis  2）表示第二主成分，百分比表示第二主成分对样品差异的贡献值；Axis 3坐标表示第三主成分，百分比表示第三主成分对样品差异的贡献值。客户可以根据元数据的分组信息可以个性化展示其他分类的距离关系。举例：可在右边设置区域的Select a Color Category下拉单选择分组信息，则同一个组的样品使用同一种颜色表示。
@@ -394,7 +394,7 @@
 
 			<h3><a id="a5.4"></a>5.4 功能相对差异性分析</h3>
 			<p class="pra">
-				LEfSe方法是非参数检验和线性判别分析的结合，适合寻找各分组的biomarkers；LEfSe寻找每一个分组的biomarker 功能（LDA>阈值的功能,为了方便客户选择，我们在结果文件夹中分别提供了阈值为2和4的结果），也就是相对于其他分组，在这个组中丰度显著较高的功能（如图5-2）<br>
+				LEfSe方法是非参数检验和线性判别分析的结合，适合寻找各分组的biomarkers；LEfSe寻找每一个分组的biomarker 功能（LDA>阈值的功能, biomarker功能在相应分组中丰度较高，在其他分组中丰度较低。为了方便客户选择，我们在结果文件夹中分别提供了阈值为2和4的结果），也就是相对于其他分组，在这个组中丰度显著较高的功能（如图5-2）<br>
 			</p>
 
 			<p align="center">
@@ -427,7 +427,19 @@
 				说明：灰色矩形框表示在样本中检测到了该基因，彩色矩形框是颜色对应分组的特征基因。同时请注意，在本分析结果中，所有分组对应的颜色都是统一的。
 			</dd>	
 
+			<p class="pra">
+				另外，您可以打开同一文件夹下的同名网页文件（后缀不同），查看每个通路矩形节点的详细信息，鼠标悬在矩形框上可以看到您样本中检测到对应通路节点的哪些KOs，以及这些KO是哪个分组的特征KO（KO后面括号内的分组，表示这个KO是这个分组的特征KO），点击矩形框可以查看KEGG官网对相应节点KOs的解释。如下嵌入网页所示：
+				<br>
+			</p>
 
+
+			<p align="center">
+				<iframe src="../../../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/{{report_category}}/{{report_category}}_map00010.html" width="900" height="1200"></iframe>
+			</p>
+			<p align="center"><strong>图5-3补充 通路中各个分组的biomarkers基因网页版<a href="../../../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/">（点击此处打开新窗口查看更多通路图网页)</a></strong></p>
+			<dd align="center" style="font-size:80%;">
+				说明：尝试把鼠标悬在矩形框上，或者点击矩形框
+			</dd>	
 
 			<hr>
 			<h2>

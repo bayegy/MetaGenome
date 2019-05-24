@@ -27,6 +27,7 @@ for map_html in map_html_list:
 
     fo = re.sub('<table[\S\s]*</table>', d + m, f)
     fo = re.sub('display: *none;', '', fo)
+    fo = re.sub("window.open\('/", "window.open('https://www.kegg.jp/", fo)
     with open(map_html, 'w') as o:
         o.write(fo)
 

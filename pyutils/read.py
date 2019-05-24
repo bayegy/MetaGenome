@@ -48,12 +48,12 @@ def get_kingdom_ratio(species_abundance_table):
     return "您样本中，检测到的物种有：{}; 物种占比情况：{}。".format(series_to_str(df, value_format=':.0f'), series_to_str(df / df.sum()))
 
 
-def format_file(file_path, **kwargs):
-    with open(file_path, 'r') as f:
+def format_file(in_fp, out_fp, **kwargs):
+    with open(in_fp, 'r') as f:
         out = f.read()
         for k, v in kwargs.items():
             out = out.replace("{{%s}}" % (k), v)
-    with open(file_path, 'w') as f:
+    with open(out_fp, 'w') as f:
         f.write(out)
 
 

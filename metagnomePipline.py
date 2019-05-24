@@ -197,8 +197,8 @@ class MetagenomePipline(object):
         self.clean_header(tb_name, pattern='_R1.metaphlan.profile$', skip=[0])
 
     @synchronize
-    def run_humann(self, fq_list: list):
-        os.system(self.homized_cmd('perl run_humann.pl {} SE'.format(fq_list)))
+    def run_humann(self, fq_list: list, processor=3):
+        os.system(self.homized_cmd('perl run_humann.pl {} SE {}'.format(fq_list, processor)))
 
     def join_humann(self):
         os.system('''
@@ -339,7 +339,7 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.Kee
         self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=7)
         self.join_metaphlan()
 
-        self.run_humann(fq_list=self.merged_pe_r1_list)
+        self.run_humann(fq_list=self.merged_pe_r1_list, processor=3)
         self.join_humann()
 
         if base_on_assembly:

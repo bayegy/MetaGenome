@@ -148,8 +148,8 @@ cp ../2-TaxaAundanceAnalysis/4-CorrelationAnalysis/RDA/Genus/${category_1}_RDA_f
 cp ../4-AMRAnalysis/5-CorrelationAnalysis/CorrelationHeatmap/AMR_Correlation_heatmap.pdf Figure7-2.pdf
 
 
-cp -r ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots page4-2
-cp -r ../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor page4-5
+#cp -r ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots page4-2
+#cp -r ../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor page4-5
 
 
 # python3 ${SCRIPTPATH}/convert_to_html_table.py -i ../1-QCStats/reads_summary.txt -o src/pages/main_cleaned.html -t txt -k '{{table1}}'
