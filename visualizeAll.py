@@ -3,6 +3,7 @@ import json
 import re
 from visualizeSpecies import VisualizeSpecies
 from visualizeFunction import VisualizeFunction
+from visualizeHumann import VisualizeHumann
 from pyutils.read import read_to_html_table, get_kingdom_ratio, format_file
 from colorMap import ColorMap
 
@@ -38,6 +39,12 @@ class VisualizeAll(VisualizeSpecies):
 
         VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,
                          self.categories, exclude_species=self.exclude_species).visualize(exclude)
+
+        for abundance_table in [self.out_dir + 'Metagenome/Humann/' + f for f in [
+            # 'All.Humann2.genefamilies.tsv',
+            'All.Humann2.pathabundance.tsv'
+        ]]:
+            VisualizeHumann(abundance_table, self.mapping_file, self.categories).visualize(exclude)
 
         categories_list = self.categories.split(',')
 

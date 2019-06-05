@@ -57,7 +57,7 @@ def format_file(in_fp, out_fp, **kwargs):
         f.write(out)
 
 
-def format_html_properties(html_fp, format_dict, out_fp, filter_function=False, use_selector=False):
+def update_html_properties(html_fp, format_dict, out_fp, filter_function=False, use_selector=False):
     """
     in a format_dict, you should never use '' or "" in a CSS selector
     """

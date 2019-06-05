@@ -10,7 +10,7 @@ from pyutils.colors import rgb2hex, hex2color
 from pyutils.tools import dupply, time_counter
 from pyutils.read import read_abundance
 from mapInfo import MapInfo
-from pyutils.read import format_html_properties
+from pyutils.read import update_html_properties
 import pdb
 
 
@@ -224,19 +224,19 @@ class ColorMap(object):
         out_report = "{}{}.html".format(self.out_dir, mapid)
         in_report = "{}/{}.html".format(self.path['map_conf'], mapid)
 
-        # format_html_properties(in_report, link_data, out_report)
+        # update_html_properties(in_report, link_data, out_report)
         if report_detail:
             tip_data = {
                 'area[coords={}]'.format(','.join([str(co) for co in coord])): {'title': '''{value}
 
 The following KOs were found in your samples[KO number(Group of feature)]:
 
-    %s''' % (', '.join([("{}({})".format(ko, self.annoted_kos[ko]) if ko in self.annoted_kos.index else ko) for ko in kos]))} for coord, kos in self.coord_kos
+    %s''' % (', '.join([("{}(biomarker of group {})".format(ko, self.annoted_kos[ko]) if ko in self.annoted_kos.index else ko) for ko in kos]))} for coord, kos in self.coord_kos
             }
 
             link_data.update(tip_data)
 
-        format_html_properties(in_report, link_data, out_report)
+        update_html_properties(in_report, link_data, out_report)
 
     def show(self):
         plot = Image.fromarray(self.plot) if not isinstance(self.plot, Image.Image) else self.plot

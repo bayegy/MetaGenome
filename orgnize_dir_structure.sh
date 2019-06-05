@@ -58,7 +58,7 @@ mkdir -p Result_Metagenomics/FiguresTablesForReport \
     Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis \
     Result_Metagenomics/1-QCStats/2-QC_report_Filtered \
     Result_Metagenomics/1-QCStats/1-QC_report_Rawfastq \
-    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2 \
+    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/4-SignificanceAnalysis \
     Result_Metagenomics/3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis \
     Result_Metagenomics/4-AMRAnalysis/4-SignificanceAnalysis \
     Result_Metagenomics/FiguresTablesForReport
@@ -121,6 +121,12 @@ cp -rp FMAP/CorrelationAnalysis    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/
 cp Metagenome/Humann/All.*tsv Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/
 
 
+cp -rp Metagenome/Humann/Barplots    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/1-Barplots 
+cp -rp Metagenome/Humann/Heatmaps    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/2-Heatmaps
+cp -rp Metagenome/Humann/Circos   Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/3-Circos
+rm -r Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/3-Circos/circos_conf
+cp -rp Metagenome/Humann/LEfSe Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/4-SignificanceAnalysis/LEfSe
+cp -rp Metagenome/Humann/CorrelationAnalysis Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/5-CorrelationAnalysis
 
 
 ################################################make FiguresTablesForReport

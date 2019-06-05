@@ -8,18 +8,29 @@ import pdb
 class VisualizeHumann(VisualizeFunction):
     """"""
 
-    def __init__(self, *args, **kwargs):
-        super(VisualizeHumann, self).__init__(*args, **kwargs)
-        self.pre_abundance_table = self.abundance_table
+    def __init__(self, *args, regroup=False, prefix=False, **kwargs):
+        super(VisualizeHumann, self).__init__(*args, **kwargs, prefix=prefix)
+        if regroup:
+            ob = regroup.replace('uniref90_', '').upper()
+            self.pre_abundance_table = "{}All.{}.abundance.tsv".format(self.out_dir, ob)
+            os.system("humann2_regroup_table --input {} --groups {} --output {}".format(self.abundance_table,
+                                                                                        regroup, self.pre_abundance_table))
+            self.prefix = prefix or ob + '_'
+        else:
+            self.pre_abundance_table = self.abundance_table
+
         os.system("humann2_split_stratified_table -i {} -o {}".format(self.pre_abundance_table, self.out_dir))
         self.abundance_table = "{}{}_unstratified.tsv".format(
-            self.out_dir, os.path.splitext(os.path.basename(self.pre_abundance_table))[0])
+            self.out_dir, self.get_file_name(self.pre_abundance_table))
         df = pd.read_csv(self.abundance_table, sep='\t')
-        df['Description'] = df.iloc[:, 0]
-        df = df.loc[(i not in ['UNMAPPED', 'UNINTEGRATED', 'UniRef90_unknown'] for i in df.iloc[:, 0]), :]
+        # df['Description'] = df.iloc[:, 0]
+        df = df.loc[(i not in ['UNMAPPED', 'UNINTEGRATED', 'UniRef90_unknown', 'UNGROUPED'] for i in df.iloc[:, 0]), :]
         df.iloc[:, 0] = [re.search('^[^:]*', i).group() for i in df.iloc[:, 0]]
         # pdb.set_trace()
         df.to_csv(self.abundance_table, sep='\t', index=False)
+
+    def get_file_name(self, path):
+        return os.path.splitext(os.path.basename(path))[0]
 
     def __visualize_with_group__(self, *args, **kwargs):
         super(VisualizeHumann, self).__visualize_with_group__(*args, **kwargs)
@@ -44,5 +55,5 @@ class VisualizeHumann(VisualizeFunction):
                 print(f)
                 # f = f.replace('_', '-')
                 if f in features:
-                    os.system("humann2_barplot --input {i} --focal-feature {f} --focal-metadatum {g} --last-metadatum {g} --output {bar_out}/{p}{f}_stratification_bar.pdf".format(
-                        i=bar_table, f=f, g=g, bar_out=bar_out, p=self.prefix))
+                    os.system("{b}humann2_barplot --input {i} --focal-feature {f} --focal-metadatum {g} --last-metadatum {g} --output {bar_out}/{p}{f}_stratification_bar.pdf".format(
+                        i=bar_table, f=f, g=g, bar_out=bar_out, p=self.prefix, b=self._base_dir))

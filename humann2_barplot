@@ -1,0 +1,14 @@
+#!/home/cheng/softwares/miniconda2/bin/python
+
+# -*- coding: utf-8 -*-
+import re
+import sys
+# sys.path.append('/home/cheng/softwares/miniconda2/lib/python2.7/site-packages')
+# sys.path=['/home/cheng/softwares/miniconda2/envs/lefse/lib/python2.7/site-packages/']+sys.path
+sys.path.insert(0, '/home/cheng/softwares/miniconda2/envs/lefse/lib/python2.7/site-packages')
+# print 'Where to look for module: ', sys.path
+from humann2Barplot import main
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
