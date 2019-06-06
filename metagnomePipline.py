@@ -203,11 +203,11 @@ class MetagenomePipline(object):
     def join_humann(self):
         os.system('''
 ln -s {out_dir}Metagenome/Humann/*/*genefamilies.tsv {out_dir}Metagenome/Humann/*/*pathabundance.tsv {out_dir}Metagenome/Humann/
-humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.Humann2.genefamilies.tsv --file_name genefamilies.tsv
-humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.Humann2.pathabundance.tsv --file_name pathabundance.tsv'''.format(out_dir=self.out_dir))
-        self.clean_header(self.out_dir + "Metagenome/Humann/All.Humann2.genefamilies.tsv",
+humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
+humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv'''.format(out_dir=self.out_dir))
+        self.clean_header(self.out_dir + "Metagenome/Humann/All.UniRef90.genefamilies.tsv",
                           pattern='_R1\..*\.unmapped\.R1_Abundance-RPKs$')
-        self.clean_header(self.out_dir + "Metagenome/Humann/All.Humann2.pathabundance.tsv",
+        self.clean_header(self.out_dir + "Metagenome/Humann/All.Metacyc.pathabundance.tsv",
                           pattern='_R1\..*\.unmapped\.R1_Abundance$')
 
     @synchronize2
@@ -246,7 +246,7 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
         if run_type == "KEGG":
             self.run_fmap(fq_list=fq_list,
                           database="orthology_uniref90_2_2157_4751.20190412161853", processor=processor, out_dir="FMAP")
-            self.quantify_fmap(out_dir="FMAP", all_name="All.Function.abundance.KeepID.KO.txt")
+            self.quantify_fmap(out_dir="FMAP", all_name="All.KO.abundance_unstratified.tsv")
         elif run_type == "AMR":
             self.run_fmap(fq_list=fq_list, database="protein_fasta_protein_homolog_model_cleaned",
                           processor=processor, out_dir="AMR")
@@ -273,35 +273,6 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
                 self.out_dir
             )
         )
-
-    def map_ko_annotation(self):
-        ko_file = self.out_dir + 'FMAP/All.Function.abundance.KeepID.KO.txt'
-        out = os.path.dirname(ko_file)
-        os.system('''
-perl {SCRIPTPATH}/ConvergeKO2Module.pl {ko_file} > {out_dir}/All.Function.abundance.KeepID.Module.txt
-perl {SCRIPTPATH}/ConvergeKO2Pathway.pl {ko_file} > {out_dir}/All.Function.abundance.KeepID.Pathway.txt
-perl {SCRIPTPATH}/ConvergePathway2Level1.pl {out_dir}/All.Function.abundance.KeepID.Pathway.txt > {out_dir}/All.Function.abundance.KeepID.Pathway.Level1.txt
-perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.KeepID.Pathway.txt > {out_dir}/All.Function.abundance.KeepID.Pathway.Level2.txt
-            '''.format(SCRIPTPATH=self.path['cii_home'], ko_file=ko_file, out_dir=out))
-
-    def map_func_definition(self):
-        FMAP_data = self.path['fmap_home'] + '/FMAP_data/'
-        FMAP = self.out_dir + "FMAP/"
-        mi = MapInfo()
-        mi.mapping(FMAP + 'All.Function.abundance.KeepID.Pathway.txt', [FMAP_data + f for f in ['KEGG_Pathway2Level1.txt', 'KEGG_Pathway2Level2.txt', 'KEGG_pathway.txt']],
-                   out_file=FMAP + 'All.Function.abundance.Pathway.full_info.txt', mapped_headers=["Level1", "Level2", "Level3"])
-        mi.mapping(FMAP + 'All.Function.abundance.KeepID.KO.txt', ['/home/cheng/softwares/FMAP/FMAP_data/KEGG_orthology.txt'],
-                   out_file=FMAP + 'All.Function.abundance.KO.full_info.txt', adjust_func=mi.ajust_ko_info, mapped_headers=['Gene_name\tEnzyme_number\tDefinition'])
-        mi.mapping(FMAP + 'All.Function.abundance.KO.full_info.txt', [FMAP_data + f for f in [
-                   'KEGG_orthology2module.txt', 'KEGG_orthology2pathway.txt']], mapped_headers=["Module", "KEGG Pathway"], add=True)
-        datas = [FMAP + f for f in ["All.Function.abundance.KeepID.KO.txt",
-                                    "All.Function.abundance.KeepID.Module.txt", "All.Function.abundance.KeepID.Pathway.txt"]]
-        mapping_sources = [FMAP_data +
-                           f for f in ["KEGG_orthology.txt", "KEGG_module.txt", "KEGG_pathway.txt"]]
-        for data, mapping_source in zip(datas, mapping_sources):
-            mi.mapping(data, [mapping_source])
-        mi.mapping(self.out_dir + 'AMR/All.AMR.abundance.txt', [FMAP_data + '/aro.csv'],
-                   pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True, map_column=-1)
 
     def run_quast(self):
         os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
@@ -346,8 +317,8 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.Function.abundance.Kee
             self.run_assembly(processor=66)
             self.run_quast()
         else:
-            self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="KEGG", processor=7)
+            # self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="KEGG", processor=7)
             self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="AMR", processor=7)
-        self.map_ko_annotation()
-        self.map_func_definition()
+        # self.map_ko_annotation()
+        # self.map_func_definition()
         self.visualize()

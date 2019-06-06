@@ -44,8 +44,8 @@ class Circos(object):
         otu = self.read_tsv(table)
         otu = otu if not otu.dtypes[-1] == np.dtype("O") else otu.drop(otu.columns[-1], axis=1)
         # pdb.set_trace()
-        otu.index = [i.replace(' ', '_').replace(';', '').replace(
-            "'", '').replace('(', '').replace(')', '') for i in otu.index]
+        otu.index = [i.replace(' ', '_').replace(';', '_').replace(
+            "'", '').replace('(', '_').replace(')', '_').replace(':', '_') for i in otu.index]
         if mapping_file and category:
             mapf = self.read_tsv(mapping_file)[category].dropna().sort_values()
             otu = otu.filter(items=mapf.index, axis=1)

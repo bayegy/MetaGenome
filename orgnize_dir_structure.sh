@@ -90,8 +90,6 @@ cp -rp Kraken2/*/CorrelationAnalysis Result_Metagenomics/2-TaxaAundanceAnalysis/
 
 
 
-
-
 cp AMR/All.AMR.abundance.txt Result_Metagenomics/4-AMRAnalysis/
   
 cp -rp AMR/Barplots    Result_Metagenomics/4-AMRAnalysis/1-Barplots 
@@ -103,16 +101,12 @@ cp -rp AMR/CorrelationAnalysis Result_Metagenomics/4-AMRAnalysis/5-CorrelationAn
 
 
 
-
-
-
-
 cp FMAP/All*.txt Result_Metagenomics/3-FuctionAnalysis/1-KEGG/
 cp -rp FMAP/Barplots    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/1-Barplots
 cp -rp FMAP/Heatmaps    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/2-Heatmaps
 cp -rp FMAP/Circos    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/3-Circos
 rm -r Result_Metagenomics/3-FuctionAnalysis/1-KEGG/3-Circos/circos_conf
-cp  FMAP/LEfSe/*    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/
+cp -r  FMAP/LEfSe/*    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/
 cp -rp FMAP/ColoredMaps    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/5-ColoredMaps
 cp -rp FMAP/CorrelationAnalysis    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/6-CorrelationAnalysis
 
@@ -140,8 +134,8 @@ cp ../2-TaxaAundanceAnalysis/1-AbundanceSummary/3-Heatmaps/Heatmap_top20_cluster
 cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/LEfSe/Genus/${category_1}_Genus_lefse_LDA2.pdf  Figure4-4.pdf
 cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/${category_1}_Venn_plot.png Figure4-5.png
 
-cp ../3-FuctionAnalysis/1-KEGG/1-Barplots/Pathway.Level1_${category_1}_barplot.pdf Figure5-1.pdf
-cp ../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/Pathway_${category_1}_lefse_LDA2.pdf   Figure5-2.pdf
+cp ../3-FuctionAnalysis/1-KEGG/1-Barplots/KEGG.Pathway.Level1_${category_1}_barplot.pdf Figure5-1.pdf
+cp ../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/KEGG.Pathway_${category_1}_lefse_LDA2.pdf   Figure5-2.pdf
 cp ../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/${category_1}/${category_1}_map00010.png   Figure5-3.png
 
 cp ../4-AMRAnalysis/1-Barplots/AMR_${category_1}_barplot.pdf Figure6-1.pdf
