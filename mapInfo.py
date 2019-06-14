@@ -1,6 +1,8 @@
 import re
+import os
 import pandas as pd
 from numpy import dtype
+import gzip
 
 
 class MapInfo(object):
@@ -20,10 +22,10 @@ class MapInfo(object):
                 self.map[fid].append(ldef)
             except KeyError:
                 self.map[fid] = [ldef]
-
-        with open(mapping_source, 'r') as f:
+        is_gz = os.path.splitext(mapping_source)[1] == '.gz'
+        with (gzip.open(mapping_source, 'r') if is_gz else open(mapping_source, 'r')) as f:
             for number, line in enumerate(f):
-                li = re.split('\t', line.strip())
+                li = re.split('\t', line.decode().strip() if is_gz else line.strip())
                 fid = li[0].strip()
                 fdef = li[map_column] if map_column else '\t'.join(li[1:])
                 ldef = adjust_func(fdef) if adjust_func else fdef
@@ -97,7 +99,6 @@ class MapInfo(object):
 
 
         """
-
 
         df = pd.read_csv(data, sep='\t')
         if df.dtypes[-1] == dtype("O") and (not add) and (not out_file):

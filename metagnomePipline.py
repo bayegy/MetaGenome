@@ -203,11 +203,11 @@ class MetagenomePipline(object):
     def join_humann(self):
         os.system('''
 ln -s {out_dir}Metagenome/Humann/*/*genefamilies.tsv {out_dir}Metagenome/Humann/*/*pathabundance.tsv {out_dir}Metagenome/Humann/
-humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
-humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv'''.format(out_dir=self.out_dir))
-        self.clean_header(self.out_dir + "Metagenome/Humann/All.UniRef90.genefamilies.tsv",
+humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/RPK.All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
+humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann/RPK.All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv'''.format(out_dir=self.out_dir))
+        self.clean_header(self.out_dir + "Metagenome/Humann/RPK.All.UniRef90.genefamilies.tsv",
                           pattern='_R1\..*\.unmapped\.R1_Abundance-RPKs$')
-        self.clean_header(self.out_dir + "Metagenome/Humann/All.Metacyc.pathabundance.tsv",
+        self.clean_header(self.out_dir + "Metagenome/Humann/RPK.All.Metacyc.pathabundance.tsv",
                           pattern='_R1\..*\.unmapped\.R1_Abundance$')
 
     @synchronize2

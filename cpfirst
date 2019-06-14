@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import os
+import sys
+import shutil
+
+source, target = sys.argv[1], sys.argv[2]
+
+directoy = os.path.dirname(source)
+pfix = os.path.splitext(source)[1]
+
+
+def popfirst(l, pfix):
+    for f in l:
+        file_path = "{}/{}".format(directoy, f)
+        if f.endswith(pfix) and os.path.isfile(file_path):
+            return file_path
+    return ''
+
+
+source_file = popfirst(os.listdir(directoy), pfix)
+if source_file:
+    shutil.copyfile(source_file, target)

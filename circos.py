@@ -147,7 +147,7 @@ if __name__ == '__main__':
     p.add_argument('-g', '--group', dest='group', metavar='<str>',
                    help='Column name in sample-metadata file')
     p.add_argument('-n', '--number', dest='number', metavar='<int>', default='10',
-                   help='Specify how many species to be display, defaulf is 20')
+                   help='Specify how many species to be display, defaulf is 10')
     p.add_argument('-b', '--by-groupMean', dest='by', metavar='<bool>', default=False,
                    help='Pass True to use group mean to plot circos')
     p.add_argument('-p', '--prefix', dest='prefix', metavar='<int>', default="",

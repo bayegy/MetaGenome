@@ -1,24 +1,10 @@
 <style>
 
-#header{
-    height: 50px;
-    width: 100%;
-    padding: 10px 0;
-    min-width: 1000px;
-    position: fixed;
-    background-color: white;
-    background: -webkit-linear-gradient(white, #F0F0F0); /* Safari 5.1 - 6.0 */
-    background: -o-linear-gradient(white, #F0F0F0); /* Opera 11.1 - 12.0 */
-    background: -moz-linear-gradient(white,#F0F0F0 ); /* Firefox 3.6 - 15 */
-    background: linear-gradient(white, #F0F0F0); /* 标准的语法 */
-    -webkit-box-shadow: 0px 2px 5px lightgray;
-    -moz-box-shadow: 0px 2px 5px lightgray;
-    box-shadow: 0px 2px 5px lightgray;
-    opacity: 0.96;
-}
+#first{}
+
 #nav{
     max-height: 600px;
-    padding:0 0 0 20px;
+    padding:0 0 0 25px;
     -webkit-overflow-y: auto;
     -ms-overflow-y: auto;
     overflow-y: auto;
@@ -26,17 +12,9 @@
     position: fixed;
     font-size: 13px;
     margin-top: 20px;
+    line-height: 40px;
+
 }
-
-
-#section {
-    min-width: 820px;
-    max-width: 950px;
-    margin-left: 340px;
-    margin-top: 20px;
-    float:left;
-}
-
 
 a, a:visited {
     color: #3299CC;
@@ -48,16 +26,25 @@ a:hover {
     text-decoration: none;
 }
 
+.buta, .buta:visited, .buta:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-info {
+    width: 200px;
+}
+
+#section {
+    min-width: 820px;
+    max-width: 950px;
+    margin-left: 340px;
+    margin-top: 20px;
+    float:left;
+}
+
+
 img{max-width:900px;height:auto;}
-/*表格样式*/
- table {width:90%;background:#ccc; margin: 10px auto;border-collapse:collapse;}
-/*border-collapse:collapse合并内外边距(去除表格单元格默认的2个像素内外边距*/
- th, td {height:25px;line-height:25px;text-align:center;border:1px solid #ccc; font-size: 80%}
- th {background:#4244C9;font-weight:normal;}
- tr {background:#EAF2D3;}
- tr:hover {background:#cc0;}
- td a {color:#06f;text-decoration:none;}
- td a:hover {color:#06f;text-decoration:underline;} 
 
 
 </style>

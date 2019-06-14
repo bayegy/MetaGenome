@@ -22,7 +22,7 @@ class Visualize(metaclass=ABCMeta):
             self.prefix = prefix
         else:
             p_prefix = os.path.splitext(os.path.basename(self.abundance_table))[0]
-            for r in ['abundance', 'KeepID', 'Humann2', 'All']:
+            for r in ['pathabundance', 'abundance', 'KeepID', 'Humann2', 'All']:
                 p_prefix = p_prefix.replace(r, '')
             p_prefix = re.sub('\.+', '.', p_prefix.strip('.'))
             self.prefix = p_prefix + '_'

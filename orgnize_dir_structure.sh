@@ -58,9 +58,9 @@ mkdir -p Result_Metagenomics/FiguresTablesForReport \
     Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis \
     Result_Metagenomics/1-QCStats/2-QC_report_Filtered \
     Result_Metagenomics/1-QCStats/1-QC_report_Rawfastq \
-    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/4-SignificanceAnalysis \
-    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis \
-    Result_Metagenomics/4-AMRAnalysis/4-SignificanceAnalysis \
+    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/ \
+    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/ \
+    Result_Metagenomics/4-AMRAnalysis/ \
     Result_Metagenomics/FiguresTablesForReport
 
 cp $mapping_file Result_Metagenomics/
@@ -79,6 +79,7 @@ cp -r Metagenome/Metaphlan/All*txt Result_Metagenomics/2-TaxaAundanceAnalysis/1-
 
 cp -r Kraken2/*/ANCOM/*ANCOM* Result_Metagenomics/2-TaxaAundanceAnalysis/2-AbundanceComparison/ANCOM/
 cp -r Kraken2/*/Lefse/* Result_Metagenomics/2-TaxaAundanceAnalysis/2-AbundanceComparison/LEfSe/
+cp -rp Kraken2/*/DunnTest Result_Metagenomics/2-TaxaAundanceAnalysis/2-AbundanceComparison/
 
 cp -r Kraken2/*/VennAndFlower/*  Result_Metagenomics/2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/
 # Kraken2/*/core-metrics/alpha
@@ -88,40 +89,36 @@ cp -rp Kraken2/*/CorrelationAnalysis Result_Metagenomics/2-TaxaAundanceAnalysis/
 #    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/observed_otus \
 #    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/shannon
 
-
-
 cp AMR/All.AMR.abundance.txt Result_Metagenomics/4-AMRAnalysis/
-  
-cp -rp AMR/Barplots    Result_Metagenomics/4-AMRAnalysis/1-Barplots 
-cp -rp AMR/Heatmaps    Result_Metagenomics/4-AMRAnalysis/2-Heatmaps
-cp -rp AMR/Circos   Result_Metagenomics/4-AMRAnalysis/3-Circos
+cp -rp AMR/1-Barplots AMR/2-Heatmaps AMR/3-Circos AMR/4-SignificanceAnalysis  AMR/5-CorrelationAnalysis  Result_Metagenomics/4-AMRAnalysis/
 rm -r Result_Metagenomics/4-AMRAnalysis/3-Circos/circos_conf
-cp AMR/LEfSe/* Result_Metagenomics/4-AMRAnalysis/4-SignificanceAnalysis/
-cp -rp AMR/CorrelationAnalysis Result_Metagenomics/4-AMRAnalysis/5-CorrelationAnalysis
-
 
 
 cp FMAP/All*.txt Result_Metagenomics/3-FuctionAnalysis/1-KEGG/
-cp -rp FMAP/Barplots    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/1-Barplots
-cp -rp FMAP/Heatmaps    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/2-Heatmaps
-cp -rp FMAP/Circos    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/3-Circos
+cp -rp FMAP/1-Barplots FMAP/2-Heatmaps FMAP/3-Circos FMAP/4-SignificanceAnalysis Result_Metagenomics/3-FuctionAnalysis/1-KEGG/
 rm -r Result_Metagenomics/3-FuctionAnalysis/1-KEGG/3-Circos/circos_conf
-cp -r  FMAP/LEfSe/*    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/
 cp -rp FMAP/ColoredMaps    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/5-ColoredMaps
-cp -rp FMAP/CorrelationAnalysis    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/6-CorrelationAnalysis
-
+cp -rp FMAP/5-CorrelationAnalysis    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/6-CorrelationAnalysis
 
 #mv Result_Metagenomics/3-FuctionAnalysis/1-KEGG/*lefse* Result_Metagenomics/3-FuctionAnalysis/1-KEGG/LEfSe/
-cp Metagenome/Humann/All.*tsv Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/
+cp Metagenome/Humann/All.*tsv Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/
+cp -rp Metagenome/Humann/1-Barplots Metagenome/Humann/2-Heatmaps Metagenome/Humann/3-Circos Metagenome/Humann/4-SignificanceAnalysis Metagenome/Humann/5-CorrelationAnalysis  Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/ 
+rm -r Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/3-Circos/circos_conf
+mv Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/All.UniRef90.genefamilies.tsv Result_Metagenomics/3-FuctionAnalysis/All.UniRef90.genefamilies.tsv
+humann2_split_stratified_table -i Result_Metagenomics/3-FuctionAnalysis/All.UniRef90.genefamilies.tsv -o Result_Metagenomics/3-FuctionAnalysis/
 
 
-cp -rp Metagenome/Humann/Barplots    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/1-Barplots 
-cp -rp Metagenome/Humann/Heatmaps    Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/2-Heatmaps
-cp -rp Metagenome/Humann/Circos   Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/3-Circos
-rm -r Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/3-Circos/circos_conf
-cp -rp Metagenome/Humann/LEfSe Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/4-SignificanceAnalysis/LEfSe
-cp -rp Metagenome/Humann/CorrelationAnalysis Result_Metagenomics/3-FuctionAnalysis/2-Metacyc_Humann2/5-CorrelationAnalysis
+cp -rp EggNOG Result_Metagenomics/3-FuctionAnalysis/3-EggNOG
+rm -r Result_Metagenomics/3-FuctionAnalysis/3-EggNOG/3-Circos/circos_conf
 
+cp -rp GO Result_Metagenomics/3-FuctionAnalysis/4-GO
+rm -r Result_Metagenomics/3-FuctionAnalysis/4-GO/3-Circos/circos_conf
+
+cp -rp EC Result_Metagenomics/3-FuctionAnalysis/5-EC
+rm -r Result_Metagenomics/3-FuctionAnalysis/5-EC/3-Circos/circos_conf
+
+cp -rp CAZy Result_Metagenomics/3-FuctionAnalysis/6-CAZy
+rm -r Result_Metagenomics/3-FuctionAnalysis/6-CAZy/3-Circos/circos_conf
 
 ################################################make FiguresTablesForReport
 cp -rp ${SCRIPTPATH}/Report/src Result_Metagenomics/FiguresTablesForReport/
@@ -135,22 +132,25 @@ cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/LEfSe/Genus/${category_1}_Gen
 cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/${category_1}_Venn_plot.png Figure4-5.png
 
 cp ../3-FuctionAnalysis/1-KEGG/1-Barplots/KEGG.Pathway.Level1_${category_1}_barplot.pdf Figure5-1.pdf
-cp ../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/KEGG.Pathway_${category_1}_lefse_LDA2.pdf   Figure5-2.pdf
+cp ../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/LEfSe/KEGG.Pathway_${category_1}_lefse_LDA2.pdf   Figure5-2.pdf
 cp ../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/${category_1}/${category_1}_map00010.png   Figure5-3.png
+cpfirst "../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/${category_1}/*.pdf"   Figure5-4.pdf
+cp ../3-FuctionAnalysis/2-Metacyc/1-Barplots/Metacyc_${category_1}_barplot.pdf   Figure5-5.pdf
+cp ../3-FuctionAnalysis/3-EggNOG/2-Heatmaps/EGGNOG_${category_1}_clustered_heatmap.pdf   Figure5-6.pdf
+cp ../3-FuctionAnalysis/4-GO/3-Circos/GO_${category_1}_circos.png   Figure5-7.png
+cpfirst "../3-FuctionAnalysis/5-EC/4-SignificanceAnalysis/LEfSe/SignificantFeatures/${category_1}/*.pdf"   Figure5-8.pdf
+cp ../3-FuctionAnalysis/6-CAZy/4-SignificanceAnalysis/LEfSe/CAZY_${category_1}_lefse_LDA2.pdf   Figure5-9.pdf
 
 cp ../4-AMRAnalysis/1-Barplots/AMR_${category_1}_barplot.pdf Figure6-1.pdf
 cp ../4-AMRAnalysis/2-Heatmaps/AMR_${category_1}_nocluster_heatmap.pdf Figure6-2.pdf
 # cp ../4-AMRAnalysis/2-Heatmaps/AMR_${category_1}_clustered_heatmap.pdf Figure6-2.pdf
 cp ../4-AMRAnalysis/3-Circos/AMR_${category_1}_circos.png Figure6-3.png
 
-
 cp ../2-TaxaAundanceAnalysis/4-CorrelationAnalysis/RDA/Genus/${category_1}_RDA_features_location_plot.pdf Figure7-1.pdf
 cp ../4-AMRAnalysis/5-CorrelationAnalysis/CorrelationHeatmap/AMR_Correlation_heatmap.pdf Figure7-2.pdf
 
-
 #cp -r ../2-TaxaAundanceAnalysis/1-AbundanceSummary/2-Barplots/All.Taxa.OTU.taxa-bar-plots page4-2
 #cp -r ../2-TaxaAundanceAnalysis/3-DiversityAnalysis/bray_curtis_emperor page4-5
-
 
 # python3 ${SCRIPTPATH}/convert_to_html_table.py -i ../1-QCStats/reads_summary.txt -o src/pages/main_cleaned.html -t txt -k '{{table1}}'
 

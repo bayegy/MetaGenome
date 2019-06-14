@@ -8,14 +8,15 @@ import re
 class VisualizeHumann(VisualizeFunction):
     """"""
 
-    def __init__(self, *args, regroup="uniref90", prefix=False, save_id_colon=True, add_raw_id=False, **kwargs):
+    def __init__(self, *args, regroup=False, prefix=False, save_id_colon=True, add_raw_id=False, custom_to=False, **kwargs):
         super(VisualizeHumann, self).__init__(*args, **kwargs, prefix=prefix)
         self.regroup = regroup
-        if not regroup == "uniref90":
-            ob = regroup.replace('uniref90_', '').upper()
+
+        if regroup or custom_to:
+            ob = custom_to.upper() if custom_to else regroup.replace('uniref90_', '').upper()
             self.pre_abundance_table = "{}All.{}.abundance.tsv".format(self.out_dir, ob)
-            os.system("humann2_regroup_table --input {} --groups {} --output {}".format(self.abundance_table,
-                                                                                        regroup, self.pre_abundance_table))
+            os.system("humann2_regroup_table --input {} {} --output {}".format(self.abundance_table,
+                                                                               "-c {}/map_{}_uniref90.txt.gz".format(self.path['humann2_utility_mapping'], custom_to) if custom_to else '--groups ' + regroup, self.pre_abundance_table))
             self.prefix = prefix or ob + '_'
         else:
             self.pre_abundance_table = self.abundance_table
@@ -41,15 +42,16 @@ class VisualizeHumann(VisualizeFunction):
 
         for g in categories:
             print(g)
-            bar_out = "{}LEfSe/SignificantFeatures/{}/".format(self.out_dir, g)
+            bar_out = "{}4-SignificanceAnalysis/LEfSe/SignificantFeatures/{}/".format(self.out_dir, g)
             if not os.path.exists(bar_out):
                 os.makedirs(bar_out)
-            humann2_ft_lefse_lda = '{}LEfSe/{}{}_lefse_LDA2.LDA.txt'.format(self.out_dir, self.prefix, g)
+            humann2_ft_lefse_lda = '{}4-SignificanceAnalysis/LEfSe/{}{}_lefse_LDA2.LDA.txt'.format(
+                self.out_dir, self.prefix, g)
             df = pd.read_csv(humann2_ft_lefse_lda, sep='\t', header=None, index_col=0)[2]
             df = df[df.notna()]
             bar_table = "{}table_for_stratification_bar.txt".format(bar_out)
             os.system("Rscript {SCRIPTPATH}/write_data_for_lefse.R -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {bar_table} -u f -j F -e {isenzyme}".format(
-                SCRIPTPATH=self.path['bayegy_home'], abundance_table=self.pre_abundance_table, mapping_file=self.mapping_file, category=g, bar_table=bar_table, isenzyme=("F" if self.regroup.find("level4ec") == -1 else "T")))
+                SCRIPTPATH=self.path['bayegy_home'], abundance_table=self.pre_abundance_table, mapping_file=self.mapping_file, category=g, bar_table=bar_table, isenzyme=("T" if (self.regroup == 'uniref90_level4ec' or self.regroup == 'uniref50_level4ec') else "F")))
             features = [re.search('^[^:\|]*', f).group().strip()
                         for f in pd.read_csv(bar_table, sep='\t', index_col=0).index if not f.find('|') == -1]
             features = list(set(features))
