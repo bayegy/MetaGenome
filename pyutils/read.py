@@ -21,13 +21,22 @@ def read_abundance(file_path, index_col=0, return_sum=-1, return_mean=-1):
     return df.sum(axis=return_sum) if not return_sum == -1 else (df if return_mean == -1 else df.mean(axis=return_mean))
 
 
-def read_to_html_table(file_path):
+def read_to_html_table(file_path, table_class=False, thead_class=False):
     file_type = re.search('[^\.]+$', file_path).group()
     if file_type == 'txt' or file_type == 'csv':
         out_df = pd.read_csv(file_path, sep='\t')
     elif file_type == "html":
         out_df = pd.read_html(file_path)[0]
-    return out_df.to_html(index=False)
+    # pdb.set_trace()
+    table = out_df.to_html(index=False)
+    if table_class or thead_class:
+        table = BeautifulSoup(table, 'lxml')
+        if table_class:
+            table.table['class'] = table_class
+        if thead_class:
+            table.thead['class'] = thead_class
+        table = table.prettify()
+    return table
 
 
 def get_kingdom_ratio(species_abundance_table):

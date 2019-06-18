@@ -8,9 +8,10 @@ import re
 class VisualizeHumann(VisualizeFunction):
     """"""
 
-    def __init__(self, *args, regroup=False, prefix=False, save_id_colon=True, add_raw_id=False, custom_to=False, **kwargs):
+    def __init__(self, *args, regroup=False, prefix=False, id_with_name=False, custom_to=False, **kwargs):
         super(VisualizeHumann, self).__init__(*args, **kwargs, prefix=prefix)
         self.regroup = regroup
+        self.save_colon = 'T' if id_with_name else 'F'
 
         if regroup or custom_to:
             ob = custom_to.upper() if custom_to else regroup.replace('uniref90_', '').upper()
@@ -25,10 +26,10 @@ class VisualizeHumann(VisualizeFunction):
         self.abundance_table = "{}{}_unstratified.tsv".format(
             self.out_dir, self.get_file_name(self.pre_abundance_table))
         df = pd.read_csv(self.abundance_table, sep='\t')
-        if add_raw_id:
+        if id_with_name:
             df['Description'] = df.iloc[:, 0]
         df = df.loc[(i not in ['UNMAPPED', 'UNINTEGRATED', 'UniRef90_unknown', 'UNGROUPED'] for i in df.iloc[:, 0]), :]
-        if not save_id_colon:
+        if id_with_name:
             df.iloc[:, 0] = [re.search('^[^:]*', i).group() for i in df.iloc[:, 0]]
         # pdb.set_trace()
         df.to_csv(self.abundance_table, sep='\t', index=False)
@@ -50,8 +51,8 @@ class VisualizeHumann(VisualizeFunction):
             df = pd.read_csv(humann2_ft_lefse_lda, sep='\t', header=None, index_col=0)[2]
             df = df[df.notna()]
             bar_table = "{}table_for_stratification_bar.txt".format(bar_out)
-            os.system("Rscript {SCRIPTPATH}/write_data_for_lefse.R -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {bar_table} -u f -j F -e {isenzyme}".format(
-                SCRIPTPATH=self.path['bayegy_home'], abundance_table=self.pre_abundance_table, mapping_file=self.mapping_file, category=g, bar_table=bar_table, isenzyme=("T" if (self.regroup == 'uniref90_level4ec' or self.regroup == 'uniref50_level4ec') else "F")))
+            os.system("Rscript {SCRIPTPATH}/write_data_for_lefse.R -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {bar_table} -u f -j F -e {isenzyme} -n {save_colon}".format(
+                SCRIPTPATH=self.path['bayegy_home'], abundance_table=self.pre_abundance_table, save_colon=self.save_colon, mapping_file=self.mapping_file, category=g, bar_table=bar_table, isenzyme=("T" if (self.regroup == 'uniref90_level4ec' or self.regroup == 'uniref50_level4ec') else "F")))
             features = [re.search('^[^:\|]*', f).group().strip()
                         for f in pd.read_csv(bar_table, sep='\t', index_col=0).index if not f.find('|') == -1]
             features = list(set(features))

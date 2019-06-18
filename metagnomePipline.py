@@ -11,15 +11,15 @@ import pandas as pd
 class MetagenomePipline(object):
     """
     arguments:
-        pre_mapping_file: The first column of pre_mapping_file should be smaple id in raw fastq files, the last column of pre_mapping_file should be new id (or the same) of samples.
+        pre_mapping_file: The first column of pre_mapping_file should be smaple id in raw fastq files, the last column of pre_mapping_file should be revised id (or the same) of samples.
 
-        categories: Categories seprated by ',' , optional, if not passed, the categories names should have the pattern of 'Group.*'
+        categories: Categories seprated by ',' , optional, if not passed, the categories names should have the pattern of 'Category.*'
 
         host_type: Will control the de_host step.
 
         run_size: Control the max number of jobs submitted to sge each time
 
-        raw_fqs_dir: Directory where the raw fastq file were stored
+        raw_fqs_dir: Directory where the raw fastq file weres stored
 
         sample_regex: Regular expression to match sample id (contained by brackets)
 

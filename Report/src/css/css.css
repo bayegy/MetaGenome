@@ -45,6 +45,12 @@ a:hover {
 
 
 img{max-width:900px;height:auto;}
-
-
+th, td {text-align:center; font-size: 80%}
+/*tr:hover {background:#cc0;}*/
+p{
+    line-height: 28px;
+}
+dd{
+    line-height: 22px;
+}
 </style>

@@ -101,8 +101,7 @@ humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -
             # 'All.UniRef90.genefamilies.tsv',
             'All.Metacyc.pathabundance.tsv'
         ]]:
-            VisualizeHumann(abundance_table, self.mapping_file, self.categories,
-                            save_id_colon=False, add_raw_id=True).visualize(exclude)
+            VisualizeHumann(abundance_table, self.mapping_file, self.categories, id_with_name=True).visualize(exclude)
         """
         categories_list = self.categories.split(',')
         """
@@ -114,4 +113,5 @@ humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -
                                                                         self._base_dir, self.mapping_file, categories_list[0]))
         page = self.out_dir + 'Result_Metagenomics/FiguresTablesForReport/src/pages/main_cleaned.html'
         format_file(page, page, table1=read_to_html_table(
-            self.out_dir + 'Report/reads_summary.txt'), species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=categories_list[0])
+            self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),
+            species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=categories_list[0])

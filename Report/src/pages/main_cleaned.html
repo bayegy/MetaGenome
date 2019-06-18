@@ -8,10 +8,10 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-		<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
-		<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
-		<script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
-		<script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="lib-js/bootstrap.min.css">
+		<script src="lib-js/jquery-3.4.1.min.js"></script>
+		<script src="lib-js/popper.min.js"></script>
+		<script src="lib-js/bootstrap.min.js"></script>
 
 		<link href="../css/css.css" rel="stylesheet" type="text/css" />
 
@@ -192,10 +192,10 @@
 			<p class="pra">1) 数据质控：测序得到的原始数据会存在一定比例的低质量数据，为了保证后续信息分析结果的准确可靠，首先要对原始数据进行质控及宿主过滤，得到有效数据。分析中将使用Cutadapt彻底清除原始数据中的Illumina接头序列，再用PrinSEQ去除低质量的序列片段和个别序列。质控前和质控后，会用FastQC来检测质控的合理性和效果。<sup>[7，8]</sup><br></p>
 			<p class="pra">2) 去除宿主：质控处理后的数据通过bowtie2比对到宿主的基因组，没有比对到的序列被保留下来做后续分析。<br></p>
 			<p class="pra">3）物种注释：使用Kraken2和自建的微生物数据库(从<a href="http://ccb.jhu.edu/software/kraken2/index.shtml?t=manual">Kraken官网</a>下载各个微生物数据库(细菌，真菌，古菌，病毒)，合并后再加入哥伦比亚大学实验室研究中新发现的一些细菌基因组数据）来鉴别样本中所含有的物种，再用Bracken来对样本中物种的实际相对丰度进行预测。相较于基于组装的物种注释，基于序列的宏基因组物种注释方法更加全面和准确。<sup>[9-12]</sup><br></p>
-			<p class="pra">4) 常用功能数据库注释：从质控以及去除宿主基因的reads出发，使用FMAP软件（github: https://github.com/jiwoongbio/FMAP.git），将各个样本的reads比对到数据库（KEGG Filtered UniProt），进行代谢通路(KEGG)的功能注释和丰度分析。<sup>[19-21]</sup><br></p>
-			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析，样品聚类分析；当有分组信息时，可以进行LEfSe biomarker挖掘分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
-			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的质控以及去除宿主基因的reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况以及这些抗性基因的物种归属和抗性机制。<sup>[21,24-25]</sup><br></p>
-			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 CCA/RDA 分析，肠型分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
+			<p class="pra">4) 常用功能数据库注释：从质控以及去除宿主基因的reads出发，使用HUMAnN2软件（基于DIAMOND），将各个样本的reads比对到数据库（UniRef90），根据UniRef90 ID 和各个数据库的对应关系，得到各个功能数据库的注释信息和相对丰度表。<sup>[19-22]</sup><br></p>
+			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析（仅物种），样品聚类分析；当有分组信息时，可以进行LEfSe biomarker挖掘分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
+			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的质控以及去除宿主基因的reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况。<sup>[21,24-25]</sup><br></p>
+			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 肠型分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
 			
 			</p>
 
@@ -219,7 +219,7 @@
 			<p class="pra">4) 去除 N 碱基（未知碱基）达到一定数量的 reads（默认设为20bp）；<br></p>
 			<p class="pra">5) 去除每条序列5'端10bp的碱基；<br></p>
 
-			<p align="center" style="font-size: 80%">{{table1}}</p>
+			<p align="center">{{table1}}</p>
 			<p align="center"><strong>表3-1 数据产出质量情况一览表</strong></p>
 			<dd align="center" style="font-size:80%;">说明：Sample ID: 样品名; InsertSize(bp): InsertSize是在建库切胶时选择的长度，合适的InsertSize能避免测序接头污染; SeqStrategy: 测序策略（一般为双端，各150bp）; RawReads(#)：测序Raw reads的数量; Raw Base(GB): 以GB为单位的Raw reads数量, 测序原始数据的总碱基数，即为Raw reads数量乘以测序长度算得; %GC：G/C碱基数占总碱基数量的百分比; Clean Reads(#)：过滤后获得的Clean reads 数量; Cleaned(%)：过滤后剩余的碱基数占Raw reads 的百分比; AfterHostRemoved Reads(#)：去除宿主基因后剩余的reads数量; HostRemoved(%)：去除的宿主reads占Clean Reads百分比。
 			</dd>
@@ -478,7 +478,7 @@
 
 
 			<h3><a id="a5.3"></a>5.3 EggNOG数据库(<a href="../../../3-FuctionAnalysis/3-EggNOG/">3-FuctionAnalysis/3-EggNOG</a>目录)</h3>
-			<p><a href="http://eggnogdb.embl.de/">EggNOG数据库</a>收集了COG（Clusters of Orthologous Groups of proteins，直系同源蛋白簇）,构成每个COG的蛋白都是被假定为来自于一个祖先蛋白，因此是orthologs或者是paralogs。通过把所有完整基因组的编码蛋白一个一个的互相比较确定的。在考虑来自一个给定基因组的蛋白时，这种比较将给出每个其他基因组的一个最相似的蛋白（因此需要用完整的基因组来定义COG），这些基因的每一个都轮番的被考虑。如果在这些蛋白（或子集）之间一个相互的最佳匹配关系被发现，那么那些相互的最佳匹配将形成一个COG。这样，一个COG中的成员将与这个COG中的其他成员比起被比较的基因组中的其他蛋白更相像。</p>
+			<p><a href="http://eggnogdb.embl.de/">EggNOG数据库</a>收集了COG（Clusters of Orthologous Groups of proteins，直系同源蛋白簇）,构成每个COG的蛋白都是被假定为来自于一个祖先蛋白，因此是orthologs或者是paralogs。通过把所有完整基因组的编码蛋白一个一个的互相比较确定的。在考虑来自一个给定基因组的蛋白时，这种比较将给出每个其他基因组的一个最相似的蛋白（因此需要用完整的基因组来定义COG），这些基因的每一个都轮番地被考虑。如果在这些蛋白（或子集）之间一个相互的最佳匹配关系被发现，那么那些相互的最佳匹配将形成一个COG。这样，一个COG中的成员将与这个COG中的其他成员比起被比较的基因组中的其他蛋白更相像。</p>
 
 			<p class="pra">从COG的相对丰度表出发，筛选出最大丰度排名前20的COG，进行聚类和热图（图5-6）展示：<br></p>
 
@@ -494,7 +494,7 @@
 			</div>
 
 			<h3><a id="a5.4"></a>5.4 GO数据库(<a href="../../../3-FuctionAnalysis/4-GO/">3-FuctionAnalysis/4-GO</a>目录)</h3>
-			<p><a href="http://geneontology.org/">GO(gene ontology)数据库</a>是基因本体联合会(Gene Onotology Consortium)所建立的数据库，旨在建立一个适用于各种物种的，堆积因和蛋白质功能进行限定和描述的，并能随着研究不断深入而更新的语言词汇标准．GO是多种生物本体语言中的一种，提供了三层结构的系统定义方式，用于描述基因产物的功能．可以简单的理解为：分三个方面描述一个基因产物的数据库，比如对某个基因的产物，GO从三方面描述：它有什么功能(分子功能MF)，它参加了什么生物学过程(生物学过程BP)，它的在细胞的什么位置(细胞组分CC)。</p>
+			<p><a href="http://geneontology.org/">GO(gene ontology)数据库</a>是基因本体联合会(Gene Onotology Consortium)所建立的数据库，旨在建立一个适用于各种物种的，对基因和蛋白质功能进行限定和描述的，并能随着研究不断深入而更新的语言词汇标准。GO是多种生物本体语言中的一种，GO数据库根据功能将基因分为三大类：分子功能（MF），生物学过程（BP），细胞组分（CC）。</p>
 
 
 			<p class="pra">	
@@ -535,8 +535,8 @@
 			<h3><a id="a5.6"></a>5.6 CAZy数据库（碳水化合物酶活性）(<a href="../../../3-FuctionAnalysis/6-CAZy/">3-FuctionAnalysis/6-CAZy</a>)目录</h3>
 			<p><a href="http://www.cazy.org/">碳水化合物活性酶数据库(CAZy)</a>是关于能够合成或者分解复杂碳水化合物和糖复合物的酶类的一个数据库资源,其基于蛋白质结构域中的氨基酸序列相似性,将碳水化合物活性酶类归入不同蛋白质家族。CAZy数据库提供了酶分子序列的家族信息，物种来源，基因序列，蛋白序列，三维结构，EC分类，相关数据库链接，建立此数据库是为了将酶分子的序列、结构、催化机制相关联。</p>
 			<p>碳水化合物活性酶数据库中基因ID前缀与功能分类的对应关系如下：</p>
-			<table class="table">
-			<thead>
+			<table class="table table-striped">
+			<thead class="thead-dark">
 			<tr>
 			<th style="text-align:center">名称</th>
 			<th style="text-align:center">缩写</th>
@@ -583,7 +583,6 @@
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				<strong>注意!</strong> 本结果中，所有的功能数据库注释结果的可视化方法基本一致，请参照其他功能数据库，抗性基因以及相关分析部分的可视化结果的解释，对该部分的结果进行解读。
 			</div>
-
 
 
 			<hr>

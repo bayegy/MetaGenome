@@ -17,6 +17,8 @@ def popfirst(l, pfix):
     return ''
 
 
-source_file = popfirst(os.listdir(directoy), pfix)
+file_list = os.listdir(directoy)
+file_list.sort()
+source_file = popfirst(file_list, pfix)
 if source_file:
     shutil.copyfile(source_file, target)
