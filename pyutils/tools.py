@@ -15,7 +15,7 @@ def time_counter(func):
     def wrapper(*args, **kwargs):
         t1 = time.time()
         out = func(*args, **kwargs)
-        print("Time used: {}".format(str(time.time() - t1)))
+        print("{} done, time used: {}".format(str(func), str(time.time() - t1)))
         return out
     return wrapper
 

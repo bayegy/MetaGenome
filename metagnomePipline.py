@@ -6,6 +6,7 @@ import re
 from visualizeAll import VisualizeAll
 from mapInfo import MapInfo
 import pandas as pd
+from pyutils.tools import time_counter
 
 
 class MetagenomePipline(object):
@@ -36,15 +37,17 @@ class MetagenomePipline(object):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='./'):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='./', base_on_assembly=False):
         self.out_dir = os.path.abspath(out_dir) + '/'
-        if not os.path.exists(self.out_dir):
-            os.makedirs(self.out_dir)
+        if not os.path.exists(self.out_dir + 'salmon_out/'):
+            os.makedirs(self.out_dir + 'salmon_out/')
         self._base_dir = os.path.dirname(__file__) + '/'
         with open(self._base_dir + "pipconfig/path.conf") as f:
             self.path = json.load(f)
         self.parsed_map = parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex)
         self.fq_info = self.parsed_map['fastq'].values
+        self.new_ids = list(set(self.parsed_map['fastq']['New_SampleID'].values))
+        self.new_ids.sort()
         self._init_outdir_()
         self.mapping_file = self.out_dir + 'mapping_file.txt'
         self.parsed_map['map'].to_csv(self.mapping_file, sep='\t', index=False)
@@ -65,6 +68,8 @@ class MetagenomePipline(object):
         self.de_host_r1_list = self.map_list(de_host_pattern, run_size, use_direction='R1')
         self.merged_pe_r1_list = self.map_list(self.merged_pe_pattern, run_size, use_direction='R1')
         self.kracken2_reports_list = self.map_list(kracken2_reports_pattern, use_direction='R1')
+        # self.new_ids_list = split_list(self.new_ids, each=run_size)
+        self.base_on_assembly = base_on_assembly
         global running_list
         running_list = self.out_dir + '.running_list'
 
@@ -250,7 +255,7 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
         elif run_type == "AMR":
             self.run_fmap(fq_list=fq_list, database="protein_fasta_protein_homolog_model_cleaned",
                           processor=processor, out_dir="AMR")
-            self.quantify_fmap(out_dir="AMR", all_name="All.AMR.abundance.txt")
+            self.quantify_fmap(out_dir="AMR", all_name="All.AMR.abundance_unstratified.tsv")
         elif run_type == "ARDB":
             self.run_fmap(fq_list=fq_list, database="ARDB.20180725064354",
                           processor=processor, out_dir="ARDB")
@@ -258,30 +263,72 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
 
     def run_assembly(self, processor=50):
         os.system(
-            "{} -1 {} -2 {} --min-contig-len 1000 -t {} -o {}Assembly/Assembly".format(
+            "{} -1 {} -2 {} --min-contig-len 1000 -t {} -o {}Assembly_out".format(
                 self.path['megahit_path'], ','.join(self.map_list(self.merged_pe_pattern, use_direction="R1")), ','.join(self.map_list(self.merged_pe_pattern, use_direction="R2")), processor, self.out_dir)
         )
         os.system(
-            "cd {}Assembly/Assembly&&prodigal -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff&&\
-            {} -i final.contigs.fa.fna -c 0.95 -G 0 -aS 0.9 -g 1 -d 0 -M 80000 -o final.contigs.fa.fna.out -T 0&&\
-            grep '>' final.contigs.fa.fna.out > final.contigs.fa.fna.out.header&&\
+            "cd {}Assembly_out&&prodigal -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff&&\
+            {} -i final.contigs.fa.fna -c 0.95 -G 0 -aS 0.9 -g 1 -d 0 -M 80000 -o NR.nucleotide.fa -T 0&&\
+            grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header&&\
             {}&&\
-            Rscript ORF_header_summary.R -i {}Assembly/Assembly/".format(
+            Rscript ORF_header_summary.R -i {}Assembly_out/".format(
                 self.out_dir, self.path['cdhit_path'],
                 self.homized_cmd(
-                    "perl ORF_generate_input_stats_file.pl {}Assembly/Assembly/final.contigs.fa.fna.out.header".format(self.out_dir)),
+                    "perl ORF_generate_input_stats_file.pl {}Assembly_out/NR.nucleotide.fa.header".format(self.out_dir)),
                 self.out_dir
             )
         )
 
     def run_quast(self):
-        os.system("python2 {} -o {}Assembly/Assembly/quast_results/quast_results/  {}Assembly/Assembly/final.contigs.fa".format(
+        os.system("python2 {} -o {}Assembly_out/quast_results/  {}Assembly_out/final.contigs.fa".format(
             self.path['quast_path'], self.out_dir, self.out_dir))
 
-    def visualize(self, exclude='none'):
-        VisualizeAll(self.mapping_file, self.categories).visualize(exclude)
+    def create_gene_db(self, processor=7):
+        os.system('''
+transeq -sequence {0}/NR.nucleotide.fa -outseq {0}/NR.protein.fa -trim Y
+sed -i 's/_1 / /' {0}/NR.protein.fa
+salmon index -t {0}/NR.nucleotide.fa -p {1} -k 31 -i {0}/salmon_index'''.format(self.out_dir + 'Assembly_out', processor))
 
-    def run(self, processor=2, base_on_assembly=False):
+    @synchronize2
+    def quant_gene(self, fq_list, processor=7):
+        for sample in fq_list:
+            cmd = "salmon quant -i {} -l A -p {} --meta -1 {} -2 {} -o {}salmon_out/{}.quant".format(
+                self.out_dir + 'Assembly_out/salmon_index', processor, self.merged_pe_pattern.format(sample, 'R1'), self.merged_pe_pattern.format(sample, 'R2'), self.out_dir, sample)
+            cmd = "echo '{}' | qsub -V -N {} -cwd -l h_vmem=80G -o {}salmon_out/ -e {}salmon_out/ -pe smp 4".format(
+                cmd, sample, self.out_dir, self.out_dir)
+            print("submit: {}\n\n".format(cmd))
+            os.system(cmd)
+
+    def join_gene(self):
+        os.system(
+            "salmon quantmerge --quants {0}salmon_out/*.quant -o {0}salmon_out/All.genes.abundance.txt".format(self.out_dir))
+        self.clean_header(self.out_dir + "salmon_out/All.genes.abundance.txt", ".quant$")
+
+    @time_counter
+    def diamond_gene(self, database, out_file, processor=66):
+        cmd = "diamond blastp --db {0} --query {1}Assembly_out/NR.protein.fa --outfmt 6 --threads {2}  -e 0.001 --max-target-seqs 1 --block-size 200 --index-chunks 1 --tmpdir /dev/shm/  --quiet --out {1}salmon_out/{3}".format(
+            database, self.out_dir, processor, out_file)
+        print(cmd)
+        os.system(cmd)
+
+    @time_counter
+    def map_gene(self, processor=70):
+
+        os.system('''
+emapper.py -m diamond --no_annot --no_file_comments --data_dir {0} --cpu {1} -i {2}Assembly_out/NR.protein.fa -o {2}salmon_out/genes --usemem --override
+emapper.py --annotate_hits_table {2}salmon_out/genes.emapper.seed_orthologs --no_file_comments -o {2}salmon_out/genes --cpu {1} --data_dir {0} --usemem --override
+sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG\tCOG\tAnnotation' {2}salmon_out/genes.emapper.annotations
+            '''.format(
+            self.path["emapper_database"], processor, self.out_dir))
+
+        self.diamond_gene(self.path['cazy_database'], 'genes_cazy.f6', processor)
+        self.diamond_gene(
+            self.path['fmap_home'] + '/FMAP_data/protein_fasta_protein_homolog_model_cleaned.dmnd', 'genes_card.f6', processor)
+
+    def visualize(self, exclude='none'):
+        VisualizeAll(self.mapping_file, self.categories).visualize(exclude, self.base_on_assembly)
+
+    def run(self, processor=2):
         """
         电脑内存：250G
 
@@ -294,7 +341,7 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× processor 个数
         """
-
+        """
         self.run_fastqc(fq_list=self.raw_list, processor=processor, first_check=5)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
@@ -304,21 +351,23 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
         self.run_fastqc(fq_list=self.de_host_r1_list, processor=processor, first_check=5)
         self.generate_summary()
 
-        self.run_kraken2(fq_list=self.map_list(self.merged_pe_pattern, 3, use_direction='R1'), processor=20)
+        self.run_kraken2(fq_list=self.map_list(self.merged_pe_pattern, 3, use_direction='R1'), processor=23)
         self.run_bracken()
-
-        self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=7)
-        self.join_metaphlan()
-
-        self.run_humann(fq_list=self.merged_pe_r1_list, processor=3)
-        self.join_humann()
-
-        if base_on_assembly:
+        """
+        if self.base_on_assembly:
+            """
             self.run_assembly(processor=66)
             self.run_quast()
+            self.create_gene_db()
+            self.quant_gene(fq_list=split_list(self.new_ids, each=3), processor=23, first_check=5)
+            self.join_gene()
+            """
+            self.map_gene()
         else:
+            self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=7)
+            self.join_metaphlan()
+            self.run_humann(fq_list=self.merged_pe_r1_list, processor=7)
+            self.join_humann()
             # self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="KEGG", processor=7)
             self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="AMR", processor=7)
-        # self.map_ko_annotation()
-        # self.map_func_definition()
-        self.visualize()
+        # self.visualize()

@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from pyutils.read import format_html_properties
+from pyutils.read import update_html_properties
 
 
 map_html_dir = sys.argv[1]
@@ -32,5 +32,5 @@ for map_html in map_html_list:
         o.write(fo)
 
     link_data = {'*': {'href': 'https://www.kegg.jp{value}'}}
-    format_html_properties(map_html, link_data, map_html,
+    update_html_properties(map_html, link_data, map_html,
                            filter_function=lambda x: True if x.startswith('/') else False, use_selector=True)

@@ -4,6 +4,7 @@ import re
 from visualizeSpecies import VisualizeSpecies
 from visualizeFunction import VisualizeFunction
 from visualizeHumann import VisualizeHumann
+from visualizeAssembly import VisualizeAssembly
 from pyutils.read import read_to_html_table, get_kingdom_ratio, format_file
 from colorMap import ColorMap
 from mapInfo import MapInfo
@@ -32,6 +33,15 @@ perl {SCRIPTPATH}/ConvergePathway2Level1.pl {out_dir}/All.KEGG.Pathway.txt > {ou
 perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.KEGG.Pathway.txt > {out_dir}/All.KEGG.Pathway.Level2.txt
             '''.format(SCRIPTPATH=self.path['cii_home'], ko_file=ko_file, out_dir=out))
 
+    @staticmethod
+    def extract_empper_cog(annotation):
+        cog = re.search('([^,]+)@NOG', annotation)
+        if cog:
+            cog = cog.group(1)
+            return 'ENOG41' + cog if not cog.startswith('COG') else cog
+        else:
+            return ""
+
     def map_func_definition(self):
         FMAP_data = self.path['fmap_home'] + '/FMAP_data/'
         FMAP = self.out_dir + "FMAP/"
@@ -57,30 +67,54 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.KEGG.Pathway.txt > {ou
                                                                                                                         "map_go_name.txt.gz"]]
 
         for data, mapping_source in zip(datas, mapping_sources):
-            mi.mapping(data, [mapping_source])
-        mi.mapping(self.out_dir + 'AMR/All.AMR.abundance.txt', [FMAP_data + '/aro.csv'],
+            if os.path.exists(data):
+                mi.mapping(data, [mapping_source])
+        mi.mapping(self.out_dir + 'AMR/All.AMR.abundance_unstratified.tsv', [FMAP_data + '/aro.csv'],
                    pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True, map_column=-1)
 
-    def visualize(self, exclude='none'):
+    def visualize(self, exclude='none', base_on_assembly=False):
 
         os.system("{}/piputils/write_colors_plan.py -i {} -c {} -p {}/piputils/group_color.list -o {}colors_plan.json".format(
             self.path['bayegy_home'], self.mapping_file, self.categories, self.path['bayegy_home'], self.out_dir))
         os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
         """
-        os.system('''
+        if base_on_assembly:
+            
+            VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
+                              'salmon_out/genes.emapper.annotations', prefix='KO_', annotation_column=6, out_dir=self.out_dir + 'FMAP').visualize(exclude)
+            VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
+                              'salmon_out/genes.emapper.annotations', prefix='GO_', annotation_column=5, out_dir=self.out_dir + 'GO').visualize(exclude)
+            
+            VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
+                              'salmon_out/genes.emapper.annotations', prefix='EGGNOG_', annotation_column=9, out_dir=self.out_dir + 'EggNOG', adjust_func=self.extract_empper_cog).visualize(exclude)
+            VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
+                              'salmon_out/genes_cazy.f6', prefix='CAZY_', out_dir=self.out_dir + 'CAZy', adjust_func=lambda x: re.search('\|([^\|]+)', x).group(1)).visualize(exclude)
+            vcard = VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
+                                      'salmon_out/genes_card.f6', prefix='AMR_', out_dir=self.out_dir + 'AMR', adjust_func=False)
+        else:
+            os.system('''
 humann2_renorm_table --input {0}/RPK.All.UniRef90.genefamilies.tsv --units cpm -o {0}/All.UniRef90.genefamilies.tsv -s n
 humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -o {0}/All.Metacyc.pathabundance.tsv -s n
-'''.format(self.out_dir + 'Metagenome/Humann'))
+    '''.format(self.out_dir + 'Metagenome/Humann'))
 
-        for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog'], ['FMAP', 'EC', 'GO', 'EggNOG']):
+            for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog'], ['FMAP', 'EC', 'GO', 'EggNOG']):
+                VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
+                                self.categories, regroup='uniref90_' + group, out_dir=self.out_dir + out_dir).visualize(exclude)
+
             VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
-                            self.categories, regroup='uniref90_' + group, out_dir=self.out_dir + out_dir).visualize(exclude)
+                            self.categories, custom_to='cazy', out_dir=self.out_dir + 'CAZy').visualize(exclude)
 
-        VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
-                        self.categories, custom_to='cazy', out_dir=self.out_dir + 'CAZy').visualize(exclude)
+            VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.Metacyc.pathabundance.tsv',
+                            self.mapping_file, self.categories, id_with_name=True).visualize(exclude)
 
         self.map_ko_annotation()
         self.map_func_definition()
+
+        if base_on_assembly:
+            vcard.visualize(exclude)
+        else:
+            VisualizeFunction(self.out_dir + 'AMR' + '/All.AMR.abundance_unstratified.tsv',
+                              self.mapping_file, self.categories).visualize(exclude)
 
         for abundance_table in [self.out_dir + 'FMAP/' + f for f in (
             # 'All.KO.abundance_unstratified.tsv',
@@ -91,26 +125,17 @@ humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -
         )]:
             VisualizeFunction(abundance_table, self.mapping_file, self.categories).visualize(exclude)
 
-        VisualizeFunction(self.out_dir + 'AMR' + '/All.AMR.abundance.txt',
-                          self.mapping_file, self.categories).visualize(exclude)
-
         VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,
                          self.categories, exclude_species=self.exclude_species).visualize(exclude)
         
-        for abundance_table in [self.out_dir + 'Metagenome/Humann/' + f for f in [
-            # 'All.UniRef90.genefamilies.tsv',
-            'All.Metacyc.pathabundance.tsv'
-        ]]:
-            VisualizeHumann(abundance_table, self.mapping_file, self.categories, id_with_name=True).visualize(exclude)
-        """
-        categories_list = self.categories.split(',')
-        """
-        for g in categories_list:
+
+        for g in self.categories.split(','):
             ColorMap(ko_lefse_lda=self.out_dir + 'FMAP/4-SignificanceAnalysis/LEfSe/KO_{}_lefse_LDA2.LDA.txt'.format(g),
                      ko_abundance_table=self.out_dir + 'FMAP/All.KO.abundance_unstratified.tsv', mapping_file=self.mapping_file, category=g, prefix=g + '_', out_dir=self.out_dir + 'FMAP/ColoredMaps/{}'.format(g)).plot_all()
         """
-        os.system("cd {}&&bash {}orgnize_dir_structure.sh {} {}".format(self.out_dir,
-                                                                        self._base_dir, self.mapping_file, categories_list[0]))
+        categories_list = self.categories.split(',')
+        os.system("cd {}&&bash {}{} {} {}".format(self.out_dir,
+                                                  self._base_dir, "orgnize_dir_structure_assembly.sh" if base_on_assembly else "orgnize_dir_structure.sh", self.mapping_file, categories_list[0]))
         page = self.out_dir + 'Result_Metagenomics/FiguresTablesForReport/src/pages/main_cleaned.html'
         format_file(page, page, table1=read_to_html_table(
             self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),

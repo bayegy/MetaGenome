@@ -106,11 +106,9 @@
 
 				<div class="dropdown-menu">
 					<a class="dropdown-item" href="#a5.1">5.1 KEGG数据库</a>
-					<a class="dropdown-item" href="#a5.2">5.2 MetaCyc数据库</a>
-					<a class="dropdown-item" href="#a5.3">5.3 EggNOG数据库</a>
-					<a class="dropdown-item" href="#a5.4">5.4 GO数据库</a>
-					<a class="dropdown-item" href="#a5.5">5.5 四级EC酶</a>
-					<a class="dropdown-item" href="#a5.6">5.6 CAZy碳水化合物活性酶库</a>
+					<a class="dropdown-item" href="#a5.3">5.2 EggNOG数据库</a>
+					<a class="dropdown-item" href="#a5.4">5.3 GO数据库</a>
+					<a class="dropdown-item" href="#a5.6">5.4 CAZy碳水化合物活性酶库</a>
 				</div>
 			</div>
 			
@@ -192,11 +190,10 @@
 			<p class="pra">1) 数据质控：测序得到的原始数据会存在一定比例的低质量数据，为了保证后续信息分析结果的准确可靠，首先要对原始数据进行质控及宿主过滤，得到有效数据。分析中将使用Cutadapt彻底清除原始数据中的Illumina接头序列，再用PrinSEQ去除低质量的序列片段和个别序列。质控前和质控后，会用FastQC来检测质控的合理性和效果。<sup>[7，8]</sup><br></p>
 			<p class="pra">2) 去除宿主：质控处理后的数据通过bowtie2比对到宿主的基因组，没有比对到的序列被保留下来做后续分析。<br></p>
 			<p class="pra">3）物种注释：使用Kraken2和自建的微生物数据库(从<a href="http://ccb.jhu.edu/software/kraken2/index.shtml?t=manual">Kraken官网</a>下载各个微生物数据库(细菌，真菌，古菌，病毒)，合并后再加入哥伦比亚大学实验室研究中新发现的一些细菌基因组数据）来鉴别样本中所含有的物种，再用Bracken来对样本中物种的实际相对丰度进行预测。相较于基于组装的物种注释，基于序列的宏基因组物种注释方法更加全面和准确。<sup>[9-12]</sup><br></p>
-			<p class="pra">4) 常用功能数据库注释：从质控以及去除宿主基因的reads出发，使用HUMAnN2软件（基于DIAMOND），将各个样本的reads比对到数据库（UniRef90），根据UniRef90 ID 和各个数据库的对应关系，得到各个功能数据库的注释信息和相对丰度表。<sup>[19-22]</sup><br></p>
-			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析（仅物种），样品聚类分析；当有分组信息时，可以进行LEfSe biomarker挖掘分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
-			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的质控以及去除宿主基因的reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况。<sup>[21,24-25]</sup><br></p>
-			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 肠型分析，分箱分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
-			
+			<p class="pra">4) 功能注释：运用megahit软件，将所有样本去宿主基因后的clean reads进行组装（megahit默认组装参数），得到contigs; 运用prodigal软件，预测contigs中的基因序列; 再用cd-hit软件，对得到的基因进行去冗余，得到去冗余基因; 使用salmon软件，对去冗余基因进行定量; 使用eggnog-mapper, diamond软件，对去冗余基因进行各个数据库的注释。统计各个数据库的基因相对丰度表。<sup>[19-22]</sup><br></p>
+			<p class="pra">5) 抗性基因注释：运用diamond软件，将去冗余基因比对到CARD数据库，得到CARD数据库的抗性基因注释信息，根据去冗余基因的丰度信息，统计抗性基因的相对丰度表。<sup>[24-25]</sup><br></p>
+			<p class="pra">6) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析（仅物种），样品聚类分析；当有分组信息时，可以进行LEfSe biomarker挖掘分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
+			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 肠型分析，分箱，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
 			</p>
 
 			<p align="center"><img src="../image/2-2.png" width="649" height="800"></p>
@@ -242,7 +239,6 @@
 			<p class="pra">
 				基于Bracken结果的绝对丰度及注释信息，对每个样品在一共7个分类水平界门纲目科属种(Kingdom,Phylum,Class,Order,Family,Genus,Species)上的序列数目占总序列数的比例进行统计，可以有效的评估样本的物种注释分辨率（注释到属/种的比例越高表示样本的注释效果越好），图4-1展示了每个样本中在各分类水平注释的相对程度:
 			</p>
-
 
 
 			<p align="center"><img src="../../Figure4-1.png" width="800" height="400"></p>
@@ -354,30 +350,26 @@
 			<br><hr><br>
 
 			<h2 id="a5">
-				五 功能数据库注释(<a href="../../../3-FuctionAnalysis">3-FuctionAnalysis</a>目录)
+				五 功能数据库注释(<a href="../../../4-FuctionAnalysis">4-FuctionAnalysis</a>目录)
 			</h2>
 
 			<h3>功能分析基本步骤</h3>
 			<p class="pra">
-				1）使用HUMAnN2软件<sup>[22]</sup>（2018年发表在Nature methods），将质控和去宿主之后的序列与蛋白质数据库（UniRef90）进行比对（基于DIAMOND）；<br>
+				1）从去冗余基因出发，运用salmon软件进行去冗余基因的定量，每个样本校正成功比对到去冗余基因的reads总数，得到相对丰度RPM（reads per million）;<br>
 			</p>
 			<p class="pra">
-				2）过滤掉比对失败的reads（HUMAnN2默认比对参数：translated_query_coverage_threshold = 90.0, prescreen_threshold = 0.01, evalue_threshold = 1.0, translated_subject_coverage_threshold = 50.0）；<br>
+				2）运用eggnog-mapper软件（基于diamond），将去冗余基因比对到EggNOG数据库（diamond --more-sensitive模式，比对参数为diamond默认参数，e-value<0.001），得到去冗余基因的KEGG，GO，COG注释信息。运用diamond，将去冗余基因比对到CAZy数据库（默认参数，e-value<0.001），得到CAZy的注释信息。<br>
 			</p>
 			<p class="pra">
-				3）统计UniRef90各个蛋白的相对丰度（RPKM ，reads per kilobase per million，校正样本比对成功reads(mapped reads)数以及基因长度后的丰度)。<br>
+				3）根据去冗余基因的丰度表和各个数据库的注释信息，对于每个数据库，将注释到相同基因的去冗余基因丰度加和，筛除比对失败的去冗余基因，得到每个数据库基因的相对丰度表。<br>
 			</p>
 
 			<p class="pra">
-				4）根据UniRef90 的ID 和各个功能数据库ID的对应关系（主要来自<a href="https://www.genome.jp/linkdb/">LinkDB</a>），统计各个功能数据库对应功能相对丰度。<br>
-			</p>
-
-			<p class="pra">
-				5）从各个数据库功能的相对丰度表出发，进行相对丰度柱形图展示，Circos图展示，丰度聚类热图展示，组间功能差异LEfSe分析，组间功能差异pair-wise多重比较DunnTest分析，显著差异功能物种来源柱形图分析，map图填色，功能与环境因子（或者其它组学数据）的相关性分析。<br>
+				4）从各个数据库功能的相对丰度表出发，进行相对丰度柱形图展示，Circos图展示，丰度聚类热图展示，组间功能差异LEfSe分析，组间功能差异pair-wise多重比较DunnTest分析，map图填色，功能与环境因子（或者其它组学数据）的相关性分析。<br>
 			</p>
 
 
-			<h3><a id="a5.1"></a>5.1 KEGG数据库(<a href="../../../3-FuctionAnalysis/1-KEGG/">3-FuctionAnalysis/1-KEGG</a>目录)</h3>
+			<h3><a id="a5.1"></a>5.1 KEGG数据库(<a href="../../../4-FuctionAnalysis/1-KEGG/">4-FuctionAnalysis/1-KEGG</a>目录)</h3>
 			<p class="pra">
 				<a href="https://www.kegg.jp/">KEGG 数据库</a>于 1995 年由 Kanehisa Laboratories 推出 0.1 版，目前发展为一个综合性数据库，其中最核心的为 KEGG PATHWAY 和 KEGG ORTHOLOGY 数据库。在 KEGG ORTHOLOGY 数据库中，将行使相同功能的基因聚在一起，称为 Ortholog Groups (KO entries)，每个 KO 包含多个基因信息，并在一至多个 pathway 中发挥作用。而在 KEGG PATHWAY 数据库中，将生物代谢通路划分为 6 类，分别为：细胞过程（Cellular Processes）、环境信息处理（Environmental Information Processing）、遗传信息处理（Genetic Information Processing）、人类疾病（Human Diseases）、新陈代谢（Metabolism）、生物体系统（Organismal Systems），其中每类又被系统分类为二、三、四层。第二层目前包括有 57个种子 pathway；第三层即为其代谢通路图；第四层为每个代谢通路图的具体注释信息。<sup>[40]</sup><br>
 			</p>
@@ -391,7 +383,7 @@
 			<p align="center">
 				<img src="../../Figure5-1.png" width="800" height="800">
 			</p>
-			<p align="center"><strong>图5-1 KEGG代谢通路的Level1层级丰度柱形图<a href="../../../3-FuctionAnalysis/1-KEGG/1-Barplots">（点击此处打开新窗口查看更多柱形图)</strong></a></p>
+			<p align="center"><strong>图5-1 KEGG代谢通路的Level1层级丰度柱形图<a href="../../../4-FuctionAnalysis/1-KEGG/1-Barplots">（点击此处打开新窗口查看更多柱形图)</strong></a></p>
 			<dd align="center" style="font-size:80%;">
 				说明：不同的颜色代表不同的KEGG Pathway分类。
 			</dd>	
@@ -404,7 +396,7 @@
 			<p align="center">
 				<img src="../../Figure5-2.png" width="600" height="600" alt="没有在分组间差异显著的代谢通路">
 			</p>
-			<p align="center"><strong>图5-2 KEGG的基本代谢通路LEfSe分析LDA柱形图<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
+			<p align="center"><strong>图5-2 KEGG的基本代谢通路LEfSe分析LDA柱形图<a href="../../../4-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
 			<dd align="center" style="font-size:80%;">
 				说明：每一横向柱形体代表一个通路，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应代谢通路ID是哪个分组的特征通路，特征通路表示在对应分组中丰度相对较高的通路。
 			</dd>	
@@ -412,7 +404,7 @@
 
 
 			<p class="pra">
-				为了方便客户了解不同KEGG功能层级上的组间差异，我们对各个功能层级进行LEfSe分析。用户可以通过点击<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）等层面的功能的LEfSe差异比较结果（LDA柱形图）。
+				为了方便客户了解不同KEGG功能层级上的组间差异，我们对各个功能层级进行LEfSe分析。用户可以通过点击<a href="../../../4-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/">./4-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/结果文件夹</a>查看KEGG数据库同源基因（KO基因），KEGG的Level3代谢通路（Pathway）和KEGG功能模块（Module）等层面的功能的LEfSe差异比较结果（LDA柱形图）。
 			</p>
 
 
@@ -424,7 +416,7 @@
 			<p align="center">
 				<img src="../../Figure5-3.png" width="600" height="600" alt="未提供分组">
 			</p>
-			<p align="center"><strong>图5-3 通路中各个分组的biomarkers基因<a href="../../../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/">（点击此处打开新窗口查看更多通路图)</a></strong></p>
+			<p align="center"><strong>图5-3 通路中各个分组的biomarkers基因<a href="../../../4-FuctionAnalysis/1-KEGG/5-ColoredMaps/">（点击此处打开新窗口查看更多通路图)</a></strong></p>
 			<dd align="center" style="font-size:80%;">
 				说明：灰色矩形框表示在样本中检测到了该基因，彩色矩形框是颜色对应分组的特征基因。同时请注意，在本分析结果中，所有分组对应的颜色都是统一的。
 			</dd>	
@@ -436,75 +428,48 @@
 
 
 			<p align="center">
-				<iframe src="../../../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/{{report_category}}/{{report_category}}_map00010.html" width="900" height="1200"></iframe>
+				<iframe src="../../../4-FuctionAnalysis/1-KEGG/5-ColoredMaps/{{report_category}}/{{report_category}}_map00010.html" width="900" height="1200"></iframe>
 			</p>
-			<p align="center"><strong>图5-3补充 通路中各个分组的biomarkers基因网页版<a href="../../../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/">（点击此处打开新窗口查看更多通路图网页)</a></strong></p>
+			<p align="center"><strong>图5-3补充 通路中各个分组的biomarkers基因网页版<a href="../../../4-FuctionAnalysis/1-KEGG/5-ColoredMaps/">（点击此处打开新窗口查看更多通路图网页)</a></strong></p>
 			<dd align="center" style="font-size:80%;">
 				说明：尝试把鼠标悬在矩形框上，或者点击矩形框
 			</dd>	
 
-			<p class="pra">
-				在用LEfSe进行分组间显著性差异分析之后，我们也会将各个分组的特征功能挑出来，根据HUMAnN2的分析结果，得到功能的物种来源，绘制功能物种来源组成柱形图，如图5-4：
-				<br>
-			</p>
+
+			<p>利用R语言的dunn.test包，我们对每一个功能的进行分组间两两多重比较，得到分析的表格，可在结果目录<a href="../../../4-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/DunnTest/">4-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/DunnTest</a>查看分析结果。该分析首先用Kruskal-Wallis算出总的p值，再用Dunn.test核心算法进行多重比较，并用Bofferoni校正错误发现率。</p>
+
+			<p>更多更详细的结果请查看结果目录<a href="../../../4-FuctionAnalysis/1-KEGG/">4-FuctionAnalysis/1-KEGG</a><br></p>
 
 
-			<p align="center"><img src="../../Figure5-4.png" alt="LEfSe未检测到特征KO"></p>
-			<p align="center"><strong>图5-4 功能物种来源组成柱形图</strong></p>
-			<dd align="center" style="font-size:80%;">说明：横坐标对应样本，以及样本分组，不同分组用不同颜色标出。纵坐标对应各个样本该功能的相对丰度，不同物种来源用不同颜色标出。</dd>
 
-
-			<p>利用R语言的dunn.test包，我们对每一个功能的进行分组间两两多重比较，得到分析的表格，可在结果目录<a href="../../../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/DunnTest/">3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/DunnTest</a>查看分析结果。该分析首先用Kruskal-Wallis算出总的p值，再用Dunn.test核心算法进行多重比较，并用Bofferoni校正错误发现率。</p>
-
-			<p>更多更详细的结果请查看结果目录<a href="../../../3-FuctionAnalysis/1-KEGG/">3-FuctionAnalysis/1-KEGG</a><br></p>
-
-
-			<h3 id="a5.2">5.2 MetaCyc数据库(<a href="../../../3-FuctionAnalysis/2-Metacyc/">3-FuctionAnalysis/2-Metacyc</a>目录)</h3>
-			<p class="pra"><a href="https://metacyc.org/">MetaCyc数据库</a>是一个阐明通过实验手段阐释代谢通路的数据库。MetaCyc目标是收集所有已知生命的代谢通路，是一个庞大而全面的数据库，目前包含了来自3009个不同生物的2722个代谢通路。MetaCyc的代谢网络包含了初生代谢，次生代谢，还包括相关的化合物、酶和基因。</p>
-
-			<p class="pra">
-				根据MetaCyc数据库的注释结果，绘制了各个通路在各样品的相对丰度统计图（图5-5, 相对丰度前20）。<br>
-			</p>
-			<p align="center"><img src="../../Figure5-5.png" width="700" height="500"></p>
-			<p align="center"><strong>图5-5 各个样品MetaCyc代谢通路相对分布情况柱形图（相对丰度前20的基因）</strong></p>
-			<dd align="center" style="font-size:80%;">说明：图例中最多显示最优势的20个通路,余下的相对丰度较低的通路被归类为Other在图中展示。</dd>
-
-			<p>更多更详细的结果请查看结果目录<a href="../../../3-FuctionAnalysis/2-Metacyc/">3-FuctionAnalysis/2-Metacyc</a><br></p>
-
-			<div class="alert alert-primary alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				<strong>注意!</strong> 本结果中，所有的功能数据库注释结果的可视化方法基本一致，请参照其他功能数据库，抗性基因以及相关分析部分的可视化结果的解释，对该部分的结果进行解读。
-			</div>
-
-
-			<h3><a id="a5.3"></a>5.3 EggNOG数据库(<a href="../../../3-FuctionAnalysis/3-EggNOG/">3-FuctionAnalysis/3-EggNOG</a>目录)</h3>
+			<h3><a id="a5.3"></a>5.2 EggNOG数据库(<a href="../../../4-FuctionAnalysis/2-EggNOG/">4-FuctionAnalysis/2-EggNOG</a>目录)</h3>
 			<p><a href="http://eggnogdb.embl.de/">EggNOG数据库</a>收集了COG（Clusters of Orthologous Groups of proteins，直系同源蛋白簇）,构成每个COG的蛋白都是被假定为来自于一个祖先蛋白，因此是orthologs或者是paralogs。通过把所有完整基因组的编码蛋白一个一个的互相比较确定的。在考虑来自一个给定基因组的蛋白时，这种比较将给出每个其他基因组的一个最相似的蛋白（因此需要用完整的基因组来定义COG），这些基因的每一个都轮番地被考虑。如果在这些蛋白（或子集）之间一个相互的最佳匹配关系被发现，那么那些相互的最佳匹配将形成一个COG。这样，一个COG中的成员将与这个COG中的其他成员比起被比较的基因组中的其他蛋白更相像。</p>
 
-			<p class="pra">从COG的相对丰度表出发，筛选出最大丰度排名前20的COG，进行聚类和热图（图5-6）展示：<br></p>
+			<p class="pra">从COG的相对丰度表出发，筛选出最大丰度排名前20的COG，进行聚类和热图（图5-4）展示：<br></p>
 
 				<p align="center"><img src="../../Figure5-6.png" width="700" height="500"></p>
-				<p align="center"><strong>图5-6 各个样品COG聚类热图（相对丰度前20的基因）</strong></p>
+				<p align="center"><strong>图5-4 各个样品COG聚类热图（相对丰度前20的基因）</strong></p>
 				<dd align="center" style="font-size:80%;">说明：竖轴代表样品/分组信息，基于欧式距离聚类，横轴的COG基于欧式距离聚类。</dd>
 			
-			<p>更多更详细的结果请查看结果目录<a href="../../../3-FuctionAnalysis/3-EggNOG/">3-FuctionAnalysis/3-EggNOG</a><br></p>
+			<p>更多更详细的结果请查看结果目录<a href="../../../4-FuctionAnalysis/2-EggNOG/">4-FuctionAnalysis/2-EggNOG</a><br></p>
 
 			<div class="alert alert-primary alert-dismissible">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				<strong>注意!</strong> 本结果中，所有的功能数据库注释结果的可视化方法基本一致，请参照其他功能数据库，抗性基因以及相关分析部分的可视化结果的解释，对该部分的结果进行解读。
 			</div>
 
-			<h3><a id="a5.4"></a>5.4 GO数据库(<a href="../../../3-FuctionAnalysis/4-GO/">3-FuctionAnalysis/4-GO</a>目录)</h3>
+			<h3><a id="a5.4"></a>5.3 GO数据库(<a href="../../../4-FuctionAnalysis/3-GO/">4-FuctionAnalysis/3-GO</a>目录)</h3>
 			<p><a href="http://geneontology.org/">GO(gene ontology)数据库</a>是基因本体联合会(Gene Onotology Consortium)所建立的数据库，旨在建立一个适用于各种物种的，对基因和蛋白质功能进行限定和描述的，并能随着研究不断深入而更新的语言词汇标准。GO是多种生物本体语言中的一种，GO数据库根据功能将基因分为三大类：分子功能（MF），生物学过程（BP），细胞组分（CC）。</p>
 
 
 			<p class="pra">	
-				Circos 图可以用于展示每个样本各个基因（丰度前10）的比例，以及每个基因在各个样本中的比例（图5-7）：<br>
+				Circos 图可以用于展示每个样本各个基因（丰度前10）的比例，以及每个基因在各个样本中的比例（图5-5）：<br>
 			</p>
 				<p align="center"><img src="../../Figure5-7.png" width="700" height="500"></p>
-				<p align="center"><strong>图5-7 Gene ontology在各个样本中的分布Circos 图</strong></p>
+				<p align="center"><strong>图5-5 Gene ontology在各个样本中的分布Circos 图</strong></p>
 				<dd align="center" style="font-size:80%;">说明：左半圈为丰度最高的十个GO基因，每个基因内，不同颜色代表不同样本来源的比例;右边半圈为样本，样本内不同颜色代表不同GO基因的比例。</dd>
 			
-			<p>更多更详细的结果请查看结果目录<a href="../../../3-FuctionAnalysis/4-GO/">3-FuctionAnalysis/4-GO</a><br></p>
+			<p>更多更详细的结果请查看结果目录<a href="../../../4-FuctionAnalysis/3-GO/">4-FuctionAnalysis/3-GO</a><br></p>
 
 			<div class="alert alert-primary alert-dismissible">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -512,27 +477,8 @@
 			</div>
 
 
-			<h3><a id="a5.5"></a>5.5 EC酶库(<a href="../../../3-FuctionAnalysis/5-EC/">3-FuctionAnalysis/5-EC</a>)目录</h3>
-			<p><a href="https://enzyme.expasy.org/">ENZYME</a>收录了酶的四级分类信息。EC编号或EC号是酶学委员会（Enzyme Commission）为酶所制作的一套编号分类法，每一个酶的编号都以字母“EC”起头，接着以四个号码来表示，这些号码代表逐步更细致的为酶作出分类。就如三肽胺基 蛋白酶的编号为EC3.4.11.4，当中的“EC3”是指水解酶（即以水来将分子分解的酶）；“EC3.4”是那些与肽键产生作用的水解酶；“EC3.4.11”是单指那些从多胜肽中分开胺基末端的水解酶；“EC3.4.11.4”则是从三肽中分开胺基末端的水解酶。</p>
 
-
-			<p class="pra">
-				在用LEfSe进行分组间显著性差异分析之后，我们也会将各个分组的特征功能挑出来，根据HUMAnN2的分析结果，得到功能的物种来源，绘制功能物种来源组成柱形图，如图5-8：
-				<br>
-			</p>
-
-			<p align="center"><img src="../../Figure5-8.png" alt="LEfSe未检测到特征酶活性基因"></p>
-			<p align="center"><strong>图5-8 酶活性基因物种来源组成柱形图</strong></p>
-			<dd align="center" style="font-size:80%;">说明：横坐标对应样本，以及样本分组，不同分组用不同颜色标出。纵坐标对应各个样本该功能的相对丰度，不同物种来源用不同颜色标出。</dd>
-
-			<p>更多更详细的结果请查看结果目录<a href="../../../3-FuctionAnalysis/5-EC/">3-FuctionAnalysis/5-EC</a><br></p>
-			<div class="alert alert-primary alert-dismissible">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				<strong>注意!</strong> 本结果中，所有的功能数据库注释结果的可视化方法基本一致，请参照其他功能数据库，抗性基因以及相关分析部分的可视化结果的解释，对该部分的结果进行解读。
-			</div>
-
-
-			<h3><a id="a5.6"></a>5.6 CAZy数据库（碳水化合物酶活性）(<a href="../../../3-FuctionAnalysis/6-CAZy/">3-FuctionAnalysis/6-CAZy</a>)目录</h3>
+			<h3><a id="a5.6"></a>5.4 CAZy数据库（碳水化合物酶活性）(<a href="../../../4-FuctionAnalysis/4-CAZy/">4-FuctionAnalysis/4-CAZy</a>)目录</h3>
 			<p><a href="http://www.cazy.org/">碳水化合物活性酶数据库(CAZy)</a>是关于能够合成或者分解复杂碳水化合物和糖复合物的酶类的一个数据库资源,其基于蛋白质结构域中的氨基酸序列相似性,将碳水化合物活性酶类归入不同蛋白质家族。CAZy数据库提供了酶分子序列的家族信息，物种来源，基因序列，蛋白序列，三维结构，EC分类，相关数据库链接，建立此数据库是为了将酶分子的序列、结构、催化机制相关联。</p>
 			<p>碳水化合物活性酶数据库中基因ID前缀与功能分类的对应关系如下：</p>
 			<table class="table table-striped">
@@ -573,12 +519,12 @@
 			<p align="center">
 				<img src="../../Figure5-9.png" width="600" height="600" alt="没有在分组间差异显著的碳水化合物活性酶">
 			</p>
-			<p align="center"><strong>图5-9 碳水化合物活性酶LEfSe分析LDA柱形图<a href="../../../3-FuctionAnalysis/6-CAZy/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
+			<p align="center"><strong>图5-6 碳水化合物活性酶LEfSe分析LDA柱形图<a href="../../../4-FuctionAnalysis/4-CAZy/4-SignificanceAnalysis/">（点击此处打开新窗口查看更多LDA柱形图)</a></strong></p>
 			<dd align="center" style="font-size:80%;">
 				说明：每一横向柱形体代表一个碳水化合物活性酶，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应碳水化合物活性酶ID是哪个分组的特征碳水化合物活性酶，特征碳水化合物活性酶表示在对应分组中丰度相对较高的酶。
 			</dd>	
 
-			<p>更多更详细的结果请查看结果目录<a href="../../../3-FuctionAnalysis/6-CAZy/">3-FuctionAnalysis/6-CAZy</a><br></p>
+			<p>更多更详细的结果请查看结果目录<a href="../../../4-FuctionAnalysis/4-CAZy/">4-FuctionAnalysis/4-CAZy</a><br></p>
 			<div class="alert alert-primary alert-dismissible">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				<strong>注意!</strong> 本结果中，所有的功能数据库注释结果的可视化方法基本一致，请参照其他功能数据库，抗性基因以及相关分析部分的可视化结果的解释，对该部分的结果进行解读。
@@ -587,20 +533,20 @@
 
 			<hr>
 			<h2 id="a6">
-				六 抗性基因注释(<a href="../../../4-AMRAnalysis">4-AMRAnalysis</a>目录)
+				六 抗性基因注释(<a href="../../../5-AMRAnalysis">5-AMRAnalysis</a>目录)
 			</h2>
 			<h3><a id="a6.1"></a>6.1  抗性基因注释基本步骤</h3>
 			<p class="pra">	
 				细菌抗生素耐药性是在人类为控制细菌生长而进行的大规模抗生素的使用的前提下, 细菌通过基因突变或者从环境有机体的基因水平转移而获得对特定抗生素的抗性，这些突变使抗生素作用靶位发生改变或不能再对其靶标施加作用。耐药性的获得通常涉及到基因/移动DNA元件及其细菌宿主之间复杂的相互作用。随着DNA测序成本的降低和分析速度的提高, 研究者能够获得大量病原体基因组以及土壤、海洋和人类相关宏基因组的数据信息。利用基因组序列数据与生物信息学方法, 可深度剖析细菌耐药机制, 确定新药靶点, 寻找新的抗生素。CARD数据库目前使用最广泛的抗性基因数据库，目前包括3997个抗性基因分类，并在线提供各个分类名称与PDB、NCBI等数据库的搜索接口，方便后续分析。<sup>[41]</sup>
 			</p>
 			<p class="pra">
-				1）使用FMAP<sup>[21]</sup>软件将各样本质控和去宿主之后的序列与CARD数据库进行比对（基于DIAMOND），过滤掉比对失败的序列（比对成功标准：e-value < 1e-3, percent identity > 80 %）；<br>
+				1）使用diamond软件，将去冗余基因比对到CARD数据库，得到CARD数据库的抗性基因注释信息;<br>
 			</p>
 			<p class="pra">
-				2）根据比对结果，统计出每个样本比对到各ARO参考序列的reads数，从而计算相对丰度（RPKM ，reads per kilobase per million，校正样本比对成功reads(mapped reads)以及基因长度后的丰度)；<br>
+				2）根据去冗余基因的丰度表和CARD数据库的注释信息，将注释到相同基因的去冗余基因丰度加和，筛除比对失败的去冗余基因，得到CARD数据库基因的相对丰度(RPM)表。；<br>
 			</p>
 			<p class="pra">
-				3）从ARO的丰度出发，进行丰度柱形图展示，丰度聚类热图展示，丰度分布圈图展示，组间ARO差异分析，以及ARO和环境因子（或者其它组学数据）的相关性分析。<br>
+				3）从抗性基因丰度出发，进行丰度柱形图展示，丰度聚类热图展示，丰度分布圈图展示，组间抗性基因差异分析，以及抗性基因和环境因子（或者其它组学数据）的相关性分析。<br>
 			</p>
 
 
@@ -633,7 +579,7 @@
 
 			<h3><a id="a6.3"></a>6.3 组间抗性基因差异性分析</h3>
 			<p class="pra">
-				结合分组信息，利用LEfSe分析了微生物抗性基因在组间是否有显著性差异。<a href="../../../4-AMRAnalysis/4-SignificanceAnalysis/">点击./4-AMRAnalysis/4-SignificanceAnalysis/查看功能差异性分析详细结果。</a>
+				结合分组信息，利用LEfSe分析了微生物抗性基因在组间是否有显著性差异。<a href="../../../5-AMRAnalysis/4-SignificanceAnalysis/">点击./5-AMRAnalysis/4-SignificanceAnalysis/查看功能差异性分析详细结果。</a>
 			</p>
 
 			<hr>
@@ -727,8 +673,9 @@
 				<strong>|</strong><strong>Result_AmpliconSequencing/  </strong><strong>[</strong><strong>主要的结果文件</strong><strong>]</strong><br>
 				|-- 1-QCStats / [序列预处理相关信息]<br>
 				|-- 2-TaxaAundanceAnalysis / [整体物种的注释与评估主要相关信息]<br>
-				|-- 3-FuctionAnalysis / [常用的功能数据库注释相关信息]<br>
-				|-- 4-AMRAnalysis / [抗性基因注释主要相关信息]<br>
+				|-- 3-Assembly / [组装及基因预测统计]<br>
+				|-- 4-FuctionAnalysis / [常用的功能数据库注释相关信息]<br>
+				|-- 5-AMRAnalysis / [抗性基因注释主要相关信息]<br>
 				|-- FiguresTablesForReport / [本报告的图表文件夹]<br>
 			</p>
 
