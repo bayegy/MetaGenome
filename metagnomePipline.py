@@ -349,7 +349,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× processor 个数
         """
-        """
+
         self.run_fastqc(fq_list=self.raw_list, processor=processor, first_check=5)
         self.run_trim(fq_list=self.raw_list)
         self.run_filter(fq_list=self.trimmed_list)
@@ -360,7 +360,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         self.generate_summary()
         self.run_kraken2(fq_list=self.map_list(self.merged_pe_pattern, 3, use_direction='R1'), processor=23)
         self.run_bracken()
-        """
+
         if self.base_on_assembly:
             self.run_assembly(processor=66)
             self.run_quast()
@@ -369,11 +369,11 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.join_gene()
             self.map_gene()
         else:
-            """
+
             self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=7)
             self.join_metaphlan()
             self.run_humann(fq_list=self.merged_pe_r1_list, processor=7)
-            """
+
             self.join_humann()
             # self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="KEGG", processor=7)
             self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="AMR", processor=7)
