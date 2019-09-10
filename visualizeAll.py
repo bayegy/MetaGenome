@@ -69,22 +69,29 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.KEGG.Pathway.txt > {ou
         for data, mapping_source in zip(datas, mapping_sources):
             if os.path.exists(data):
                 mi.mapping(data, [mapping_source])
+
+        mi.mapping(self.out_dir + 'CAZy/All.CAZY.abundance_unstratified.tsv', [FMAP_data + '/fam_description.txt'])
         mi.mapping(self.out_dir + 'AMR/All.AMR.abundance_unstratified.tsv', [FMAP_data + '/aro.csv'],
-                   pattern="ARO[^\|]+", first_pattern="[^\|]+$", add_sid_to_info=True, map_column=-1)
+                   pattern="ARO[^\|]+",
+                   # first_pattern="[^\|]+$",
+                   first_pattern="ARO[^\|]+",
+                   # add_sid_to_info=True,
+                   add_sid_to_info=False,
+                   map_column=-1)
 
     def visualize(self, exclude='none', base_on_assembly=False):
 
         os.system("{}/piputils/write_colors_plan.py -i {} -c {} -p {}/piputils/group_color.list -o {}colors_plan.json".format(
             self.path['bayegy_home'], self.mapping_file, self.categories, self.path['bayegy_home'], self.out_dir))
         os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
-        """
+
         if base_on_assembly:
-            
+
             VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
                               'salmon_out/genes.emapper.annotations', prefix='KO_', annotation_column=6, out_dir=self.out_dir + 'FMAP').visualize(exclude)
             VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
                               'salmon_out/genes.emapper.annotations', prefix='GO_', annotation_column=5, out_dir=self.out_dir + 'GO').visualize(exclude)
-            
+
             VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
                               'salmon_out/genes.emapper.annotations', prefix='EGGNOG_', annotation_column=9, out_dir=self.out_dir + 'EggNOG', adjust_func=self.extract_empper_cog).visualize(exclude)
             VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.categories, annotation_file=self.out_dir +
@@ -127,12 +134,11 @@ humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -
 
         VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,
                          self.categories, exclude_species=self.exclude_species).visualize(exclude)
-        
 
         for g in self.categories.split(','):
             ColorMap(ko_lefse_lda=self.out_dir + 'FMAP/4-SignificanceAnalysis/LEfSe/KO_{}_lefse_LDA2.LDA.txt'.format(g),
                      ko_abundance_table=self.out_dir + 'FMAP/All.KO.abundance_unstratified.tsv', mapping_file=self.mapping_file, category=g, prefix=g + '_', out_dir=self.out_dir + 'FMAP/ColoredMaps/{}'.format(g)).plot_all()
-        """
+
         categories_list = self.categories.split(',')
         os.system("cd {}&&bash {}{} {} {}".format(self.out_dir,
                                                   self._base_dir, "orgnize_dir_structure_assembly.sh" if base_on_assembly else "orgnize_dir_structure.sh", self.mapping_file, categories_list[0]))

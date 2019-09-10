@@ -4,7 +4,7 @@
 
 <html>
 	<head>
-		<title>宏基因组_微科服_结题报告</title>
+		<title>宏基因组_微生太_结题报告</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
@@ -38,32 +38,35 @@
 
 	<body>
 
-		<div class="noprint" id="ee" style="position:fixed;margin-left:25px;margin-top: 8px;">
-			<button class="btn btn-primary dropdown-toggle" id="myBtn"></button>
+		<div class="noprint" id="show" style="position:fixed;margin-left:25px;margin-top: 8px;">
+			<button class="btn btn-primary dropdown-toggle" id="show-btn"></button>
 		</div>
-		<div class="noprint" id="emm" style="position:fixed;margin-left:25px;margin-top: 8px">
-			<button class="btn btn-primary" id="h" style="width: 200px;">隐藏目录</button>
+		<div class="noprint" id="hide" style="position:fixed;margin-left:25px;margin-top: 8px">
+			<button class="btn btn-primary" id="hide-btn" style="width: 200px;">隐藏目录</button>
 		</div>
-
-		<dd align="center" style="font-size:80%;">&nbsp;</dd>
 
 		<script>
-		document.getElementById("myBtn").addEventListener("click", function()
-		{
-			document.getElementById("nav").style.display=""
-			document.getElementById("emm").style.display=""
-			document.getElementById("section").style.margin="20px 20px 20px 340px"
-		});
 
-		document.getElementById("h").addEventListener("click", function()
-		{
-			document.getElementById("nav").style.display="none";
-			document.getElementById("emm").style.display="none";
-			document.getElementById("section").style.margin="20px"
-		});
+		$("#show-btn").click(function(){
+			$("#nav").show();
+			$("#show").hide();
+			$("#hide").show();
+			$("#section").css({
+				margin: "20px 20px 20px 340px"
+			});
+		})
+
+		$("#hide-btn").click(function(){
+			$("#nav").hide();
+			$("#show").show();
+			$("#hide").hide();
+			$("#section").css({
+				margin: "20px"
+			});
+		})
 		</script>
 
-		<div class="noprint" id="nav">
+		<div class="noprint" id="nav" style="margin-top: 50px">
 			
 			<button type="button" class="btn btn-info"><a class="buta" href="#a1">一 概述</a></button>
 						
@@ -195,7 +198,7 @@
 			<p class="pra">4) 常用功能数据库注释：从质控以及去除宿主基因的reads出发，使用HUMAnN2软件（基于DIAMOND），将各个样本的reads比对到数据库（UniRef90），根据UniRef90 ID 和各个数据库的对应关系，得到各个功能数据库的注释信息和相对丰度表。<sup>[19-22]</sup><br></p>
 			<p class="pra">5) 基于物种丰度表和功能丰度表，可以进行丰度聚类分析，PCoA和NMDS降维分析（仅物种），样品聚类分析；当有分组信息时，可以进行LEfSe biomarker挖掘分析以及代谢通路比较分析，挖掘样品之间的物种组成和功能组成差异。<sup>[22，23]</sup><br></p>
 			<p class="pra">6) 抗性基因注释：从去除宿主基因的clean reads出发，使用FMAP软件将各个样本的质控以及去除宿主基因的reads与抗生素抗性基因数据库CARD进行比对注释，可以获得抗性基因丰度分布情况。<sup>[21,24-25]</sup><br></p>
-			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 肠型分析，分箱分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微科服宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
+			<p class="pra">7) 另外，还可以基于标准分析结果，进行一系列高级信息分析（如 肠型分析，分箱分析，病原与宿主互作数据库(PHI)注释，分泌蛋白预测，III型分泌系统效应蛋白预测，细菌致病菌毒力因子(VFDB)注释，转移元件分析（MGE）等，更多详细信息请查看微生太宏基因组高级信息分析说明）；同时，结合环境因子、病理指标或特殊表型进行深入关联研究，能够为进一步深入研究和利用样品的物种和功能提供理论依据。<sup>[26-28]</sup>
 			
 			</p>
 
@@ -208,7 +211,7 @@
 			</h2>
 
 			<p class="pra">
-				本项目采用Illumina HiSeq平台对测序样本进行双端测序。基于FASTQ格式的测序文件是一种存储序列信息的特定文件，推荐用Notepad++等文本编辑器或者在电脑终端中打开。FASTQ文件每四行对应一条测序Read：第一行以符号“@”起始，对应于序列ID和相应的描述信息；第二行为实际测得的碱基序列；第三行以符号“+”起始；而第四行的字符串则记录了第二行序列中每个碱基所对应的测序质量（详见<a href="https://en.wikipedia.org/wiki/Fastq"> https://en.wikipedia.org/wiki/Fastq</a>）。
+				本项目采用Illumina Novaseq平台对测序样本进行双端测序。基于FASTQ格式的测序文件是一种存储序列信息的特定文件，推荐用Notepad++等文本编辑器或者在电脑终端中打开。FASTQ文件每四行对应一条测序Read：第一行以符号“@”起始，对应于序列ID和相应的描述信息；第二行为实际测得的碱基序列；第三行以符号“+”起始；而第四行的字符串则记录了第二行序列中每个碱基所对应的测序质量（详见<a href="https://en.wikipedia.org/wiki/Fastq"> https://en.wikipedia.org/wiki/Fastq</a>）。
 			</p>
 			<p class="pra">
 				采用 Illumina测序平台测序获得的原始数据(Raw Data)存在一定比例低质量数据，为了保证后续分析的结果准确可靠，需要对原始的测序数据进行预处理，包括修剪（cutadapt 去除接头序列 ），质控（prinseq 参数： -min_len 50 -min_qual_mean 30 -lc_method entropy -lc_threshold 70 -ns_max_n 20 -trim_left 10），去宿主序列（bowtie2），获取用于后续分析的有效序列。测序数据预处理统计结果见表 3-1。序列质控步骤和参数如下：<br></p>
@@ -724,7 +727,7 @@
 			<h2><a id="a9"></a>九 交付结果目录结构 </h2>
 			<p>交付数据分为若干个子目录。 </p>
 			<p>
-				<strong>|</strong><strong>Result_AmpliconSequencing/  </strong><strong>[</strong><strong>主要的结果文件</strong><strong>]</strong><br>
+				<strong>|Result_AmpliconSequencing/  [主要的结果文件]</strong><br>
 				|-- 1-QCStats / [序列预处理相关信息]<br>
 				|-- 2-TaxaAundanceAnalysis / [整体物种的注释与评估主要相关信息]<br>
 				|-- 3-FuctionAnalysis / [常用的功能数据库注释相关信息]<br>

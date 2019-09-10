@@ -89,7 +89,7 @@ cp -rp Kraken2/*/CorrelationAnalysis Result_Metagenomics/2-TaxaAundanceAnalysis/
 #    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/observed_otus \
 #    Result_Metagenomics/2-TaxaAundanceAnalysis/3-DiversityAnalysis/alpha/shannon
 
-cp AMR/All.AMR.abundance.txt Result_Metagenomics/4-AMRAnalysis/
+cp AMR/All.AMR.abundance_unstratified.tsv Result_Metagenomics/4-AMRAnalysis/
 cp -rp AMR/1-Barplots AMR/2-Heatmaps AMR/3-Circos AMR/4-SignificanceAnalysis  AMR/5-CorrelationAnalysis  Result_Metagenomics/4-AMRAnalysis/
 rm -r Result_Metagenomics/4-AMRAnalysis/3-Circos/circos_conf
 
@@ -101,7 +101,7 @@ cp -rp FMAP/ColoredMaps    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/5-Colore
 cp -rp FMAP/5-CorrelationAnalysis    Result_Metagenomics/3-FuctionAnalysis/1-KEGG/6-CorrelationAnalysis
 
 #mv Result_Metagenomics/3-FuctionAnalysis/1-KEGG/*lefse* Result_Metagenomics/3-FuctionAnalysis/1-KEGG/LEfSe/
-cp Metagenome/Humann/All.*tsv Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/
+cp Metagenome/Humann/All.* Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/
 cp -rp Metagenome/Humann/1-Barplots Metagenome/Humann/2-Heatmaps Metagenome/Humann/3-Circos Metagenome/Humann/4-SignificanceAnalysis Metagenome/Humann/5-CorrelationAnalysis  Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/ 
 rm -r Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/3-Circos/circos_conf
 mv Result_Metagenomics/3-FuctionAnalysis/2-Metacyc/All.UniRef90.genefamilies.tsv Result_Metagenomics/3-FuctionAnalysis/All.UniRef90.genefamilies.tsv

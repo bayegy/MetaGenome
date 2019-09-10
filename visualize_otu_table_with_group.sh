@@ -122,14 +122,15 @@ MAIN() {
 	perl ${SCRIPTPATH}/stat_otu_tab.pl -unif min $otu_table -prefix ${output_dir}/Absolute/otu_table -nomat -abs -spestat exported/Absolute/classified_stat.xls
 	perl ${SCRIPTPATH}/bar_diagram.pl -table ${output_dir}/Relative/classified_stat_relative.xls -style 1 -x_title "Sample Name" -y_title "Sequence Number Percent" -right -textup -rotate='-45' --y_mun 1,7 > ${output_dir}/Relative/Classified_stat_relative.svg
 
-
+	source ${basedir}/path/activate_qiime2.sh
+	# conda activate qiime2-2019.1
+	# conda activate qiime2-2019.4
 
 	echo -e "\n#Convert OTU table to biom format"
 	biom convert -i $otu_table -o ${output_dir}/${sample_name}.taxonomy.biom --to-hdf5 --table-type="OTU table" --process-obs-metadata taxonomy
 	#biom convert -i $otu_table -o ${output_dir}/${sample_name}.taxonomy.biom --table-type="OTU table" --process-obs-metadata taxonomy
 
 	#source $SCRIPTPATH/path/restore_path.sh
-	source ${basedir}/path/activate_qiime2.sh
 
 
 	echo -e "\n#Generate Qiime2 artifacts"
@@ -211,6 +212,7 @@ MAIN() {
 	mv ${output_dir}/Absolute/otu_table.s.absolute.mat ${output_dir}/Absolute/otu_table.Species.absolute.txt
 
 	source ${basedir}/path/deactivate_qiime2.sh
+	# conda deactivate
 	source ${basedir}/path/restore_path.sh
 
 

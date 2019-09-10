@@ -44,7 +44,10 @@ def get_kingdom_ratio(species_abundance_table):
     kingdom = [re.search('^[^;]+', s).group().replace('k__', '') for s in df.index]
     # pdb.set_trace()
     df = df.groupby(kingdom).sum()
-    del df['Environmentalsamples']
+    try:
+        del df['Environmentalsamples']
+    except Exception as e:
+        pass
 
     def series_to_str(series, value_format=':.2%'):
         return ', '.join([('{}({%s})' % (value_format)).format(k, v) for k, v in series.items()])

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/cheng/softwares/miniconda2/bin/python
 
 """
 HUMAnN2 Plotting Tool
@@ -444,7 +444,8 @@ def main():
             # unique = sorted(set(table.metarow))
             # mcdict = {v: c for v, c in zip(unique, get_colors(args.meta_colormap, len(unique)))}
             unique = sorted(set(table.metarow), key=str.lower)
-            mcdict = {v: c for v, c in zip(unique, get_colors1(args.focal_metadatum) or get_colors(args.meta_colormap, len(unique)))}
+            mcdict = {v: c for v, c in zip(unique, get_colors1(args.focal_metadatum)
+                                           or get_colors(args.meta_colormap, len(unique)))}
 
     # plot metadata?
     if table.metarow is not None:

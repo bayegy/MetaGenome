@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from metagnomePipline import MetagenomePipline
+import argparse
+
+p = argparse.ArgumentParser(
+    description="This script is used for the analysis of metagenome sequencing.")
+p.add_argument('-i', '--input', dest='input', metavar='<directory>', default=False,
+               help='Directory of raw fastq files. Sub-directory is allowed when storing fastq files.')
+p.add_argument('-m', '--map', dest='map', metavar='<path>', default=False,
+               help='Sample metadata file. The sample ID must in first and last column.')
+p.add_argument('-c', '--category', dest='category', metavar='<str>', default='auto',
+               help='column name of categories in metadata. You may specify more than one category, and the categories must be seprated by commas')
+p.add_argument('-s', '--sample-id-patern', dest='sp', default=r'(.+)_.*_[12]\.fq\.gz', metavar='<regular expression>',
+               help="The regular expression of sample ID in file names. You must use () to contain sample ID expression, and to prevent unexpected error, using '' to contain the expression is necessary. Supply this parameter together with -i -f -r.")
+p.add_argument('-f', '--forward-file-pattern', dest='fp', default=r'_1\.fq\.gz$', metavar='<regular expression>',
+               help='The regular expression representing forward sequence in file names,Supply this parameter together with -i -s -r.')
+p.add_argument('-r', '--reverse-file-pattern', dest='rp', default=r'_2\.fq\.gz$', metavar='<regular expression>',
+               help='The regular expression representing reverse sequence in file names,Supply this parameter together with -i -s -f.')
+p.add_argument('-e', '--exclude', dest='exclude', default='none', metavar='<str>',
+               help='The variables excluded from RDA and correlation heatmap analysis, if more than one variable is expected, you should use comma as delimeters. if more than one run is expected, use semicolon as delimeters. example: "Var1,Var2;Var1,Var3". default is none, meaning no variable will be excluded.')
+p.add_argument('-n', '--number', dest='number', default=10, metavar='<int>',
+               help='Control the max number of jobs submitted to sge each time.')
+p.add_argument('-t', '--host-type', dest='host', default="hg38", metavar='<str>',
+               help='Will control the de_host step. The host of sample, hg38, mouse or rat')
+p.add_argument('-a', '--assembly', dest='assembly', default="no", metavar='<str>',
+               help='Analyze base on assembly. yes (use assembly) or no')
+p.add_argument('-o', '--outdir', dest='outdir', metavar='<directory>', default='./',
+               help='specify the output directory')
+
+options = p.parse_args()
+m = MetagenomePipline(raw_fqs_dir=options.input, pre_mapping_file=options.map, categories=False if options.category=='auto' else options.category, run_size=options.number, host_type=options.host, sample_regex=options.sp,
+                      forward_regex=options.fp, reverse_regex=options.rp, out_dir=options.outdir, base_on_assembly=True if options.assembly == 'yes' else False, exclude=options.exclude)
+
+m.run()

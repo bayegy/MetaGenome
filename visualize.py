@@ -22,9 +22,9 @@ class Visualize(metaclass=ABCMeta):
             self.prefix = prefix
         else:
             p_prefix = os.path.splitext(os.path.basename(self.abundance_table))[0]
-            for r in ['pathabundance', 'abundance', 'KeepID', 'Humann2', 'All']:
+            for r in ['pathabundance', 'abundance', 'KeepID', 'Humann2', "unstratified", 'All']:
                 p_prefix = p_prefix.replace(r, '')
-            p_prefix = re.sub('\.+', '.', p_prefix.strip('.'))
+            p_prefix = re.sub('\.+', '.', p_prefix.strip('.|_'))
             self.prefix = p_prefix + '_'
         # self.running_bash = self.out_dir + 'visualize_function.sh'
 

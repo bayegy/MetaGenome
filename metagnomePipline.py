@@ -37,7 +37,7 @@ class MetagenomePipline(object):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='./', base_on_assembly=False):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, run_size=10, host_type="hg38", sample_regex="(.+)_.*_[12]\.fq\.gz", forward_regex="_1\.fq\.gz$", reverse_regex="_2\.fq\.gz$", out_dir='./', base_on_assembly=False, exclude='none'):
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir + 'salmon_out/'):
             os.makedirs(self.out_dir + 'salmon_out/')
@@ -53,7 +53,7 @@ class MetagenomePipline(object):
         self.parsed_map['map'].to_csv(self.mapping_file, sep='\t', index=False)
         self.categories = categories if categories else ','.join(
             [g for g in self.parsed_map['map'].columns if not g.find('Category') == -1])
-        print("The detected categories are: \n    {}\n".format(self.categories))
+        print("The detected categories are: \n\n{}\n".format(self.categories))
         self.raw_pattern = self.out_dir + "Raw_fastq/{}_{}.fq.gz"
         trimmed_pattern = self.out_dir + "Primer_trimmed/{}_{}.fq.gz"
         filtered_pattern = self.out_dir + "Filtered/{}_{}.good.fastq.gz"
@@ -70,8 +70,12 @@ class MetagenomePipline(object):
         self.kracken2_reports_list = self.map_list(kracken2_reports_pattern, use_direction='R1')
         # self.new_ids_list = split_list(self.new_ids, each=run_size)
         self.base_on_assembly = base_on_assembly
+        self.host_type = host_type
+        self.exclude = exclude
         global running_list
         running_list = self.out_dir + '.running_list'
+        print("\nThe correlation analysis plan is:\n\n{}\n".format(self.exclude))
+        print("\nThe host type is:\n\n{}\n".format(self.host_type))
 
     def _init_outdir_(self):
         os.system('perl ' + self.path['cii_home'] + 'create_dir_structure.pl ' + self.out_dir)
@@ -153,8 +157,8 @@ class MetagenomePipline(object):
 
     @synchronize
     def run_de_host(self, fq_list: list, processor=2):
-        os.system(self.homized_cmd('perl host_subtraction_wrapper.pl --aim Host --config human --single-end-fq-list {} --threads {} -m N'.format(
-            fq_list, str(processor)), home=self.path['de_host_home']))
+        os.system(self.homized_cmd('perl host_subtraction_wrapper.pl --aim Host --config {} --single-end-fq-list {} --threads {} -m N'.format(
+            self.host_type, fq_list, str(processor)), home=self.path['de_host_home']))
 
     def generate_summary(self):
         os.system("mv {}Host_subtracted/bowtie/QC_report/* {}QC_report/".format(self.out_dir, self.out_dir))
@@ -162,7 +166,7 @@ class MetagenomePipline(object):
         with open(running_list, 'w') as f:
             f.write('\n'.join(self.map_list(self.raw_pattern, use_direction="R1")))
         os.system(self.homized_cmd(
-            "perl generate_summary_wrapper.pl --aim Host --file-list {}".format(running_list)))
+            "perl generate_summary_wrapper.pl --aim Host --host {} --file-list {}".format(self.host_type, running_list)))
 
     @synchronize
     def run_merge_se_to_pe(self, fq_list: list):
@@ -259,7 +263,11 @@ humann2_join_tables -i {out_dir}Metagenome/Humann/ -o {out_dir}Metagenome/Humann
         elif run_type == "ARDB":
             self.run_fmap(fq_list=fq_list, database="ARDB.20180725064354",
                           processor=processor, out_dir="ARDB")
-            self.quantify_fmap(out_dir="ARDB", all_name="All.ARDB.abundance.txt", print_definition=True)
+            self.quantify_fmap(out_dir="ARDB", all_name="All.ARDB.abundance_unstratified.tsv", print_definition=True)
+        elif run_type == "MGE":
+            self.run_fmap(fq_list=fq_list, database="MGEs_FINAL_99perc_trim",
+                          processor=processor, out_dir="MGE")
+            self.quantify_fmap(out_dir="MGE", all_name="All.MGE.abundance_unstratified.tsv")
 
     def run_assembly(self, processor=50):
         os.system(
@@ -325,10 +333,10 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         self.diamond_gene(
             self.path['fmap_home'] + '/FMAP_data/protein_fasta_protein_homolog_model_cleaned.dmnd', 'genes_card.f6', processor)
 
-    def visualize(self, exclude='none'):
-        VisualizeAll(self.mapping_file, self.categories).visualize(exclude, self.base_on_assembly)
+    def visualize(self):
+        VisualizeAll(self.mapping_file, self.categories).visualize(self.exclude, self.base_on_assembly)
 
-    def run(self, processor=2):
+    def run(self, processor=3):
         """
         电脑内存：250G
 
@@ -350,24 +358,24 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         self.run_merge_se_to_pe(fq_list=self.de_host_r1_list)
         self.run_fastqc(fq_list=self.de_host_r1_list, processor=processor, first_check=5)
         self.generate_summary()
-
         self.run_kraken2(fq_list=self.map_list(self.merged_pe_pattern, 3, use_direction='R1'), processor=23)
         self.run_bracken()
         """
         if self.base_on_assembly:
-            """
             self.run_assembly(processor=66)
             self.run_quast()
             self.create_gene_db()
             self.quant_gene(fq_list=split_list(self.new_ids, each=3), processor=23, first_check=5)
             self.join_gene()
-            """
             self.map_gene()
         else:
+            """
             self.run_metaphlan2(fq_list=self.merged_pe_r1_list, processor=7)
             self.join_metaphlan()
             self.run_humann(fq_list=self.merged_pe_r1_list, processor=7)
+            """
             self.join_humann()
             # self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="KEGG", processor=7)
             self.fmap_wrapper(fq_list=self.merged_pe_r1_list, run_type="AMR", processor=7)
-        # self.visualize()
+
+        self.visualize()

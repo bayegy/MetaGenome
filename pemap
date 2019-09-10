@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import re
+from multiprocessing import process
+import pandas as pd
+
+class PEmap(object):
+    """docstring for PEmap"""
+
+    def __init__(self, read1, read2, database, out_dir="./", sample_name=False):
+        self.read1 = os.path.abspath(read1)
+        self.read2 = os.path.abspath(read2)
+        self.sample_name = sample_name or os.path.basename(read1)
+        self.database = os.path.abspath(database)
+        self.length_file = os.path.splitext(database)[0] + '.length.txt'
+        self.out_dir = os.path.abspath(out_dir) + '/'
+        self.read1_out = self.out_dir + self.sample_name + '_R1.mapout.tsv'
+        self.read2_out = self.out_dir + self.sample_name + '_R2.mapout.tsv'
+        self.abundance_out = self.out_dir + self.sample_name + '_abundance.tsv'
+        if not os.path.exists(self.out_dir):
+            os.makedirs(self.out_dir)
+
+    def diamond(self, identity=50, evalue=0.001, processor=7):
+
+        cmd=f'''
+diamond blastx --query {self.read1} --db {self.database} --out {self.read1_out} --outfmt 6 --evalue {evalue} --id {identity} --max-target-seqs 1 --threads {processor} --block-size 200 --index-chunks 1 --tmpdir /dev/shm/
+diamond blastx --query {self.read2} --db {self.database} --out {self.read2_out} --outfmt 6 --evalue {evalue} --id {identity} --max-target-seqs 1 --threads {processor} --block-size 200 --index-chunks 1 --tmpdir /dev/shm/
+'''
+        print(cmd)
+        os.system(cmd)
+
+    def read(self, fp, column=[0, 2]):
+        df = pd.read_csv(fp, sep='\t', index_col=0, header=None)
+        df = df.iloc[:, column]
+        df.index = [i.split('/')[0] for i in df.index]
+        # df.columns = ["sseqid", "length"]
+        return df
+
+    def quantify(self):
+        r1_mapout = self.read(self.read1_out)
+        r2_mapout = self.read(self.read2_out)
+        gene_length = pd.read_csv(self.length_file, sep='\t', index_col=0, header=None).iloc[:, 0]
+        r1qs, r2qs = list(r1_mapout.index), list(r2_mapout.index)
+        qseqids = set(r1qs + r2qs)
+        abdc = []
+        for q in qseqids:
+            if q in r1qs:
+                r1sub, r1len = r1_mapout.loc[q]
+                g1len = gene_length[r1sub]
+                if q in r2qs:
+                    r2sub, r2len = r2_mapout.loc[q]
+                    # g2len = gene_length[r2sub]
+                    if r1sub == r2sub:
+                        print("eq")
+                        r2sub, r2len = r2_mapout.loc[q]
+                        abdc.append([r1sub, (r1len + r2len) / g1len])
+                    else:
+                        abdc.append([r1sub, r1len / g1len])
+                else:
+                    abdc.append([r1sub, r1len / g1len])
+            else:
+                r2sub, r2len = r2_mapout.loc[q]
+                g2len = gene_length[r2sub]
+                abdc.append([r2sub, r2len / g2len])
+        abdc = pd.DataFrame(abdc)
+        abdc.columns = ["Orthology","CPM"]
+        abdc['count']=1
+        abdc = abdc.groupby("Orthology").sum()
+        total_raw = int(list(os.popen(f'zcat {self.read1} | grep "@" | wc -l'))[0])
+        abdc = (abdc * 1000000) / total_raw
+        abdc.to_csv(self.abundance_out, sep='\t')
+
+    def run(self, identity=50, evalue=0.001, processor=7):
+        self.diamond(identity, evalue, processor)
+        self.quantify()
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Paired end reads map and quantification tool",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument("-1", "--read1",
+                        metavar="<fastq raw reads>",
+                        required=True,
+                        help="Fastq raw reads1", )
+    parser.add_argument("-2", "--read2",
+                        metavar="<fastq raw reads>",
+                        required=True,
+                        help="Fastq raw reads2", )
+    parser.add_argument("-d", "--database",
+                        metavar="<database>",
+                        required=True,
+                        help="Protein database for diamond", )
+    parser.add_argument("-p", "--processor",
+                        metavar="<processor>",
+                        default=7,
+                        help="Number of processors", )
+    parser.add_argument("-e", "--evalue",
+                        metavar="<evalue>",
+                        default=0.001,
+                        help="evalue for diamond", )
+    parser.add_argument("-i", "--identity",
+                        metavar="<identity>",
+                        default=50,
+                        help="identity for diamond", )
+    parser.add_argument("-o", "--outdir",
+                        metavar="<outdir>",
+                        default="./",
+                        help="Where to save the results.", )
+    args = parser.parse_args()
+    p = PEmap(args.read1, args.read2, args.database, args.outdir)
+    p.run(args.identity, args.evalue, args.processor)
