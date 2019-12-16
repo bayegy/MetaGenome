@@ -34,7 +34,8 @@ source lefse;
 {SCRIPTPATH}/mod_format_input.py {outdir}4-SignificanceAnalysis/LEfSe/{prefix}{category}_lefse.txt {base}2.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py {base}2.lefseinput.txt {base}2.LDA.txt -l 2 -a 0.03 -w 0.03;
 {SCRIPTPATH}/mod_lefse-plot_res.py --map {mapping_file} --category {category}  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 {base}2.LDA.txt {base}2.pdf;
 #{SCRIPTPATH}/mod_lefse-plot_cladogram.py {base}2.LDA.txt  --map {mapping_file} --category {category} --dpi 300 {base}2.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
-{SCRIPTPATH}/mod_format_input.py {outdir}4-SignificanceAnalysis/LEfSe/{prefix}{category}_lefse.txt {base}4.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py {base}4.lefseinput.txt {base}4.LDA.txt -l 4 -a 0.03 -w 0.03;
+#{SCRIPTPATH}/mod_format_input.py {outdir}4-SignificanceAnalysis/LEfSe/{prefix}{category}_lefse.txt {base}4.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py {base}4.lefseinput.txt {base}4.LDA.txt -l 4 -a 0.03 -w 0.03;
+lda22ldamt.py {base}2.LDA.txt {base}4.LDA.txt 4
 {SCRIPTPATH}/mod_lefse-plot_res.py --map {mapping_file} --category {category}  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 {base}4.LDA.txt {base}4.pdf;
 #{SCRIPTPATH}/mod_lefse-plot_cladogram.py {base}4.LDA.txt --map {mapping_file} --category {category} --dpi 300 {base}4.cladogram.pdf --clade_sep 1.8 --format pdf --right_space_prop 0.45 --label_font_size 10;
 source delefse'''.format(base='{}4-SignificanceAnalysis/LEfSe/{}{}_lefse_LDA'.format(self.out_dir, self.prefix, g), SCRIPTPATH=self.path['bayegy_home'], abundance_table=self.abundance_table, mapping_file=self.mapping_file, category=g, outdir=self.out_dir, prefix=self.prefix))

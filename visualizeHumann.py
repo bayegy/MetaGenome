@@ -43,7 +43,7 @@ class VisualizeHumann(VisualizeFunction):
 
         for g in categories:
             print(g)
-            bar_out = "{}4-SignificanceAnalysis/LEfSe/SignificantFeatures/{}/".format(self.out_dir, g)
+            bar_out = "{}4-SignificanceAnalysis/LEfSe/SignificantFeatures/".format(self.out_dir)
             if not os.path.exists(bar_out):
                 os.makedirs(bar_out)
             humann2_ft_lefse_lda = '{}4-SignificanceAnalysis/LEfSe/{}{}_lefse_LDA2.LDA.txt'.format(

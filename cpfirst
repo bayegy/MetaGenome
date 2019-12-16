@@ -6,7 +6,7 @@ import shutil
 source, target = sys.argv[1], sys.argv[2]
 
 directoy = os.path.dirname(source)
-pfix = os.path.splitext(source)[1]
+pfix = source.split('/')[-1].strip("*")
 
 
 def popfirst(l, pfix):
@@ -21,4 +21,6 @@ file_list = os.listdir(directoy)
 file_list.sort()
 source_file = popfirst(file_list, pfix)
 if source_file:
-    shutil.copyfile(source_file, target)
+    cmd = "cp '{}' '{}'".format(source_file, target)
+    print(cmd)
+    os.system(cmd)

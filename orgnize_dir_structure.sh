@@ -134,11 +134,11 @@ cp ../2-TaxaAundanceAnalysis/2-AbundanceComparison/VennAndFlower/${category_1}_V
 cp ../3-FuctionAnalysis/1-KEGG/1-Barplots/KEGG.Pathway.Level1_${category_1}_barplot.pdf Figure5-1.pdf
 cp ../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/LEfSe/KEGG.Pathway_${category_1}_lefse_LDA2.pdf   Figure5-2.pdf
 cp ../3-FuctionAnalysis/1-KEGG/5-ColoredMaps/${category_1}/${category_1}_map00010.png   Figure5-3.png
-cpfirst "../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/${category_1}/*.pdf"   Figure5-4.pdf
+cpfirst "../3-FuctionAnalysis/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/${category_1}/.pdf"   Figure5-4.pdf
 cp ../3-FuctionAnalysis/2-Metacyc/1-Barplots/Metacyc_${category_1}_barplot.pdf   Figure5-5.pdf
 cp ../3-FuctionAnalysis/3-EggNOG/2-Heatmaps/EGGNOG_${category_1}_clustered_heatmap.pdf   Figure5-6.pdf
 cp ../3-FuctionAnalysis/4-GO/3-Circos/GO_${category_1}_circos.png   Figure5-7.png
-cpfirst "../3-FuctionAnalysis/5-EC/4-SignificanceAnalysis/LEfSe/SignificantFeatures/${category_1}/*.pdf"   Figure5-8.pdf
+cpfirst "../3-FuctionAnalysis/5-EC/4-SignificanceAnalysis/LEfSe/SignificantFeatures/${category_1}/.pdf"   Figure5-8.pdf
 cp ../3-FuctionAnalysis/6-CAZy/4-SignificanceAnalysis/LEfSe/CAZY_${category_1}_lefse_LDA2.pdf   Figure5-9.pdf
 
 cp ../4-AMRAnalysis/1-Barplots/AMR_${category_1}_barplot.pdf Figure6-1.pdf

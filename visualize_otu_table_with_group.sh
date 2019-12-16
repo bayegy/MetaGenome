@@ -111,7 +111,7 @@ MAIN() {
 	echo -e "\n#Setting up the directory structure"
 	echo -e "\n#The output directory prefix is $output_prefix"
 	sample_name=`echo $(basename $otu_table) | sed -e 's/\.txt$//'`
-	output_dir=${out_dir}/${output_prefix}taxa_visualization/
+	output_dir=${out_dir}
 	check_dir $output_dir
 
 
@@ -288,8 +288,10 @@ MAIN() {
 					Rscript ${SCRIPTPATH}/write_data_for_lefse.R -i  otu_table.${n7}.relative.txt -m  $mapping_file -c  $category_1 -o  ${category_1}_${n7}_lefse.txt -u l;
 					base="${category_1}_${n7}_lefse_LDA2"; lefse-format_input.py ${category_1}_${n7}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 2;  
 					${SCRIPTPATH}/mod_lefse-plot_res.py --category $category_1 --map $mapping_file --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; ${SCRIPTPATH}/mod_lefse-plot_cladogram.py ${base}.LDA.txt --category $category_1 --map $mapping_file --dpi 300 ${base}.cladogram.pdf --format pdf;
-					base="${category_1}_${n7}_lefse_LDA4"; lefse-format_input.py ${category_1}_${n7}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 4;  
-					${SCRIPTPATH}/mod_lefse-plot_res.py --category $category_1 --map $mapping_file  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base}.LDA.txt ${base}.pdf; ${SCRIPTPATH}/mod_lefse-plot_cladogram.py ${base}.LDA.txt --category $category_1 --map $mapping_file --dpi 300 ${base}.cladogram.pdf --format pdf;
+					base4="${category_1}_${n7}_lefse_LDA4"; 
+					# lefse-format_input.py ${category_1}_${n7}_lefse.txt ${base}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${base}.lefseinput.txt ${base}.LDA.txt -l 4;
+					lda22ldamt.py ${base}.LDA.txt ${base4}.LDA.txt 4;
+					${SCRIPTPATH}/mod_lefse-plot_res.py --category $category_1 --map $mapping_file  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${base4}.LDA.txt ${base4}.pdf; ${SCRIPTPATH}/mod_lefse-plot_cladogram.py ${base4}.LDA.txt --category $category_1 --map $mapping_file --dpi 300 ${base4}.cladogram.pdf --format pdf;
 				done;
 			cd ../../
 		done;

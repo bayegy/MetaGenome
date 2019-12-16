@@ -20,10 +20,10 @@ def time_counter(func):
     return wrapper
 
 
-def generate_span(number_list: []) -> []:
+def generate_span(number_list: [], start=0) -> []:
     """Please sapply iterable number list"""
     step_sum = []
-    current_sum = 0
+    current_sum = start
     for e in number_list:
         current_sum += e
         step_sum.append(current_sum)
@@ -79,6 +79,7 @@ def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sa
                         print('    ' + fq_id)
                         fq_failed += 1
     matched_fq_info = pd.DataFrame(matched_fq_info, columns=["Fastq_path", "New_SampleID", "Direction"])
+    matched_fq_info = matched_fq_info.sort_values(by="New_SampleID")
 
     print("\nThe following samples were found in pre_mapping file, but not found in fastq files:")
     matched_map = []
@@ -101,6 +102,7 @@ def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sa
                     map_failed_id += 1
 
     matched_map = pd.DataFrame(matched_map, columns=columns)
+    matched_map = matched_map.sort_values(by="#SampleID")
     print('''
     In summary:
         %s fastq files were matched;

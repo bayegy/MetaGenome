@@ -51,11 +51,9 @@ class ColorMap(object):
 
     """
 
-    def __init__(self, ko_lefse_lda, ko_abundance_table=False, mapping_file=False, category=False, prefix="", out_dir='./'):
+    def __init__(self, ko_lefse_lda, ko_abundance_table=False, mapping_file=False, category=False, out_dir='./'):
         self.out_dir = os.path.abspath(out_dir) + '/'
-        if not os.path.exists(self.out_dir):
-            os.makedirs(self.out_dir)
-        self.out_dir += prefix
+        # self.out_dir += prefix
         self._base_dir = os.path.dirname(__file__) + '/'
         with open(self._base_dir + "pipconfig/path.conf") as f:
             self.path = json.load(f)
@@ -64,11 +62,15 @@ class ColorMap(object):
         self.user_kos = pd.read_csv(ko_lefse_lda, sep='\t', header=None, index_col=0)[2]
         self.annoted_kos = self.user_kos[self.user_kos.notna()]
         self.gps_colors = get_lefse_colors(category, mapping_file, ko_lefse_lda, return_dict=True) if (
-            mapping_file and category) else dict(zip(list(set(self.annoted_kos)), sns.color_palette('Accent', 12).as_hex()))
+            mapping_file and category) else {}
+        self.gps_colors = self.gps_colors or dict(
+            zip(list(set(self.annoted_kos)), sns.color_palette('Accent', 12).as_hex()))
         # pdb.set_trace()
+
         self.kos_colors = {ko: self.gps_colors[self.user_kos[ko]]
                            if notna else "#999999" for ko, notna in zip(self.user_kos.index, self.user_kos.notna())}
         self.ko_abundance_table = ko_abundance_table
+        """
         maps = []
         mi = MapInfo()
         mi.load_map(self.path['fmap_home'] + '/FMAP_data/KEGG_orthology2pathway.txt')
@@ -78,7 +80,7 @@ class ColorMap(object):
             except KeyError:
                 pass
         self.maps = list(set(maps))
-        self.prefix = prefix
+        """
 
     def get_map_conf(self, mapid, margin_right=60, clean_frame=True):
         self.current_mapid = mapid
@@ -221,7 +223,7 @@ class ColorMap(object):
         # pdb.set_trace()
         link_data = {'img[name=pathwayimage]': {"src": '{}{}.png'.format(self.prefix, mapid)}}
 
-        out_report = "{}{}.html".format(self.out_dir, mapid)
+        out_report = self.file_name + '.html'
         in_report = "{}/{}.html".format(self.path['map_conf'], mapid)
 
         # update_html_properties(in_report, link_data, out_report)
@@ -247,7 +249,7 @@ The following KOs were found in your samples[KO number(Group of feature)]:
         plot.save(fp)
 
     @time_counter
-    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120, report_detail=True):
+    def plot_map(self, mapid, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120, report_detail=True, sub_out_dir='', prefix=''):
         """
         To plot a single map:
 
@@ -257,6 +259,7 @@ The following KOs were found in your samples[KO number(Group of feature)]:
 
             see also plot_all
         """
+        self.prefix = prefix
         self.get_map_conf(mapid, margin_right)
         self.__cac_map_colors__()
         self.__cac_map_text__(use_text, show_abundance)
@@ -265,10 +268,14 @@ The following KOs were found in your samples[KO number(Group of feature)]:
         self.__color_map__(self.legend_color)
         self.__text_map__(self.text_data, position, color, fontsize)
         self.__text_map__(self.legend_text, 'left', "#000000", legend_fontsize)
-        self.plot.save("{}{}.png".format(self.out_dir, mapid))
+        final_out = "{}{}/".format(self.out_dir, sub_out_dir)
+        if not os.path.exists(final_out):
+            os.makedirs(final_out)
+        self.file_name = "{}{}{}".format(final_out, prefix, mapid)
+        self.plot.save(self.file_name + '.png')
         self.write_report(mapid, report_detail)
 
-    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120, report_detail=True):
+    def plot_all(self, use_text="gene", position="center", color="#000000", fontsize=9, show_abundance=False, legend_fontsize=9, margin_right=60, off_right=120, report_detail=True, map_level=False):
         """
         To plot all maps in map_abundance_table
 
@@ -290,9 +297,22 @@ The following KOs were found in your samples[KO number(Group of feature)]:
                 report_detail: report details of KOs in map if True
 
         """
+        if map_level:
+            self.map_level = {}
+            with open(map_level) as level_file:
+                for num, line in enumerate(level_file):
+                    if num:
+                        li = line.strip().split('\t')
+                        levels = [re.sub(' |,|\(|\)|\+|\-|\:|\/|\\\\', '_', l) for l in li[-3:]]
+                        levels = [re.sub('_+', '_', l) for l in levels]
+                        self.map_level[li[0]] = levels
+        else:
+            print("map level mapping file is needed")
+            sys.exit()
+
         filter_maps = ["map01100", "map01110", "map01120", "map01130", "map00312"]
-        for mapid in self.maps:
+        for mapid in self.map_level.keys():
             if mapid not in filter_maps:
                 print(mapid)
                 self.plot_map(mapid, use_text, position, color, fontsize,
-                              show_abundance, legend_fontsize, margin_right, off_right, report_detail)
+                              show_abundance, legend_fontsize, margin_right, off_right, report_detail, sub_out_dir=os.path.join(*self.map_level[mapid]))
