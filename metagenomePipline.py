@@ -1,19 +1,15 @@
 import os
 import time
 from pyutils.tools import split_list, parse_premap
-import json
 import re
 from visualizeAll import VisualizeAll
-from mapInfo import MapInfo
 import pandas as pd
-from pyutils.tools import time_counter
 from systemMixin import SystemMixin
 import numpy as np
 from pipconfig import settings
 from lxml import html
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
-from queue import Queue
 import uuid
 
 
@@ -103,11 +99,7 @@ class MetagenomePipline(SystemMixin):
             self.kraken2_out)
         self.kracken2_reports_list = self.map_list(
             self.kracken2_reports_pattern, use_direction='R1')
-        self.qc_stats_queue = Queue()
-        global running_list
-        running_list = self.out_dir + '.running_list'
-        global tmp_dir
-        tmp_dir = self.tmp_dir
+        self.running_list = self.out_dir + '.running_list'
 
     def format_raw(self):
         for fq_path, new_id, direction in self.fq_info:
@@ -161,7 +153,6 @@ class MetagenomePipline(SystemMixin):
         """
 
         def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, **kwargs):
-            global tmp_dir
             print("######################Running " + str(func))
             start_time = time.time()
             for fqs in fq_list:
@@ -175,8 +166,8 @@ class MetagenomePipline(SystemMixin):
                 print("This run done! checking callback...")
                 if callback:
                     callback(**callback_kwargs)
-                if os.listdir(tmp_dir):
-                    os.system("rm -r {}/*".format(tmp_dir))
+                if os.listdir(self.tmp_dir):
+                    self.system("rm -r {tmp_dir}/*")
             end_time = time.time()
             time_used = (end_time - start_time) / 60
             print("######################" + str(func) +
@@ -223,15 +214,14 @@ echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
 
     def run_bracken(self):
-        global running_list
         bracken_list = [l + '.bracken' for l in self.kracken2_reports_list]
         for report in self.kracken2_reports_list:
             self.system(
                 "python2 {bracken_path} -i {report} -k {bracken_database} -l S -o {report}.bracken", report=report)
-        with open(running_list, 'w') as f:
+        with open(self.running_list, 'w') as f:
             f.write('\n'.join(bracken_list))
         os.system(
-            self.homized_cmd("perl Braken_to_OTUtable.pl {} {}".format(self.ncbi_taxaID_path, running_list)))
+            self.homized_cmd("perl Braken_to_OTUtable.pl {} {}".format(self.ncbi_taxaID_path, self.running_list)))
 
     def clean_header(self, tb_name, pattern, skip=[]):
         df = pd.read_csv(tb_name, sep='\t')
