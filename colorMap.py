@@ -11,6 +11,7 @@ from pyutils.tools import dupply, time_counter
 from pyutils.read import read_abundance
 from mapInfo import MapInfo
 from pyutils.read import update_html_properties
+from pipconfig import settings
 import pdb
 
 
@@ -55,8 +56,7 @@ class ColorMap(object):
         self.out_dir = os.path.abspath(out_dir) + '/'
         # self.out_dir += prefix
         self._base_dir = os.path.dirname(__file__) + '/'
-        with open(self._base_dir + "pipconfig/path.conf") as f:
-            self.path = json.load(f)
+        self.path = settings.path
         sys.path.append(self.path['bayegy_home'])
         from getColors import get_lefse_colors
         self.user_kos = pd.read_csv(ko_lefse_lda, sep='\t', header=None, index_col=0)[2]

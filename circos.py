@@ -6,6 +6,7 @@ import re
 import os
 import shutil
 from pyutils.tools import generate_span
+from pipconfig import settings
 # import pdb
 
 
@@ -35,10 +36,9 @@ class Circos(object):
         self.__rev_otu_col = self.__otu_col[::-1, :]
 
     def __read_conf__(self):
-        with open(self.__base_path + "/pipconfig/path.conf") as f:
-            js = json.load(f)
-            self._circos = js['circos_path']
-            self._etc = js['circos_etc']
+        js = settings.path
+        self._circos = js['circos_path']
+        self._etc = js['circos_etc']
 
     def __init_data__(self, table, mapping_file, category, by_group_mean):
         otu = self.read_tsv(table)

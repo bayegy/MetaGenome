@@ -13,6 +13,11 @@ from pyutils.tools import dupply, time_counter
 from pyutils.read import read_abundance
 from mapInfo import MapInfo
 from pyutils.read import update_html_properties
+try:
+    from pipconfig import settings
+except ImportError:
+    pass
+
 # import pdb
 
 
@@ -52,7 +57,7 @@ class ColorMap(object):
 
     """
 
-    def __init__(self, feature_list_path, map_conf_path="/home/cheng/Databases/map", colors=False, column=0, ko_abundance_table=False, prefix="", out_dir='./'):
+    def __init__(self, feature_list_path, map_conf_path=False, colors=False, column=0, ko_abundance_table=False, prefix="", out_dir='./'):
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
@@ -77,7 +82,7 @@ class ColorMap(object):
         self.kos_colors = {ko: self.gps_colors[self.user_kos[ko]]
                            if notna else "#999999" for ko, notna in zip(self.user_kos.index, self.user_kos.notna())}
         self.ko_abundance_table = ko_abundance_table
-        self.map_conf_path = map_conf_path
+        self.map_conf_path = map_conf_path if map_conf_path else settings.path['map_conf']
         self.prefix = prefix
 
     def get_map_conf(self, mapid, margin_right=60, clean_frame=True):
