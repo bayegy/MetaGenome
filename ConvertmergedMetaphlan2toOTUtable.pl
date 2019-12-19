@@ -31,7 +31,7 @@ while(<FH1>){
 	chomp;
 	if ($. == 1){
 		$header = $_;
-		$header =~ s/ID/#OTU ID/;
+		$header =~ s/ID/#Taxon ID/;
 		$header = $header . "\ttaxonomy";
 		print OFH $header, "\n";
 		next;
@@ -39,7 +39,7 @@ while(<FH1>){
 	next if /^#/;
 	my @array = split(/\t/);
 	my $string = sprintf ("%05d", $otu_count);
-	$string = 'OTU'. $string;
+	$string = 'Taxon'. $string;
 	$array[0] =~ s/\|/;/g;
 	$array[($#array)+1] = $array[0];
 	$array[0] = $string;

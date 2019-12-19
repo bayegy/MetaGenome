@@ -34,13 +34,13 @@ path = {
 }
 
 memery_needs = {
-    "kneaddata": 50,
+    "kneaddata": 100,
     "kraken2": 70,
     "humann2": 45,
     "fmap": 30,
     "salmon": 80
 }
 
-memery = 1000
+memery = 900
 
-threads = 90
+threads = 85

@@ -364,10 +364,14 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
     def alloc_src(self, proc, threads=False, sam_num=False):
         memery_needs = self.memery_needs[proc]
+        total_sample = len(self.new_ids)
         if not sam_num:
             sample_number = self.memery // memery_needs
             sample_number = sample_number if sample_number < self.threads else self.threads
             sample_number = sample_number if sample_number > 1 else 1
+            sample_number = sample_number if sample_number < total_sample else total_sample
+            runs = np.ceil(total_sample / sample_number)
+            sample_number = int(np.ceil(total_sample / runs))
         else:
             sample_number = sam_num
         threads = threads if threads else (self.threads // sample_number)
@@ -469,21 +473,18 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-
+        """
         self.format_raw()
-        sam_num = int(self.memery / 100)
-        sam_num = sam_num if sam_num < 5 else 5
-        srcs = self.alloc_src("kneaddata", threads=False, sam_num=sam_num)
+        srcs = self.alloc_src("kneaddata", threads=False)
         self.run_kneaddata(fq_list=self.paired_data(
             self.raw_pattern, srcs['sample_number']), callback=self.kneaddata_callback, **srcs['src'])
-
         self.generate_qc_report(processors=20)
-
+        
         srcs = self.alloc_src("kraken2", threads=False)
         self.run_kraken2(fq_list=self.paired_data(self.clean_paired_pattern,
                                                   srcs['sample_number']), **srcs['src'])
         self.run_bracken()
-
+        """
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
