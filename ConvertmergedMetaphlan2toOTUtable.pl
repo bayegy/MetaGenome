@@ -31,7 +31,7 @@ while(<FH1>){
 	chomp;
 	if ($. == 1){
 		$header = $_;
-		$header =~ s/ID/#Taxon ID/;
+		$header =~ s/ID/#OTU ID/;
 		$header = $header . "\ttaxonomy";
 		print OFH $header, "\n";
 		next;

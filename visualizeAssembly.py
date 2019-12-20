@@ -22,5 +22,5 @@ class VisualizeAssembly(VisualizeFunction):
         gene_abdc.columns = columns
         # pdb.set_trace()
         gene_abdc = gene_abdc.groupby("Genes").sum()
-        self.abundance_table = self.out_dir + "All.{}.abundance_unstratified.tsv".format(prefix.strip('_'))
+        self.set_attr(abundance_table=self.out_dir + "All.{}.abundance_unstratified.tsv".format(prefix.strip('_')))
         gene_abdc.to_csv(self.abundance_table, sep='\t', index=True)

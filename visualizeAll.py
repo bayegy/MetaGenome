@@ -20,28 +20,28 @@ class VisualizeAll(VisualizeSpecies):
     def __init__(self, mapping_file, categories=False, out_dir=False, exclude_species="Environmentalsamples"):
         super(VisualizeAll, self).__init__("multi_table", mapping_file,
                                            categories, out_dir=out_dir, exclude_species=exclude_species)
-        self.out_dir = out_dir if out_dir else os.path.dirname(self.mapping_file) + '/'
-        self._base_dir = os.path.dirname(__file__) + '/'
-        self.root_dir = self.out_dir + 'Result/'
-        self.qc_dir = self.root_dir + '00-QCStats/'
-        self.table_dir = self.root_dir + '01-BaseTables/'
-        self.asem_dir = self.root_dir + '01-Assembly/'
-        self.FMAP_data = self.path['fmap_home'] + '/FMAP_data/'
-        self.context = dict(root_dir=self.root_dir, qc_dir=self.qc_dir, SCRIPTPATH=self._base_dir,
-                            out_dir=self.out_dir, mapping_file=self.mapping_file, table_dir=self.table_dir, asem_dir=self.asem_dir)
+        root_dir = self.out_dir + 'Result/'
+        self.set_path(force=True,
+                      root_dir=root_dir,
+                      qc_dir=root_dir + '00-QCStats',
+                      table_dir=root_dir + '01-BaseTables',
+                      )
+        self.set_path(force=False,
+                      FMAP_data=self.fmap_home + '/FMAP_data/',
+                      )
+        self.set_attr(asem_dir=self.root_dir + '01-Assembly/')
+
         self.mi = MapInfo()
 
     def map_ko_annotation(self):
         ko_file = self.function_dir + '1-KEGG/All.KO.abundance_unstratified.tsv'
         # self.kegg_dir = os.path.dirname(ko_file) + '/'
-        cmd = '''
-perl {SCRIPTPATH}/ConvergeKO2Module.pl {ko_file} > {out_dir}/All.KEGG.Module.txt
-perl {SCRIPTPATH}/ConvergeKO2Pathway.pl {ko_file} > {out_dir}/All.KEGG.Pathway.txt
-perl {SCRIPTPATH}/ConvergePathway2Level1.pl {out_dir}/All.KEGG.Pathway.txt > {out_dir}/All.KEGG.Pathway.Level1.txt
-perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.KEGG.Pathway.txt > {out_dir}/All.KEGG.Pathway.Level2.txt
-            '''.format(SCRIPTPATH=self._base_dir, ko_file=ko_file, out_dir=self.kegg_dir)
-        print(cmd)
-        os.system(cmd)
+        self.system('''
+{perl_path} {base_dir}/ConvergeKO2Module.pl {ko_file} > {kegg_dir}/All.KEGG.Module.txt
+{perl_path} {base_dir}/ConvergeKO2Pathway.pl {ko_file} > {kegg_dir}/All.KEGG.Pathway.txt
+{perl_path} {base_dir}/ConvergePathway2Level1.pl {kegg_dir}/All.KEGG.Pathway.txt > {kegg_dir}/All.KEGG.Pathway.Level1.txt
+{perl_path} {base_dir}/ConvergePathway2Level2.pl {kegg_dir}/All.KEGG.Pathway.txt > {kegg_dir}/All.KEGG.Pathway.Level2.txt
+            ''', ko_file=ko_file)
 
     @staticmethod
     def extract_empper_cog(annotation):
@@ -82,36 +82,39 @@ perl {SCRIPTPATH}/ConvergePathway2Level2.pl {out_dir}/All.KEGG.Pathway.txt > {ou
             if os.path.exists(data):
                 mi.mapping(data, [mapping_source])
 
-        mi.mapping(self.function_dir + '{}/All.CAZY.abundance_unstratified.tsv'.format("4-CAZy" if asem else "6-CAZy"),
-                   [FMAP_data + '/fam_description.txt'])
+        mi.mapping(self.cazy_dir + '/All.CAZY.abundance_unstratified.tsv',
+                   [self.FMAP_data + '/fam_description.txt'])
 
     def init_out_dir(self, category):
         asem = self.base_on_assembly
-        self.category = category
-        self.categroy_dir = "{}/{}/".format(self.root_dir, self.category)
-        self.taxa_dir = self.categroy_dir + '1-TaxaAundanceAnalysis/'
-        self.function_dir = self.categroy_dir + '2-FuctionAnalysis/'
-        self.amr_dir = self.categroy_dir + '3-AMRAnalysis/'
-        self.kegg_dir = self.function_dir + '1-KEGG/'
-        self.go_dir = self.function_dir + ('3-GO/' if asem else '4-GO/')
-        self.eggnog_dir = self.function_dir + ('2-EggNOG/' if asem else '3-EggNOG/')
-        self.cazy_dir = self.function_dir + ('4-CAZy/' if asem else '6-CAZy/')
-        self.report_dir = self.categroy_dir + 'FiguresTablesForReport/'
-        self.context.update(dict(category=category, eggnog_dir=self.eggnog_dir, report_dir=self.report_dir, go_dir=self.go_dir, kegg_dir=self.kegg_dir,
-                                 cazy_dir=self.cazy_dir, function_dir=self.function_dir, taxa_dir=self.taxa_dir, amr_dir=self.amr_dir, categroy_dir=self.categroy_dir))
+        self.set_attr(
+            category=category
+        )
+        categroy_dir = "{}/{}/".format(self.root_dir, self.category)
+        self.set_path(force=True,
+                      categroy_dir=categroy_dir,
+                      taxa_dir=categroy_dir + '1-TaxaAundanceAnalysis/',
+                      function_dir=categroy_dir + '2-FuctionAnalysis/',
+                      amr_dir=categroy_dir + '3-AMRAnalysis/',
+                      report_dir=categroy_dir + 'FiguresTablesForReport/',
+                      )
+        self.set_path(force=True,
+                      kegg_dir=self.function_dir + '1-KEGG/',
+                      go_dir=self.function_dir + ('3-GO/' if asem else '4-GO/'),
+                      eggnog_dir=self.function_dir + ('2-EggNOG/' if asem else '3-EggNOG/'),
+                      cazy_dir=self.function_dir + ('4-CAZy/' if asem else '6-CAZy/'),
+                      )
 
     def visualize(self, exclude='none', base_on_assembly=False):
         self.base_on_assembly = base_on_assembly
-        os.system("{}/piputils/write_colors_plan.py -i {} -c {} -p {}/piputils/group_color.list -o {}colors_plan.json".format(
-            self.path['bayegy_home'], self.mapping_file, self.categories, self.path['bayegy_home'], self.out_dir))
+        self.system("{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} -p {bayegy_home}/piputils/group_color.list -o {out_dir}colors_plan.json")
         os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
 
         reads_spec = """
-mkdir -p {table_dir}
-cp {out_dir}Metagenome/Humann/All.UniRef90.genefamilies.tsv {table_dir}
+cp {out_dir}Metagenome/Humann/RPK.All.UniRef90.genefamilies.tsv {table_dir}
 cp {out_dir}Metagenome/Metaphlan/All.Metaphlan2.profile.txt {table_dir}/All.Metaphlan2.taxa.txt
 cp {out_dir}Kraken2/All.Taxa.OTU.txt  {table_dir}/All.Kraken2.taxa.txt
-humann2_split_stratified_table -i {table_dir}/All.UniRef90.genefamilies.tsv -o {table_dir}
+{humann2_home}/humann2_split_stratified_table -i {table_dir}/RPK.All.UniRef90.genefamilies.tsv -o {table_dir}
         """.format(**self.context)
 
         asem_spec = """
@@ -120,7 +123,7 @@ cp {out_dir}Assembly_out/ORF* {asem_dir}/2-ORFPrediction/
 cp -r {out_dir}Assembly_out/quast_results/* {asem_dir}/1-Quast/
         """.format(**self.context)
 
-        os.system("""
+        self.system("""
 mkdir -p {qc_dir}/1-QC_report_Rawfastq/ {qc_dir}/2-QC_report_Filtered/
 cp {mapping_file} {root_dir}
 cp {out_dir}/kneaddata_out/fastqc/*html {qc_dir}/1-QC_report_Rawfastq/
@@ -128,7 +131,7 @@ rm {qc_dir}/1-QC_report_Rawfastq/*unmatched*
 mv {qc_dir}/1-QC_report_Rawfastq/*kneaddata* {qc_dir}/2-QC_report_Filtered/
 cp {out_dir}Report/reads_summary.txt {qc_dir}/
 {spec}
-            """.format(spec=asem_spec if base_on_assembly else reads_spec, **self.context))
+            """, spec=asem_spec if base_on_assembly else reads_spec)
         for g in self.categories.split(','):
             self.init_out_dir(g)
 
@@ -146,17 +149,14 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                 vcard = VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
                                           'salmon_out/genes_card.f6', prefix='AMR_', out_dir=self.amr_dir, adjust_func=False)
             else:
-                os.system('''
-humann2_renorm_table --input {0}/RPK.All.UniRef90.genefamilies.tsv --units cpm -o {0}/All.UniRef90.genefamilies.tsv -s n
-humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -o {0}/All.Metacyc.pathabundance.tsv -s n
-        '''.format(self.out_dir + 'Metagenome/Humann'))
+                self.system('''
+{humann2_home}/humann2_renorm_table --input {b}/RPK.All.UniRef90.genefamilies.tsv --units cpm -o {b}/All.UniRef90.genefamilies.tsv -s n
+{humann2_home}/humann2_renorm_table --input {b}/RPK.All.Metacyc.pathabundance.tsv --units cpm -o {b}/All.Metacyc.pathabundance.tsv -s n
+        ''', b=self.out_dir + 'Metagenome/Humann')
 
-                for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog'], ['1-KEGG', '5-EC', '4-GO', '3-EggNOG']):
+                for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog', 'cazy'], ['1-KEGG', '5-EC', '4-GO', '3-EggNOG', '6-CAZy']):
                     VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
-                                    self.category, regroup='uniref90_' + group, out_dir=self.function_dir + out_dir).visualize(exclude)
-
-                VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
-                                self.category, custom_to='cazy', out_dir=self.function_dir + '6-CAZy').visualize(exclude)
+                                    self.category, custom_to=group, out_dir=self.function_dir + out_dir).visualize(exclude)
 
                 VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.Metacyc.pathabundance.tsv',
                                 self.mapping_file, self.category, id_with_name=True, out_dir=self.function_dir + '2-Metacyc').visualize(exclude)
@@ -173,14 +173,14 @@ humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -
                                 map_column=-1)
                 vcard.visualize(exclude)
             else:
-                self.mi.mapping(self.out_dir + 'AMR/All.AMR.abundance_unstratified.tsv', [self.FMAP_data + '/aro.csv'],
+                self.mi.mapping(self.out_dir + 'FMAP/All.AMR.abundance_unstratified.tsv', [self.FMAP_data + '/aro.csv'],
                                 pattern="ARO[^\|]+",
                                 # first_pattern="[^\|]+$",
                                 first_pattern="ARO[^\|]+",
                                 # add_sid_to_info=True,
                                 add_sid_to_info=False,
                                 map_column=-1)
-                VisualizeFunction(self.out_dir + 'AMR/All.AMR.abundance_unstratified.tsv',
+                VisualizeFunction(self.out_dir + 'FMAP/All.AMR.abundance_unstratified.tsv',
                                   self.mapping_file, self.category, out_dir=self.amr_dir).visualize(exclude)
 
             for abundance_table in [self.kegg_dir + f for f in (
@@ -202,18 +202,18 @@ humann2_renorm_table --input {0}/RPK.All.Metacyc.pathabundance.tsv --units cpm -
                      ko_abundance_table=self.function_dir + '1-KEGG/All.KO.abundance_unstratified.tsv', mapping_file=self.mapping_file, category=g, out_dir=self.function_dir + '1-KEGG/5-ColoredMaps/').plot_all(map_level=self.function_dir + '1-KEGG/All.KEGG.Pathway.mapping.txt')
 
             reads_spec = """
-cp -rp {SCRIPTPATH}/Report/src {report_dir}
-cp {SCRIPTPATH}/Report/结题报告.html {categroy_dir}
+cp -rp {base_dir}/Report/src {report_dir}
+cp {base_dir}/Report/结题报告.html {categroy_dir}
 cp {function_dir}/2-Metacyc/1-Barplots/Metacyc_{category}_barplot.pdf  Figure5-5.pdf
 cpfirst "{function_dir}/5-EC/4-SignificanceAnalysis/LEfSe/SignificantFeatures/.pdf"   Figure5-8.pdf
             """.format(**self.context)
 
             asem_spec = """
-cp -rp {SCRIPTPATH}/Report_assembly/src {report_dir}
-cp {SCRIPTPATH}/Report_assembly/结题报告.html {categroy_dir}
+cp -rp {base_dir}/Report_assembly/src {report_dir}
+cp {base_dir}/Report_assembly/结题报告.html {categroy_dir}
             """.format(**self.context)
 
-            os.system("""
+            self.system("""
 mkdir {report_dir}
 cd {report_dir}
 cp {taxa_dir}/1-AbundanceSummary/Classified_stat_relative.png Figure4-1.png
@@ -235,7 +235,7 @@ cp {amr_dir}/5-CorrelationAnalysis/CorrelationHeatmap/AMR_Correlation_heatmap.pd
 mv {kegg_dir}/5-CorrelationAnalysis {kegg_dir}6-CorrelationAnalysis
 {spec}
 if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do echo $pdfs; base=$(basename $pdfs .pdf); convert  -density 300 -quality 80 $pdfs ${{base}}.png; rm $pdfs;done;fi;
-                """.format(spec=asem_spec if base_on_assembly else reads_spec, **self.context))
+                """, spec=asem_spec if base_on_assembly else reads_spec)
 
             page = self.report_dir + 'src/pages/main_cleaned.html' if base_on_assembly else self.categroy_dir + "结题报告.html"
 
@@ -243,4 +243,5 @@ if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do
                 self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),
                 species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category)
 
-            os.system("change_suffix.py {} -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ".format(self.root_dir))
+        self.system("{base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
+        self.system("{base_dir}/change_suffix.py {root_dir} -o tsv -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")

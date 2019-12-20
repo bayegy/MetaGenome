@@ -101,16 +101,22 @@ class MetagenomePipline(SystemMixin):
             self.kracken2_reports_pattern, use_direction='R1')
         self.running_list = self.out_dir + '.running_list'
 
-    def format_raw(self):
+    def format_raw(self, processors=3):
+        executor = ThreadPoolExecutor(max_workers=processors)
+        for fq_path, new_id, direction in self.fq_info:
+            if fq_path.endswith('.gz'):
+                executor.submit(self.unzip, fq_path)
+        executor.shutdown(True)
         for fq_path, new_id, direction in self.fq_info:
             formated_fq = self.raw_pattern.format(
                 sample_id=new_id, direction=direction)
             if not os.path.exists(formated_fq):
-                if fq_path.endswith('.gz'):
-                    print("Unzip file {}...".format(fq_path))
-                    os.system("gunzip {}".format(fq_path))
-                    fq_path = fq_path.rstrip('.gz')
+                fq_path = fq_path.rstrip('.gz')
                 os.system("ln -s {} {}".format(fq_path, formated_fq))
+
+    def unzip(self, fq_path):
+        print("Unzip file {}...".format(fq_path))
+        os.system("gunzip {}".format(fq_path))
 
     def map_list(self, pattern=False, each=False, use_direction="both"):
         out = []
@@ -228,11 +234,22 @@ echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.
         df.columns = [re.sub(pattern, '', c) for c in df.columns]
         df.drop(index=skip).to_csv(tb_name, sep="\t", index=False)
 
+    @synchronize
+    def run_metaphlan2(self, fq_list, threads, mem):
+        self.system("""
+echo '{metaphlan2_home}/metaphlan2.py --input_type multifastq --bowtie2_exe {bowtie2_home}/bowtie2 \
+ --bowtie2_build {bowtie2_home}/bowtie2-build  --tmp_dir {tmp_dir} \
+ --bowtie2db {metaphlan2_database} \
+ --nproc {threads} --bowtie2out {tmp_dir}/{sample}.bt2.out.txt {r1} \
+ -o {metaphlan_out}/{sample}.metaphlan.profile.txt --sample_id {sample}' \
+  | qsub -V -N {sample} -o {metaphlan_out} -e {metaphlan_out}
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
+
     def join_metaphlan(self):
         tb_name = self.metaphlan_out + '/All.Metaphlan2.profile.txt'
         self.system(
-            "python2 {base_dir}/merge_metaphlan_tables.py {humann2_out}/*profile.txt > {tb_name}", tb_name=tb_name)
-        self.clean_header(tb_name, pattern='_R1.metaphlan.profile$', skip=[0])
+            "python2 {base_dir}/merge_metaphlan_tables.py {metaphlan_out}/*profile.txt > {tb_name}", tb_name=tb_name)
+        self.clean_header(tb_name, pattern='\.metaphlan\.profile$', skip=[0])
 
     @synchronize
     def run_humann2(self, fq_list, threads=2, mem=40):
@@ -242,8 +259,9 @@ echo '{humann2_home}/humann2 --input {r1} \
   --protein-database {humann2_protein_database} --nucleotide-database {humann2_nucleotide_database} \
   --threads {threads} --memory-use  maximum \
   --output-basename {sample} \
-  --output {humann2_out} \
-  --remove-temp-output' \
+  --output {humann2_out} --taxonomic-profile {metaphlan_out}/{sample}.metaphlan.profile.txt \
+  --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database}" \
+  --remove-temp-output --remove-column-description-output' \
   | qsub -V -N {sample} -o {humann2_out} -e {humann2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
 
@@ -259,11 +277,13 @@ echo '{humann2_home}/humann2 --input {r1} \
         self.system('''
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv
-{humann2_home}/humann2_join_tables -i {humann2_out}/ -o {metaphlan_out}/All.Metaphlan2.profile.txt --file_name metaphlan_bugs_list.tsv''')
-        self.clean_header(self.out_dir + "Metagenome/Humann/RPK.All.UniRef90.genefamilies.tsv",
+{humann2_home}/humann2_join_tables -i {metaphlan_out}/ -o {metaphlan_out}/All.Metaphlan2.profile.txt --file_name metaphlan.profile.txt''')
+        self.clean_header(self.humann2_out + "/RPK.All.UniRef90.genefamilies.tsv",
                           pattern='_.*Abundance-RPKs$')
-        self.clean_header(self.out_dir + "Metagenome/Humann/RPK.All.Metacyc.pathabundance.tsv",
+        self.clean_header(self.humann2_out + "/RPK.All.Metacyc.pathabundance.tsv",
                           pattern='_.*Abundance$')
+        self.clean_header(self.metaphlan_out + "/All.Metaphlan2.profile.txt",
+                          pattern='\.metaphlan\.profile$')
 
     def set_fmap_db(self, database):
         with open(self.fmap_home + '/FMAP_data/database', 'w') as f:
@@ -274,7 +294,7 @@ echo '{humann2_home}/humann2 --input {r1} \
         self.system("""
 echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
  qsub -V -N {sample} -o {fmap_out} -e {fmap_out}
-            """, **self.parse_fq_list(fq_list))
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
 
     def quantify_fmap(self, all_name="all.txt", print_definition=False):
         p = "" if print_definition else "-n"
@@ -284,7 +304,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         args = [
             "{sample}={fmap_out}/{sample}.abundance.txt".format(sample=new_id, fmap_out=self.fmap_out) for new_id in self.new_ids]
         self.system("perl {fmap_home}/FMAP_table.pl {p} {args} > {fmap_out}/{all_name}",
-                    p=p, args=args, all_name=all_name)
+                    p=p, args=" ".join(args), all_name=all_name)
 
     def fmap_wrapper(self, fq_list, run_type="KEGG", threads=4, mem=10):
         fmap_db = {
@@ -335,7 +355,7 @@ sed -i 's/_1 / /' {assembly_out}/NR.protein.fa
         self.system("""
 echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} -o {salmon_out}/{sample}.quant' \
 | qsub -V -N {sample} -o {salmon_out} -e {salmon_out}
-            """, **self.parse_fq_list(fq_list))
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
 
     def join_gene(self):
         self.system(
@@ -454,7 +474,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
                 f.write('\t'.join(vals) + '\n')
 
     def visualize(self):
-        VisualizeAll(self.mapping_file, self.categories).visualize(
+        VisualizeAll(self.mapping_file, self.categories, out_dir=self.out_dir).visualize(
             self.exclude, self.base_on_assembly)
 
     def clean(self):
@@ -473,35 +493,36 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-        """
+
         self.format_raw()
-        srcs = self.alloc_src("kneaddata", threads=False)
+        srcs = self.alloc_src("kneaddata")
         self.run_kneaddata(fq_list=self.paired_data(
             self.raw_pattern, srcs['sample_number']), callback=self.kneaddata_callback, **srcs['src'])
         self.generate_qc_report(processors=20)
-        
-        srcs = self.alloc_src("kraken2", threads=False)
+        srcs = self.alloc_src("kraken2")
         self.run_kraken2(fq_list=self.paired_data(self.clean_paired_pattern,
                                                   srcs['sample_number']), **srcs['src'])
         self.run_bracken()
-        """
+
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
             self.create_gene_db(threads=self.threads)
-            srcs = self.alloc_src("salmon", threads=False)
+            srcs = self.alloc_src("salmon")
             self.quant_gene(fq_list=self.paired_data(self.clean_paired_pattern,
                                                      srcs['sample_number']), **srcs['src'], first_check=5)
             self.join_gene()
             self.map_gene(threads=self.threads)
         else:
-            srcs = self.alloc_src("humann2", threads=False)
+
+            srcs = self.alloc_src("humann2")
             self.run_humann2(fq_list=self.map_list(self.clean_paired_pattern,
-                                                   srcs['sample_number'], use_direction="R1"), callback=self.humann2_callback, **srcs['src'])
+                                                   srcs['sample_number'], use_direction="R1"), **srcs['src'])
             self.join_humann()
+
             # self.join_metaphlan()
-            srcs = self.alloc_src("fmap", threads=False)
+            srcs = self.alloc_src("fmap")
             self.fmap_wrapper(fq_list=self.map_list(self.clean_paired_pattern,
                                                     srcs['sample_number'], use_direction="R1"), run_type="AMR", **srcs['src'])
-        # self.visualize()
+        self.visualize()
         self.clean()

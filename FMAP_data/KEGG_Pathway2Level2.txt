@@ -1,0 +1,530 @@
+map00010	Carbohydrate metabolism
+map00020	Carbohydrate metabolism
+map00030	Carbohydrate metabolism
+map00040	Carbohydrate metabolism
+map00051	Carbohydrate metabolism
+map00052	Carbohydrate metabolism
+map00053	Carbohydrate metabolism
+map00061	Lipid metabolism
+map00062	Lipid metabolism
+map00071	Lipid metabolism
+map00072	Lipid metabolism
+map00073	Lipid metabolism
+map00100	Lipid metabolism
+map00120	Lipid metabolism
+map00121	Lipid metabolism
+map00130	Metabolism of cofactors and vitamins
+map00140	Lipid metabolism
+map00190	Energy metabolism
+map00195	Energy metabolism
+map00196	Energy metabolism
+map00220	Amino acid metabolism
+map00230	Nucleotide metabolism
+map00231	Biosynthesis of other secondary metabolites
+map00232	Biosynthesis of other secondary metabolites
+map00240	Nucleotide metabolism
+map00250	Amino acid metabolism
+map00253	Metabolism of terpenoids and polyketides
+map00254	Biosynthesis of other secondary metabolites
+map00260	Amino acid metabolism
+map00261	Biosynthesis of other secondary metabolites
+map00270	Amino acid metabolism
+map00280	Amino acid metabolism
+map00281	Metabolism of terpenoids and polyketides
+map00290	Amino acid metabolism
+map00300	Amino acid metabolism
+map00310	Amino acid metabolism
+map00311	Biosynthesis of other secondary metabolites
+map00330	Amino acid metabolism
+map00331	Biosynthesis of other secondary metabolites
+map00332	Biosynthesis of other secondary metabolites
+map00333	Biosynthesis of other secondary metabolites
+map00340	Amino acid metabolism
+map00350	Amino acid metabolism
+map00360	Amino acid metabolism
+map00361	Xenobiotics biodegradation and metabolism
+map00362	Xenobiotics biodegradation and metabolism
+map00363	Xenobiotics biodegradation and metabolism
+map00364	Xenobiotics biodegradation and metabolism
+map00365	Xenobiotics biodegradation and metabolism
+map00380	Amino acid metabolism
+map00400	Amino acid metabolism
+map00401	Biosynthesis of other secondary metabolites
+map00402	Biosynthesis of other secondary metabolites
+map00403	Biosynthesis of other secondary metabolites
+map00404	Biosynthesis of other secondary metabolites
+map00405	Biosynthesis of other secondary metabolites
+map00410	Metabolism of other amino acids
+map00430	Metabolism of other amino acids
+map00440	Metabolism of other amino acids
+map00450	Metabolism of other amino acids
+map00460	Metabolism of other amino acids
+map00471	Metabolism of other amino acids
+map00472	Metabolism of other amino acids
+map00473	Metabolism of other amino acids
+map00480	Metabolism of other amino acids
+map00500	Carbohydrate metabolism
+map00510	Glycan biosynthesis and metabolism
+map00511	Glycan biosynthesis and metabolism
+map00512	Glycan biosynthesis and metabolism
+map00513	Glycan biosynthesis and metabolism
+map00514	Glycan biosynthesis and metabolism
+map00515	Glycan biosynthesis and metabolism
+map00520	Carbohydrate metabolism
+map00521	Biosynthesis of other secondary metabolites
+map00522	Metabolism of terpenoids and polyketides
+map00523	Metabolism of terpenoids and polyketides
+map00524	Biosynthesis of other secondary metabolites
+map00525	Biosynthesis of other secondary metabolites
+map00531	Glycan biosynthesis and metabolism
+map00532	Glycan biosynthesis and metabolism
+map00533	Glycan biosynthesis and metabolism
+map00534	Glycan biosynthesis and metabolism
+map00540	Glycan biosynthesis and metabolism
+map00550	Glycan biosynthesis and metabolism
+map00561	Lipid metabolism
+map00562	Carbohydrate metabolism
+map00563	Glycan biosynthesis and metabolism
+map00564	Lipid metabolism
+map00565	Lipid metabolism
+map00571	Glycan biosynthesis and metabolism
+map00572	Glycan biosynthesis and metabolism
+map00590	Lipid metabolism
+map00591	Lipid metabolism
+map00592	Lipid metabolism
+map00600	Lipid metabolism
+map00601	Glycan biosynthesis and metabolism
+map00603	Glycan biosynthesis and metabolism
+map00604	Glycan biosynthesis and metabolism
+map00620	Carbohydrate metabolism
+map00621	Xenobiotics biodegradation and metabolism
+map00622	Xenobiotics biodegradation and metabolism
+map00623	Xenobiotics biodegradation and metabolism
+map00624	Xenobiotics biodegradation and metabolism
+map00625	Xenobiotics biodegradation and metabolism
+map00626	Xenobiotics biodegradation and metabolism
+map00627	Xenobiotics biodegradation and metabolism
+map00630	Carbohydrate metabolism
+map00633	Xenobiotics biodegradation and metabolism
+map00640	Carbohydrate metabolism
+map00642	Xenobiotics biodegradation and metabolism
+map00643	Xenobiotics biodegradation and metabolism
+map00650	Carbohydrate metabolism
+map00660	Carbohydrate metabolism
+map00670	Metabolism of cofactors and vitamins
+map00680	Energy metabolism
+map00710	Energy metabolism
+map00720	Energy metabolism
+map00730	Metabolism of cofactors and vitamins
+map00740	Metabolism of cofactors and vitamins
+map00750	Metabolism of cofactors and vitamins
+map00760	Metabolism of cofactors and vitamins
+map00770	Metabolism of cofactors and vitamins
+map00780	Metabolism of cofactors and vitamins
+map00785	Metabolism of cofactors and vitamins
+map00790	Metabolism of cofactors and vitamins
+map00791	Xenobiotics biodegradation and metabolism
+map00830	Metabolism of cofactors and vitamins
+map00860	Metabolism of cofactors and vitamins
+map00900	Metabolism of terpenoids and polyketides
+map00901	Biosynthesis of other secondary metabolites
+map00902	Metabolism of terpenoids and polyketides
+map00903	Metabolism of terpenoids and polyketides
+map00904	Metabolism of terpenoids and polyketides
+map00905	Metabolism of terpenoids and polyketides
+map00906	Metabolism of terpenoids and polyketides
+map00908	Metabolism of terpenoids and polyketides
+map00909	Metabolism of terpenoids and polyketides
+map00910	Energy metabolism
+map00920	Energy metabolism
+map00930	Xenobiotics biodegradation and metabolism
+map00940	Biosynthesis of other secondary metabolites
+map00941	Biosynthesis of other secondary metabolites
+map00942	Biosynthesis of other secondary metabolites
+map00943	Biosynthesis of other secondary metabolites
+map00944	Biosynthesis of other secondary metabolites
+map00945	Biosynthesis of other secondary metabolites
+map00950	Biosynthesis of other secondary metabolites
+map00960	Biosynthesis of other secondary metabolites
+map00965	Biosynthesis of other secondary metabolites
+map00966	Biosynthesis of other secondary metabolites
+map00970	Translation
+map00980	Xenobiotics biodegradation and metabolism
+map00981	Metabolism of terpenoids and polyketides
+map00982	Xenobiotics biodegradation and metabolism
+map00983	Xenobiotics biodegradation and metabolism
+map00984	Xenobiotics biodegradation and metabolism
+map00999	Biosynthesis of other secondary metabolites
+map01010	Chemical structure transformation maps
+map01040	Lipid metabolism
+map01051	Metabolism of terpenoids and polyketides
+map01052	Metabolism of terpenoids and polyketides
+map01053	Metabolism of terpenoids and polyketides
+map01054	Metabolism of terpenoids and polyketides
+map01055	Metabolism of terpenoids and polyketides
+map01056	Metabolism of terpenoids and polyketides
+map01057	Metabolism of terpenoids and polyketides
+map01058	Biosynthesis of other secondary metabolites
+map01059	Metabolism of terpenoids and polyketides
+map01060	Chemical structure transformation maps
+map01061	Chemical structure transformation maps
+map01062	Chemical structure transformation maps
+map01063	Chemical structure transformation maps
+map01064	Chemical structure transformation maps
+map01065	Chemical structure transformation maps
+map01066	Chemical structure transformation maps
+map01070	Chemical structure transformation maps
+map01100	Global and overview maps
+map01110	Global and overview maps
+map01120	Global and overview maps
+map01130	Global and overview maps
+map01200	Global and overview maps
+map01210	Global and overview maps
+map01212	Global and overview maps
+map01220	Global and overview maps
+map01230	Global and overview maps
+map01501	Drug resistance: Antimicrobial
+map01502	Drug resistance: Antimicrobial
+map01503	Drug resistance: Antimicrobial
+map01521	Drug resistance: Antineoplastic
+map01522	Drug resistance: Antineoplastic
+map01523	Drug resistance: Antineoplastic
+map01524	Drug resistance: Antineoplastic
+map02010	Membrane transport
+map02020	Signal transduction
+map02024	Cellular community - prokaryotes
+map02025	Cellular community - prokaryotes
+map02026	Cellular community - prokaryotes
+map02030	Cell motility
+map02040	Cell motility
+map02060	Membrane transport
+map03008	Translation
+map03010	Translation
+map03013	Translation
+map03015	Translation
+map03018	Folding, sorting and degradation;
+map03020	Transcription
+map03022	Transcription
+map03030	Replication and repair
+map03040	Transcription
+map03050	Folding, sorting and degradation;
+map03060	Folding, sorting and degradation;
+map03070	Membrane transport
+map03320	Endocrine system
+map03410	Replication and repair
+map03420	Replication and repair
+map03430	Replication and repair
+map03440	Replication and repair
+map03450	Replication and repair
+map03460	Replication and repair
+map04010	Signal transduction
+map04011	Signal transduction
+map04012	Signal transduction
+map04013	Signal transduction
+map04014	Signal transduction
+map04015	Signal transduction
+map04016	Signal transduction
+map04020	Signal transduction
+map04022	Signal transduction
+map04024	Signal transduction
+map04060	Signaling molecules and interaction
+map04062	Immune system
+map04064	Signal transduction
+map04066	Signal transduction
+map04068	Signal transduction
+map04070	Signal transduction
+map04071	Signal transduction
+map04072	Signal transduction
+map04075	Signal transduction
+map04080	Signaling molecules and interaction
+map04110	Cell growth and death
+map04111	Cell growth and death
+map04112	Cell growth and death
+map04113	Cell growth and death
+map04114	Cell growth and death
+map04115	Cell growth and death
+map04120	Folding, sorting and degradation;
+map04122	Folding, sorting and degradation;
+map04130	Folding, sorting and degradation;
+map04136	Transport and catabolism
+map04137	Transport and catabolism
+map04138	Transport and catabolism
+map04139	Transport and catabolism
+map04140	Transport and catabolism
+map04141	Folding, sorting and degradation;
+map04142	Transport and catabolism
+map04144	Transport and catabolism
+map04145	Transport and catabolism
+map04146	Transport and catabolism
+map04150	Signal transduction
+map04151	Signal transduction
+map04152	Signal transduction
+map04210	Cell growth and death
+map04211	Aging
+map04212	Aging
+map04213	Aging
+map04214	Cell growth and death
+map04215	Cell growth and death
+map04216	Cell growth and death
+map04217	Cell growth and death
+map04218	Cell growth and death
+map04260	Circulatory system
+map04261	Circulatory system
+map04270	Circulatory system
+map04310	Signal transduction
+map04320	Development
+map04330	Signal transduction
+map04340	Signal transduction
+map04341	Signal transduction
+map04350	Signal transduction
+map04360	Development
+map04370	Signal transduction
+map04371	Signal transduction
+map04380	Development
+map04390	Signal transduction
+map04391	Signal transduction
+map04392	Signal transduction
+map04510	Cellular community - eukaryotes
+map04512	Signaling molecules and interaction
+map04514	Signaling molecules and interaction
+map04520	Cellular community - eukaryotes
+map04530	Cellular community - eukaryotes
+map04540	Cellular community - eukaryotes
+map04550	Cellular community - eukaryotes
+map04610	Immune system
+map04611	Immune system
+map04612	Immune system
+map04614	Endocrine system
+map04620	Immune system
+map04621	Immune system
+map04622	Immune system
+map04623	Immune system
+map04624	Immune system
+map04625	Immune system
+map04626	Environmental adaptation
+map04630	Signal transduction
+map04640	Immune system
+map04650	Immune system
+map04657	Immune system
+map04658	Immune system
+map04659	Immune system
+map04660	Immune system
+map04662	Immune system
+map04664	Immune system
+map04666	Immune system
+map04668	Signal transduction
+map04670	Immune system
+map04672	Immune system
+map04710	Environmental adaptation
+map04711	Environmental adaptation
+map04712	Environmental adaptation
+map04713	Environmental adaptation
+map04714	Environmental adaptation
+map04720	Nervous system
+map04721	Nervous system
+map04722	Nervous system
+map04723	Nervous system
+map04724	Nervous system
+map04725	Nervous system
+map04726	Nervous system
+map04727	Nervous system
+map04728	Nervous system
+map04730	Nervous system
+map04740	Sensory system
+map04742	Sensory system
+map04744	Sensory system
+map04745	Sensory system
+map04750	Sensory system
+map04810	Cell motility
+map04910	Endocrine system
+map04911	Endocrine system
+map04912	Endocrine system
+map04913	Endocrine system
+map04914	Endocrine system
+map04915	Endocrine system
+map04916	Endocrine system
+map04917	Endocrine system
+map04918	Endocrine system
+map04919	Endocrine system
+map04920	Endocrine system
+map04921	Endocrine system
+map04922	Endocrine system
+map04923	Endocrine system
+map04924	Endocrine system
+map04925	Endocrine system
+map04926	Endocrine system
+map04927	Endocrine system
+map04928	Endocrine system
+map04930	Endocrine and metabolic diseases
+map04931	Endocrine and metabolic diseases
+map04932	Endocrine and metabolic diseases
+map04933	Endocrine and metabolic diseases
+map04934	Endocrine and metabolic diseases
+map04940	Endocrine and metabolic diseases
+map04950	Endocrine and metabolic diseases
+map04960	Excretory system
+map04961	Excretory system
+map04962	Excretory system
+map04964	Excretory system
+map04966	Excretory system
+map04970	Digestive system
+map04971	Digestive system
+map04972	Digestive system
+map04973	Digestive system
+map04974	Digestive system
+map04975	Digestive system
+map04976	Digestive system
+map04977	Digestive system
+map04978	Digestive system
+map04979	Digestive system
+map05010	Neurodegenerative diseases
+map05012	Neurodegenerative diseases
+map05014	Neurodegenerative diseases
+map05016	Neurodegenerative diseases
+map05020	Neurodegenerative diseases
+map05030	Substance dependence
+map05031	Substance dependence
+map05032	Substance dependence
+map05033	Substance dependence
+map05034	Substance dependence
+map05100	Infectious diseases: Bacterial
+map05110	Infectious diseases: Bacterial
+map05111	Cellular community - prokaryotes
+map05120	Infectious diseases: Bacterial
+map05130	Infectious diseases: Bacterial
+map05131	Infectious diseases: Bacterial
+map05132	Infectious diseases: Bacterial
+map05133	Infectious diseases: Bacterial
+map05134	Infectious diseases: Bacterial
+map05140	Infectious diseases: Parasitic
+map05142	Infectious diseases: Parasitic
+map05143	Infectious diseases: Parasitic
+map05144	Infectious diseases: Parasitic
+map05145	Infectious diseases: Parasitic
+map05146	Infectious diseases: Parasitic
+map05150	Infectious diseases: Bacterial
+map05152	Infectious diseases: Bacterial
+map05160	Infectious diseases: Viral
+map05161	Infectious diseases: Viral
+map05162	Infectious diseases: Viral
+map05163	Infectious diseases: Viral
+map05164	Infectious diseases: Viral
+map05165	Infectious diseases: Viral
+map05166	Infectious diseases: Viral
+map05167	Infectious diseases: Viral
+map05168	Infectious diseases: Viral
+map05169	Infectious diseases: Viral
+map05170	Infectious diseases: Viral
+map05200	Cancers: Overview
+map05202	Cancers: Overview
+map05203	Cancers: Overview
+map05204	Cancers: Overview
+map05205	Cancers: Overview
+map05206	Cancers: Overview
+map05210	Cancers: Specific types
+map05211	Cancers: Specific types
+map05212	Cancers: Specific types
+map05213	Cancers: Specific types
+map05214	Cancers: Specific types
+map05215	Cancers: Specific types
+map05216	Cancers: Specific types
+map05217	Cancers: Specific types
+map05218	Cancers: Specific types
+map05219	Cancers: Specific types
+map05220	Cancers: Specific types
+map05221	Cancers: Specific types
+map05222	Cancers: Specific types
+map05223	Cancers: Specific types
+map05224	Cancers: Specific types
+map05225	Cancers: Specific types
+map05226	Cancers: Specific types
+map05230	Cancers: Overview
+map05231	Cancers: Overview
+map05310	Immune diseases
+map05320	Immune diseases
+map05321	Immune diseases
+map05322	Immune diseases
+map05323	Immune diseases
+map05330	Immune diseases
+map05332	Immune diseases
+map05340	Immune diseases
+map05410	Cardiovascular diseases
+map05412	Cardiovascular diseases
+map05414	Cardiovascular diseases
+map05416	Cardiovascular diseases
+map05418	Cardiovascular diseases
+map07011	Chronology: Antiinfectives
+map07012	Chronology: Antiinfectives
+map07013	Chronology: Antiinfectives
+map07014	Chronology: Antiinfectives
+map07015	Chronology: Nervous system agents
+map07016	Chronology: Other drugs
+map07017	Chronology: Other drugs
+map07018	Chronology: Other drugs
+map07019	Chronology: Antiinfectives
+map07020	Chronology: Antiinfectives
+map07021	Chronology: Antiinfectives
+map07023	Chronology: Antiinfectives
+map07024	Target-based classification: Enzymes
+map07025	Structure-based classification
+map07026	Chronology: Antiinfectives
+map07027	Chronology: Nervous system agents
+map07028	Chronology: Nervous system agents
+map07029	Chronology: Nervous system agents
+map07030	Chronology: Nervous system agents
+map07031	Chronology: Nervous system agents
+map07032	Chronology: Nervous system agents
+map07033	Chronology: Nervous system agents
+map07034	Structure-based classification
+map07035	Structure-based classification
+map07036	Target-based classification: Ion channels
+map07037	Chronology: Other drugs
+map07038	Chronology: Other drugs
+map07039	Chronology: Nervous system agents
+map07040	Chronology: Antineoplastics
+map07041	Chronology: Antineoplastics
+map07042	Chronology: Antineoplastics
+map07043	Chronology: Antineoplastics
+map07044	Chronology: Antiinfectives
+map07045	Chronology: Antineoplastics
+map07046	Chronology: Other drugs
+map07047	Chronology: Other drugs
+map07048	Chronology: Other drugs
+map07049	Chronology: Other drugs
+map07050	Chronology: Other drugs
+map07051	Chronology: Other drugs
+map07052	Chronology: Other drugs
+map07053	Chronology: Antiinfectives
+map07054	Chronology: Other drugs
+map07055	Chronology: Other drugs
+map07056	Chronology: Nervous system agents
+map07057	Chronology: Nervous system agents
+map07110	Skeleton-based classification
+map07112	Skeleton-based classification
+map07114	Skeleton-based classification
+map07117	Skeleton-based classification
+map07211	Target-based classification: G protein-coupled receptors
+map07212	Target-based classification: G protein-coupled receptors
+map07213	Target-based classification: G protein-coupled receptors
+map07214	Target-based classification: G protein-coupled receptors
+map07215	Target-based classification: G protein-coupled receptors
+map07216	Target-based classification: Enzymes
+map07217	Target-based classification: Enzymes
+map07218	Target-based classification: Enzymes
+map07219	Target-based classification: Enzymes
+map07220	Target-based classification: G protein-coupled receptors
+map07221	Target-based classification: Ion channels
+map07222	Target-based classification: Nuclear receptors
+map07223	Target-based classification: Nuclear receptors
+map07224	Target-based classification: G protein-coupled receptors
+map07225	Target-based classification: Nuclear receptors
+map07226	Target-based classification: Nuclear receptors
+map07227	Target-based classification: G protein-coupled receptors
+map07228	Target-based classification: G protein-coupled receptors
+map07229	Target-based classification: G protein-coupled receptors
+map07230	Target-based classification: Ion channels
+map07231	Target-based classification: Ion channels
+map07232	Target-based classification: Ion channels
+map07233	Target-based classification: Transporters
+map07234	Target-based classification: Transporters
+map07235	Target-based classification: Ion channels

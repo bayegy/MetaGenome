@@ -1,0 +1,530 @@
+map00010	Metabolism
+map00020	Metabolism
+map00030	Metabolism
+map00040	Metabolism
+map00051	Metabolism
+map00052	Metabolism
+map00053	Metabolism
+map00061	Metabolism
+map00062	Metabolism
+map00071	Metabolism
+map00072	Metabolism
+map00073	Metabolism
+map00100	Metabolism
+map00120	Metabolism
+map00121	Metabolism
+map00130	Metabolism
+map00140	Metabolism
+map00190	Metabolism
+map00195	Metabolism
+map00196	Metabolism
+map00220	Metabolism
+map00230	Metabolism
+map00231	Metabolism
+map00232	Metabolism
+map00240	Metabolism
+map00250	Metabolism
+map00253	Metabolism
+map00254	Metabolism
+map00260	Metabolism
+map00261	Metabolism
+map00270	Metabolism
+map00280	Metabolism
+map00281	Metabolism
+map00290	Metabolism
+map00300	Metabolism
+map00310	Metabolism
+map00311	Metabolism
+map00330	Metabolism
+map00331	Metabolism
+map00332	Metabolism
+map00333	Metabolism
+map00340	Metabolism
+map00350	Metabolism
+map00360	Metabolism
+map00361	Metabolism
+map00362	Metabolism
+map00363	Metabolism
+map00364	Metabolism
+map00365	Metabolism
+map00380	Metabolism
+map00400	Metabolism
+map00401	Metabolism
+map00402	Metabolism
+map00403	Metabolism
+map00404	Metabolism
+map00405	Metabolism
+map00410	Metabolism
+map00430	Metabolism
+map00440	Metabolism
+map00450	Metabolism
+map00460	Metabolism
+map00471	Metabolism
+map00472	Metabolism
+map00473	Metabolism
+map00480	Metabolism
+map00500	Metabolism
+map00510	Metabolism
+map00511	Metabolism
+map00512	Metabolism
+map00513	Metabolism
+map00514	Metabolism
+map00515	Metabolism
+map00520	Metabolism
+map00521	Metabolism
+map00522	Metabolism
+map00523	Metabolism
+map00524	Metabolism
+map00525	Metabolism
+map00531	Metabolism
+map00532	Metabolism
+map00533	Metabolism
+map00534	Metabolism
+map00540	Metabolism
+map00550	Metabolism
+map00561	Metabolism
+map00562	Metabolism
+map00563	Metabolism
+map00564	Metabolism
+map00565	Metabolism
+map00571	Metabolism
+map00572	Metabolism
+map00590	Metabolism
+map00591	Metabolism
+map00592	Metabolism
+map00600	Metabolism
+map00601	Metabolism
+map00603	Metabolism
+map00604	Metabolism
+map00620	Metabolism
+map00621	Metabolism
+map00622	Metabolism
+map00623	Metabolism
+map00624	Metabolism
+map00625	Metabolism
+map00626	Metabolism
+map00627	Metabolism
+map00630	Metabolism
+map00633	Metabolism
+map00640	Metabolism
+map00642	Metabolism
+map00643	Metabolism
+map00650	Metabolism
+map00660	Metabolism
+map00670	Metabolism
+map00680	Metabolism
+map00710	Metabolism
+map00720	Metabolism
+map00730	Metabolism
+map00740	Metabolism
+map00750	Metabolism
+map00760	Metabolism
+map00770	Metabolism
+map00780	Metabolism
+map00785	Metabolism
+map00790	Metabolism
+map00791	Metabolism
+map00830	Metabolism
+map00860	Metabolism
+map00900	Metabolism
+map00901	Metabolism
+map00902	Metabolism
+map00903	Metabolism
+map00904	Metabolism
+map00905	Metabolism
+map00906	Metabolism
+map00908	Metabolism
+map00909	Metabolism
+map00910	Metabolism
+map00920	Metabolism
+map00930	Metabolism
+map00940	Metabolism
+map00941	Metabolism
+map00942	Metabolism
+map00943	Metabolism
+map00944	Metabolism
+map00945	Metabolism
+map00950	Metabolism
+map00960	Metabolism
+map00965	Metabolism
+map00966	Metabolism
+map00970	Genetic Information Processing
+map00980	Metabolism
+map00981	Metabolism
+map00982	Metabolism
+map00983	Metabolism
+map00984	Metabolism
+map00999	Metabolism
+map01010	Metabolism
+map01040	Metabolism
+map01051	Metabolism
+map01052	Metabolism
+map01053	Metabolism
+map01054	Metabolism
+map01055	Metabolism
+map01056	Metabolism
+map01057	Metabolism
+map01058	Metabolism
+map01059	Metabolism
+map01060	Metabolism
+map01061	Metabolism
+map01062	Metabolism
+map01063	Metabolism
+map01064	Metabolism
+map01065	Metabolism
+map01066	Metabolism
+map01070	Metabolism
+map01100	Metabolism
+map01110	Metabolism
+map01120	Metabolism
+map01130	Metabolism
+map01200	Metabolism
+map01210	Metabolism
+map01212	Metabolism
+map01220	Metabolism
+map01230	Metabolism
+map01501	Human Diseases
+map01502	Human Diseases
+map01503	Human Diseases
+map01521	Human Diseases
+map01522	Human Diseases
+map01523	Human Diseases
+map01524	Human Diseases
+map02010	Genetic Information Processing
+map02020	Genetic Information Processing
+map02024	Cellular Processes
+map02025	Cellular Processes
+map02026	Cellular Processes
+map02030	Cellular Processes
+map02040	Cellular Processes
+map02060	Genetic Information Processing
+map03008	Genetic Information Processing
+map03010	Genetic Information Processing
+map03013	Genetic Information Processing
+map03015	Genetic Information Processing
+map03018	Genetic Information Processing
+map03020	Genetic Information Processing
+map03022	Genetic Information Processing
+map03030	Genetic Information Processing
+map03040	Genetic Information Processing
+map03050	Genetic Information Processing
+map03060	Genetic Information Processing
+map03070	Genetic Information Processing
+map03320	Organismal Systems
+map03410	Genetic Information Processing
+map03420	Genetic Information Processing
+map03430	Genetic Information Processing
+map03440	Genetic Information Processing
+map03450	Genetic Information Processing
+map03460	Genetic Information Processing
+map04010	Genetic Information Processing
+map04011	Genetic Information Processing
+map04012	Genetic Information Processing
+map04013	Genetic Information Processing
+map04014	Genetic Information Processing
+map04015	Genetic Information Processing
+map04016	Genetic Information Processing
+map04020	Genetic Information Processing
+map04022	Genetic Information Processing
+map04024	Genetic Information Processing
+map04060	Genetic Information Processing
+map04062	Organismal Systems
+map04064	Genetic Information Processing
+map04066	Genetic Information Processing
+map04068	Genetic Information Processing
+map04070	Genetic Information Processing
+map04071	Genetic Information Processing
+map04072	Genetic Information Processing
+map04075	Genetic Information Processing
+map04080	Genetic Information Processing
+map04110	Cellular Processes
+map04111	Cellular Processes
+map04112	Cellular Processes
+map04113	Cellular Processes
+map04114	Cellular Processes
+map04115	Cellular Processes
+map04120	Genetic Information Processing
+map04122	Genetic Information Processing
+map04130	Genetic Information Processing
+map04136	Cellular Processes
+map04137	Cellular Processes
+map04138	Cellular Processes
+map04139	Cellular Processes
+map04140	Cellular Processes
+map04141	Genetic Information Processing
+map04142	Cellular Processes
+map04144	Cellular Processes
+map04145	Cellular Processes
+map04146	Cellular Processes
+map04150	Genetic Information Processing
+map04151	Genetic Information Processing
+map04152	Genetic Information Processing
+map04210	Cellular Processes
+map04211	Organismal Systems
+map04212	Organismal Systems
+map04213	Organismal Systems
+map04214	Cellular Processes
+map04215	Cellular Processes
+map04216	Cellular Processes
+map04217	Cellular Processes
+map04218	Cellular Processes
+map04260	Organismal Systems
+map04261	Organismal Systems
+map04270	Organismal Systems
+map04310	Genetic Information Processing
+map04320	Organismal Systems
+map04330	Genetic Information Processing
+map04340	Genetic Information Processing
+map04341	Genetic Information Processing
+map04350	Genetic Information Processing
+map04360	Organismal Systems
+map04370	Genetic Information Processing
+map04371	Genetic Information Processing
+map04380	Organismal Systems
+map04390	Genetic Information Processing
+map04391	Genetic Information Processing
+map04392	Genetic Information Processing
+map04510	Cellular Processes
+map04512	Genetic Information Processing
+map04514	Genetic Information Processing
+map04520	Cellular Processes
+map04530	Cellular Processes
+map04540	Cellular Processes
+map04550	Cellular Processes
+map04610	Organismal Systems
+map04611	Organismal Systems
+map04612	Organismal Systems
+map04614	Organismal Systems
+map04620	Organismal Systems
+map04621	Organismal Systems
+map04622	Organismal Systems
+map04623	Organismal Systems
+map04624	Organismal Systems
+map04625	Organismal Systems
+map04626	Organismal Systems
+map04630	Genetic Information Processing
+map04640	Organismal Systems
+map04650	Organismal Systems
+map04657	Organismal Systems
+map04658	Organismal Systems
+map04659	Organismal Systems
+map04660	Organismal Systems
+map04662	Organismal Systems
+map04664	Organismal Systems
+map04666	Organismal Systems
+map04668	Genetic Information Processing
+map04670	Organismal Systems
+map04672	Organismal Systems
+map04710	Organismal Systems
+map04711	Organismal Systems
+map04712	Organismal Systems
+map04713	Organismal Systems
+map04714	Organismal Systems
+map04720	Organismal Systems
+map04721	Organismal Systems
+map04722	Organismal Systems
+map04723	Organismal Systems
+map04724	Organismal Systems
+map04725	Organismal Systems
+map04726	Organismal Systems
+map04727	Organismal Systems
+map04728	Organismal Systems
+map04730	Organismal Systems
+map04740	Organismal Systems
+map04742	Organismal Systems
+map04744	Organismal Systems
+map04745	Organismal Systems
+map04750	Organismal Systems
+map04810	Cellular Processes
+map04910	Organismal Systems
+map04911	Organismal Systems
+map04912	Organismal Systems
+map04913	Organismal Systems
+map04914	Organismal Systems
+map04915	Organismal Systems
+map04916	Organismal Systems
+map04917	Organismal Systems
+map04918	Organismal Systems
+map04919	Organismal Systems
+map04920	Organismal Systems
+map04921	Organismal Systems
+map04922	Organismal Systems
+map04923	Organismal Systems
+map04924	Organismal Systems
+map04925	Organismal Systems
+map04926	Organismal Systems
+map04927	Organismal Systems
+map04928	Organismal Systems
+map04930	Human Diseases
+map04931	Human Diseases
+map04932	Human Diseases
+map04933	Human Diseases
+map04934	Human Diseases
+map04940	Human Diseases
+map04950	Human Diseases
+map04960	Organismal Systems
+map04961	Organismal Systems
+map04962	Organismal Systems
+map04964	Organismal Systems
+map04966	Organismal Systems
+map04970	Organismal Systems
+map04971	Organismal Systems
+map04972	Organismal Systems
+map04973	Organismal Systems
+map04974	Organismal Systems
+map04975	Organismal Systems
+map04976	Organismal Systems
+map04977	Organismal Systems
+map04978	Organismal Systems
+map04979	Organismal Systems
+map05010	Human Diseases
+map05012	Human Diseases
+map05014	Human Diseases
+map05016	Human Diseases
+map05020	Human Diseases
+map05030	Human Diseases
+map05031	Human Diseases
+map05032	Human Diseases
+map05033	Human Diseases
+map05034	Human Diseases
+map05100	Human Diseases
+map05110	Human Diseases
+map05111	Cellular Processes
+map05120	Human Diseases
+map05130	Human Diseases
+map05131	Human Diseases
+map05132	Human Diseases
+map05133	Human Diseases
+map05134	Human Diseases
+map05140	Human Diseases
+map05142	Human Diseases
+map05143	Human Diseases
+map05144	Human Diseases
+map05145	Human Diseases
+map05146	Human Diseases
+map05150	Human Diseases
+map05152	Human Diseases
+map05160	Human Diseases
+map05161	Human Diseases
+map05162	Human Diseases
+map05163	Human Diseases
+map05164	Human Diseases
+map05165	Human Diseases
+map05166	Human Diseases
+map05167	Human Diseases
+map05168	Human Diseases
+map05169	Human Diseases
+map05170	Human Diseases
+map05200	Human Diseases
+map05202	Human Diseases
+map05203	Human Diseases
+map05204	Human Diseases
+map05205	Human Diseases
+map05206	Human Diseases
+map05210	Human Diseases
+map05211	Human Diseases
+map05212	Human Diseases
+map05213	Human Diseases
+map05214	Human Diseases
+map05215	Human Diseases
+map05216	Human Diseases
+map05217	Human Diseases
+map05218	Human Diseases
+map05219	Human Diseases
+map05220	Human Diseases
+map05221	Human Diseases
+map05222	Human Diseases
+map05223	Human Diseases
+map05224	Human Diseases
+map05225	Human Diseases
+map05226	Human Diseases
+map05230	Human Diseases
+map05231	Human Diseases
+map05310	Human Diseases
+map05320	Human Diseases
+map05321	Human Diseases
+map05322	Human Diseases
+map05323	Human Diseases
+map05330	Human Diseases
+map05332	Human Diseases
+map05340	Human Diseases
+map05410	Human Diseases
+map05412	Human Diseases
+map05414	Human Diseases
+map05416	Human Diseases
+map05418	Human Diseases
+map07011	Drug Development
+map07012	Drug Development
+map07013	Drug Development
+map07014	Drug Development
+map07015	Drug Development
+map07016	Drug Development
+map07017	Drug Development
+map07018	Drug Development
+map07019	Drug Development
+map07020	Drug Development
+map07021	Drug Development
+map07023	Drug Development
+map07024	Drug Development
+map07025	Drug Development
+map07026	Drug Development
+map07027	Drug Development
+map07028	Drug Development
+map07029	Drug Development
+map07030	Drug Development
+map07031	Drug Development
+map07032	Drug Development
+map07033	Drug Development
+map07034	Drug Development
+map07035	Drug Development
+map07036	Drug Development
+map07037	Drug Development
+map07038	Drug Development
+map07039	Drug Development
+map07040	Drug Development
+map07041	Drug Development
+map07042	Drug Development
+map07043	Drug Development
+map07044	Drug Development
+map07045	Drug Development
+map07046	Drug Development
+map07047	Drug Development
+map07048	Drug Development
+map07049	Drug Development
+map07050	Drug Development
+map07051	Drug Development
+map07052	Drug Development
+map07053	Drug Development
+map07054	Drug Development
+map07055	Drug Development
+map07056	Drug Development
+map07057	Drug Development
+map07110	Drug Development
+map07112	Drug Development
+map07114	Drug Development
+map07117	Drug Development
+map07211	Drug Development
+map07212	Drug Development
+map07213	Drug Development
+map07214	Drug Development
+map07215	Drug Development
+map07216	Drug Development
+map07217	Drug Development
+map07218	Drug Development
+map07219	Drug Development
+map07220	Drug Development
+map07221	Drug Development
+map07222	Drug Development
+map07223	Drug Development
+map07224	Drug Development
+map07225	Drug Development
+map07226	Drug Development
+map07227	Drug Development
+map07228	Drug Development
+map07229	Drug Development
+map07230	Drug Development
+map07231	Drug Development
+map07232	Drug Development
+map07233	Drug Development
+map07234	Drug Development
+map07235	Drug Development

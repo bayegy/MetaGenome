@@ -30,7 +30,12 @@ path = {
     "adapters_path": "/home/cheng/pipelines/MetaGenome/data/adaptor_Illumina.fa",
     "transeq_path": "/home/cheng/softwares/miniconda2/bin/transeq",
     "emapper_path": "/home/cheng/softwares/miniconda2/bin/emapper.py",
-    "fastqc_home": "/home/cheng/softwares/fastqc/FastQC/"
+    "fastqc_home": "/home/cheng/softwares/fastqc/FastQC/",
+    "python3_path": "/usr/bin/python3",
+    "R_path": "/usr/bin/Rscript",
+    "perl_path": "/usr/bin/perl",
+    "qiime2_home": "/home/cheng/miniconda2/envs/qiime2-2019.4/",
+    "lefse_home": "/home/cheng/softwares/miniconda2/share/lefse-1.0.8.post1-1",
 }
 
 memery_needs = {
