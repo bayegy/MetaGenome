@@ -229,7 +229,7 @@ echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.
         os.system(
             self.homized_cmd("perl Braken_to_OTUtable.pl {} {}".format(self.ncbi_taxaID_path, self.running_list)))
 
-    def clean_header(self, tb_name, pattern, skip=[]):
+    def clean_header(self, tb_name, pattern="_.*$", skip=[]):
         df = pd.read_csv(tb_name, sep='\t')
         df.columns = [re.sub(pattern, '', c) for c in df.columns]
         df.drop(index=skip).to_csv(tb_name, sep="\t", index=False)
@@ -260,14 +260,13 @@ echo '{humann2_home}/humann2 --input {r1} \
   --threads {threads} --memory-use  maximum \
   --output-basename {sample} \
   --output {humann2_out} \
-  --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database}" \
-  --remove-column-description-output' \
+  --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database} --sample_id {sample}" ' \
   | qsub -V -N {sample} -o {humann2_out} -e {humann2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
 
     def humann2_callback(self):
         self.system(
-            "mv {humann2_out}/*/*genefamilies.tsv {humann2_out}/*/*pathabundance.tsv {humann2_out}/*/*bugs_list.tsv {humann2_out}/")
+            "mv {humann2_out}/*/*bugs_list.tsv {humann2_out}/")
         for e in os.listdir(self.humann2_out):
             path = os.path.join(self.humann2_out, e)
             if os.path.isdir(path):
@@ -278,12 +277,9 @@ echo '{humann2_home}/humann2 --input {r1} \
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {metaphlan_out}/All.Metaphlan2.profile.txt --file_name bugs_list.tsv''')
-        self.clean_header(self.humann2_out + "/RPK.All.UniRef90.genefamilies.tsv",
-                          pattern='_.*Abundance.*$')
-        self.clean_header(self.humann2_out + "/RPK.All.Metacyc.pathabundance.tsv",
-                          pattern='_.*Abundance.*$')
-        self.clean_header(self.metaphlan_out + "/All.Metaphlan2.profile.txt",
-                          pattern='_.*Abundance.*$')
+        self.clean_header(self.humann2_out + "/RPK.All.UniRef90.genefamilies.tsv")
+        self.clean_header(self.humann2_out + "/RPK.All.Metacyc.pathabundance.tsv")
+        self.clean_header(self.metaphlan_out + "/All.Metaphlan2.profile.txt")
 
     def set_fmap_db(self, database):
         with open(self.fmap_home + '/FMAP_data/database', 'w') as f:
@@ -435,10 +431,12 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             ("SeqStrategy", "(150:150)"),
         ])
         raw_fqc = self.find_file(
-            target_dir, "reformatted.*_{}_R1_fastqc.html".format(sample_id))
+            target_dir, "^reformatted_identifier.+_{}_R1_fastqc.html$".format(sample_id))
+        print("The raw fastqc file of {} is {}".format(sample_id, raw_fqc))
         raw_num_reads, raw_gc_content = self.search_fqc(raw_fqc)
         clean_fqc = self.find_file(
-            target_dir, "{}_R\d.*paired_1_fastqc.html".format(sample_id))
+            target_dir, "^{}_R1_kneaddata_paired_1_fastqc.html$".format(sample_id))
+        print("The clean fastqc file of {} is {}".format(sample_id, clean_fqc))
         clean_num_reads, clean_gc_content = self.search_fqc(clean_fqc)
         raw_q20, raw_q30 = self.q20_q30(
             self.raw_pattern.format(sample_id=sample_id, direction="R1"))
@@ -498,7 +496,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         srcs = self.alloc_src("kneaddata")
         self.run_kneaddata(fq_list=self.paired_data(
             self.raw_pattern, srcs['sample_number']), callback=self.kneaddata_callback, **srcs['src'])
-        self.generate_qc_report(processors=20)
+        self.generate_qc_report(processors=8)
         srcs = self.alloc_src("kraken2")
         self.run_kraken2(fq_list=self.paired_data(self.clean_paired_pattern,
                                                   srcs['sample_number']), **srcs['src'])
