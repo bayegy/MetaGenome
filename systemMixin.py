@@ -1,5 +1,6 @@
 import time
 import os
+import re
 
 
 class PathNotExistsError(Exception):
@@ -36,13 +37,18 @@ class SystemMixin(object):
     def get_attrs(self, obj):
         return {attr: val for attr, val in obj.__dict__.items() if not attr.startswith('__')}
 
-    def system(self, cmd, **kwargs):
+    def system(self, cmd, escape_sge=False, **kwargs):
         if not hasattr(self, "context"):
             self.context = {}
         context = self.context.copy()
         context.update(kwargs)
         cmd = cmd.format(**context)
-        cmd_name = cmd.strip().split()[0]
+        cmd = cmd.strip()
+        if escape_sge:
+            cmd = re.sub('\|[^\|]+$', '', cmd)
+            cmd = re.sub('^echo', '', cmd)
+            cmd = cmd.strip(" |'")
+        cmd_name = cmd.split()[0]
         t1 = time.time()
         print("############Running command: {}\n{}\n".format(cmd_name, cmd))
         os.system(cmd)

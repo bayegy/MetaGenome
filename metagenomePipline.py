@@ -13,6 +13,66 @@ from concurrent.futures import ThreadPoolExecutor
 import uuid
 
 
+def sge_decorator(func):
+    """
+    对于被修饰的函数：fq_list参数值应是单个fq文件的路径（或路径对）
+    对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
+    """
+
+    def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
+        fq_list = split_list(fq_list, max_workers)
+        print("######################Running " + str(func))
+        start_time = time.time()
+        for fqs in fq_list:
+            for fq in fqs:
+                func(self, fq_list=fq, **kwargs)
+            time.sleep(first_check * 60)
+            while True:
+                if not list(os.popen("qstat")):
+                    break
+                time.sleep(60)
+            print("This run done! checking callback...")
+            if callback:
+                callback(**callback_kwargs)
+            if os.listdir(self.tmp_dir):
+                self.system("rm -r {tmp_dir}/*")
+        end_time = time.time()
+        time_used = (end_time - start_time) / 60
+        print("######################" + str(func) +
+              " done; time used: {} min".format(time_used))
+    return wfunc
+
+
+def pool_decorator(func):
+    """
+    对于被修饰的函数：fq_list参数值应是单个fq文件的路径（或路径对）
+    对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
+    """
+
+    def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
+        fq_list = split_list(fq_list, max_workers)
+        print("######################Running " + str(func))
+        start_time = time.time()
+        for fqs in fq_list:
+            executor = ThreadPoolExecutor(max_workers=max_workers)
+            for fq in fqs:
+                executor.submit(func, self, fq_list=fq, **kwargs)
+            executor.shutdown(True)
+            print("This run done! checking callback...")
+            if callback:
+                callback(**callback_kwargs)
+            if os.listdir(self.tmp_dir):
+                self.system("rm -r {tmp_dir}/*")
+        end_time = time.time()
+        time_used = (end_time - start_time) / 60
+        print("######################" + str(func) +
+              " done; time used: {} min".format(time_used))
+    return wfunc
+
+
+synchronize = sge_decorator if settings.use_sge else pool_decorator
+
+
 class RawDataNotPairedError(Exception):
     pass
 
@@ -100,6 +160,7 @@ class MetagenomePipline(SystemMixin):
         self.kracken2_reports_list = self.map_list(
             self.kracken2_reports_pattern, use_direction='R1')
         self.running_list = self.out_dir + '.running_list'
+        self.escape_sge = not settings.use_sge
 
     def format_raw(self, processors=3):
         executor = ThreadPoolExecutor(max_workers=processors)
@@ -152,35 +213,6 @@ class MetagenomePipline(SystemMixin):
                 source_file = os.path.join(root, fl)
                 os.system("mv '{}' '{}'".format(source_file, target_dir))
 
-    def synchronize(func):
-        """
-        对于被修饰的函数：fq_list参数值应是单个fq文件的路径（或路径对）
-        对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
-        """
-
-        def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
-            fq_list = split_list(fq_list, max_workers)
-            print("######################Running " + str(func))
-            start_time = time.time()
-            for fqs in fq_list:
-                for fq in fqs:
-                    func(self, fq_list=fq, **kwargs)
-                time.sleep(first_check * 60)
-                while True:
-                    if not list(os.popen("qstat")):
-                        break
-                    time.sleep(60)
-                print("This run done! checking callback...")
-                if callback:
-                    callback(**callback_kwargs)
-                if os.listdir(self.tmp_dir):
-                    self.system("rm -r {tmp_dir}/*")
-            end_time = time.time()
-            time_used = (end_time - start_time) / 60
-            print("######################" + str(func) +
-                  " done; time used: {} min".format(time_used))
-        return wfunc
-
     def homized_cmd(self, cmd, home=False):
         home = home or self.base_dir
         return "cd {}&&{}".format(home, cmd)
@@ -207,7 +239,7 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
  --bowtie2 {bowtie2_home} \
  --fastqc  {fastqc_home}' \
  | qsub -V -N {sample} -o {kneaddata_out} -e {kneaddata_out}
-            """, **self.parse_fq_list(fq_list), kneaddata_out=self.tmp_dir, threads=threads, mem=mem)
+            """, **self.parse_fq_list(fq_list), kneaddata_out=self.tmp_dir, threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def kneaddata_callback(self):
         self.mirror_move(self.tmp_dir, self.kneaddata_out)
@@ -218,7 +250,7 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
 echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.2 \
  --report {kraken2_out}/{sample}.report --paired {r1} {r2}' \
   | qsub -V -N {sample} -o {kraken2_out} -e {kraken2_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def run_bracken(self):
         bracken_list = [l + '.bracken' for l in self.kracken2_reports_list]
@@ -244,7 +276,7 @@ echo '{metaphlan2_home}/metaphlan2.py --input_type multifastq --bowtie2_exe {bow
  --nproc {threads} --bowtie2out {tmp_dir}/{sample}.bt2.out.txt {r1} \
  -o {metaphlan_out}/{sample}.metaphlan.profile.txt --sample_id {sample}' \
   | qsub -V -N {sample} -o {metaphlan_out} -e {metaphlan_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def join_metaphlan(self):
         tb_name = self.metaphlan_out + '/All.Metaphlan2.profile.txt'
@@ -263,7 +295,7 @@ echo '{humann2_home}/humann2 --input {r1} \
   --output {humann2_out} \
   --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database} --sample_id {sample}" ' \
   | qsub -V -N {sample} -o {humann2_out} -e {humann2_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def humann2_callback(self):
         self.system(
@@ -293,7 +325,7 @@ echo '{humann2_home}/humann2 --input {r1} \
         self.system("""
 echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
  qsub -V -N {sample} -o {fmap_out} -e {fmap_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def quantify_fmap(self, all_name="all.txt", print_definition=False):
         p = "" if print_definition else "-n"
@@ -354,7 +386,7 @@ sed -i 's/_1 / /' {assembly_out}/NR.protein.fa
         self.system("""
 echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} -o {salmon_out}/{sample}.quant' \
 | qsub -V -N {sample} -o {salmon_out} -e {salmon_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem)
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def join_gene(self):
         self.system(
@@ -493,14 +525,14 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-
+        """
         self.format_raw(processors=4)
         self.run_kneaddata(
             self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=8)
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-
+        """
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
