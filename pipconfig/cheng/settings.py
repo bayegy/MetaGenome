@@ -19,6 +19,7 @@ path = {
     "humann2_protein_database": "/home/cheng/Databases/humann2/uniref90_full",
     "humann2_nucleotide_database": "/home/cheng/Databases/humann2/chocophlan_full",
     "humann2_utility_mapping": "/home/cheng/Databases/humann2/utility_mapping",
+    "metaphlan2_database": "/home/cheng/softwares/miniconda2/bin/metaphlan_databases",
     "map_conf": "/home/cheng/Databases/map/",
     "kneaddata_path": "/home/cheng/miniconda2/bin/kneaddata",
     "trimmomatic_home": "/home/cheng/pipelines/Genome/softwares/Trimmomatic-0.39/",
@@ -35,17 +36,20 @@ path = {
     "R_path": "/usr/bin/Rscript",
     "perl_path": "/usr/bin/perl",
     "qiime2_home": "/home/cheng/miniconda2/envs/qiime2-2019.4/",
-    "lefse_home": "/home/cheng/softwares/miniconda2/share/lefse-1.0.8.post1-1",
+    "lefse_pylib_home": "/home/cheng/softwares/miniconda2/share/lefse-1.0.8.post1-1",
+    "lefse_rlib_home": "/home/cheng/softwares/miniconda2/envs/lefse/lib/R/library/",
+    "lefse_py_home": "/home/cheng/softwares/miniconda2/envs/lefse/bin",
 }
 
 memery_needs = {
-    "kneaddata": 10,
+    "kneaddata": 100,
     "kraken2": 70,
     "humann2": 45,
-    "fmap": 30,
+    "fmap": 40,
     "salmon": 80
 }
 
+
 memery = 500
 
-threads = 66
+threads = 63

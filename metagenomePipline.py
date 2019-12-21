@@ -89,12 +89,12 @@ class MetagenomePipline(SystemMixin):
         print("The detected categories are: \n\n{}\n".format(self.categories))
 
         self.raw_pattern = "%s/{sample_id}_{direction}.fq" % (self.raw_dir)
-        self.raw_list = self.paired_data(self.raw_pattern, 5)
+        self.raw_list = self.paired_data(self.raw_pattern)
         self.clean_paired_pattern = "%s/{sample_id}_R1_kneaddata_paired_{direction_num}.fastq" % (
             self.kneaddata_out)
-        self.clean_paired_r1_list = self.map_list(
-            self.clean_paired_pattern, 10, use_direction='R1')
-        self.clean_paired_list = self.paired_data(self.clean_paired_pattern, 5)
+        self.clean_r1_list = self.map_list(
+            self.clean_paired_pattern, use_direction='R1')
+        self.clean_paired_list = self.paired_data(self.clean_paired_pattern)
         self.kracken2_reports_pattern = "%s/{sample_id}.report" % (
             self.kraken2_out)
         self.kracken2_reports_list = self.map_list(
@@ -158,7 +158,8 @@ class MetagenomePipline(SystemMixin):
         对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
         """
 
-        def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, **kwargs):
+        def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
+            fq_list = split_list(fq_list, max_workers)
             print("######################Running " + str(func))
             start_time = time.time()
             for fqs in fq_list:
@@ -277,8 +278,10 @@ echo '{humann2_home}/humann2 --input {r1} \
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {metaphlan_out}/All.Metaphlan2.profile.txt --file_name bugs_list.tsv''')
-        self.clean_header(self.humann2_out + "/RPK.All.UniRef90.genefamilies.tsv")
-        self.clean_header(self.humann2_out + "/RPK.All.Metacyc.pathabundance.tsv")
+        self.clean_header(self.humann2_out +
+                          "/RPK.All.UniRef90.genefamilies.tsv")
+        self.clean_header(self.humann2_out +
+                          "/RPK.All.Metacyc.pathabundance.tsv")
         self.clean_header(self.metaphlan_out + "/All.Metaphlan2.profile.txt")
 
     def set_fmap_db(self, database):
@@ -394,11 +397,10 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         print("For {}:\nSample number per run is: {}\n Threads number per sample is {}\n Memery size per sample is {}".format(
             proc, sample_number, threads, memery_needs))
         return {
-            "sample_number": sample_number,
-            "src": {
-                "threads": threads,
-                "mem": memery_needs
-            }
+            "max_workers": sample_number,
+            "threads": threads,
+            "mem": memery_needs
+
         }
 
     def find_file(self, directory, pattern):
@@ -491,36 +493,27 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-        """
-        self.format_raw()
-        srcs = self.alloc_src("kneaddata")
-        self.run_kneaddata(fq_list=self.paired_data(
-            self.raw_pattern, srcs['sample_number']), callback=self.kneaddata_callback, **srcs['src'])
+
+        self.format_raw(processors=4)
+        self.run_kneaddata(
+            self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=8)
-        srcs = self.alloc_src("kraken2")
-        self.run_kraken2(fq_list=self.paired_data(self.clean_paired_pattern,
-                                                  srcs['sample_number']), **srcs['src'])
+        self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-        """
+
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
             self.create_gene_db(threads=self.threads)
-            srcs = self.alloc_src("salmon")
-            self.quant_gene(fq_list=self.paired_data(self.clean_paired_pattern,
-                                                     srcs['sample_number']), **srcs['src'], first_check=5)
+            self.quant_gene(self.clean_paired_list,
+                            first_check=5, **self.alloc_src("salmon"))
             self.join_gene()
             self.map_gene(threads=self.threads)
         else:
-
-            srcs = self.alloc_src("humann2")
-            self.run_humann2(fq_list=self.map_list(self.clean_paired_pattern,
-                                                   srcs['sample_number'], use_direction="R1"), callback=self.humann2_callback, **srcs['src'])
+            self.run_humann2(
+                self.clean_r1_list, callback=self.humann2_callback, **self.alloc_src("humann2"))
             self.join_humann()
-
-            # self.join_metaphlan()
-            srcs = self.alloc_src("fmap")
-            self.fmap_wrapper(fq_list=self.map_list(self.clean_paired_pattern,
-                                                    srcs['sample_number'], use_direction="R1"), run_type="AMR", **srcs['src'])
+            self.fmap_wrapper(self.clean_r1_list,
+                              run_type="AMR", **self.alloc_src("fmap"))
         self.visualize()
         self.clean()
