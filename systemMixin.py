@@ -1,6 +1,7 @@
 import time
 import os
 import re
+import subprocess
 
 
 class PathNotExistsError(Exception):
@@ -18,7 +19,8 @@ class SystemMixin(object):
                 if force:
                     os.makedirs(path)
                 else:
-                    raise PathNotExistsError("Set path failed! Path of {} : {} does not exists.".format(attr, path))
+                    raise PathNotExistsError(
+                        "Set path failed! Path of {} : {} does not exists.".format(attr, path))
             path = os.path.abspath(path)
             if os.path.isdir(path):
                 path = path + '/'
@@ -50,7 +52,10 @@ class SystemMixin(object):
             cmd = cmd.strip(" |'")
         cmd_name = cmd.split()[0]
         t1 = time.time()
-        print("############Running command: {}\n{}\n".format(cmd_name, cmd))
-        os.system(cmd)
+        print("\033[0;32;40m############Running command: {}\n{}\n\033[0m".format(
+            cmd_name, cmd))
+        # os.system(cmd)
+        subprocess.call(["bash", "-c", cmd])
         time_took = (time.time() - t1) / 60
-        print("############{} done, time took: {} minutes".format(cmd_name, time_took))
+        print("\033[0;32;40m############{} done, time took: {} minutes\033[0m".format(
+            cmd_name, time_took))

@@ -16,7 +16,8 @@ class VisualizeHumann(VisualizeFunction):
         if regroup or custom_to:
             ob = custom_to.upper() if custom_to else regroup.replace('uniref90_', '').upper()
             self.set_attr(prefix=prefix or ob + '_',
-                          pre_abundance_table="{}All.{}.abundance.tsv".format(self.out_dir, ob)
+                          pre_abundance_table="{}All.{}.abundance.tsv".format(
+                              self.out_dir, ob)
                           )
             self.system("{humann2_home}/humann2_regroup_table --input {abundance_table} {par} --output {pre_abundance_table}",
                         par="-c {}/map_{}_uniref90.txt.gz".format(self.humann2_utility_mapping, custom_to) if custom_to else '--groups ' + regroup)
@@ -24,15 +25,18 @@ class VisualizeHumann(VisualizeFunction):
         else:
             self.set_attr(pre_abundance_table=self.abundance_table)
 
-        self.system("{humann2_home}/humann2_split_stratified_table -i {pre_abundance_table} -o {out_dir}")
+        self.system(
+            "{humann2_home}/humann2_split_stratified_table -i {pre_abundance_table} -o {out_dir}")
         self.set_path(force=False, abundance_table="{}{}_unstratified.tsv".format(
             self.out_dir, self.get_file_name(self.pre_abundance_table)))
         df = pd.read_csv(self.abundance_table, sep='\t')
         if id_with_name:
             df['Description'] = df.iloc[:, 0]
-        df = df.loc[(i not in ['UNMAPPED', 'UNINTEGRATED', 'UniRef90_unknown', 'UNGROUPED'] for i in df.iloc[:, 0]), :]
+        df = df.loc[(i not in ['UNMAPPED', 'UNINTEGRATED',
+                               'UniRef90_unknown', 'UNGROUPED'] for i in df.iloc[:, 0]), :]
         if id_with_name:
-            df.iloc[:, 0] = [re.search('^[^:]*', i).group() for i in df.iloc[:, 0]]
+            df.iloc[:, 0] = [re.search('^[^:]*', i).group()
+                             for i in df.iloc[:, 0]]
         # pdb.set_trace()
         df.to_csv(self.abundance_table, sep='\t', index=False)
 
@@ -45,13 +49,16 @@ class VisualizeHumann(VisualizeFunction):
 
         for g in categories:
             print(g)
-            bar_out = "{}4-SignificanceAnalysis/LEfSe/SignificantFeatures/".format(self.out_dir)
+            bar_out = "{}4-SignificanceAnalysis/LEfSe/SignificantFeatures/".format(
+                self.out_dir)
             self.set_path(force=True, bar_out=bar_out)
 
             humann2_ft_lefse_lda = '{}4-SignificanceAnalysis/LEfSe/{}{}_lefse_LDA2.LDA.txt'.format(
                 self.out_dir, self.prefix, g)
-            self.set_path(force=False, humann2_ft_lefse_lda=humann2_ft_lefse_lda)
-            df = pd.read_csv(humann2_ft_lefse_lda, sep='\t', header=None, index_col=0)[2]
+            self.set_path(
+                force=False, humann2_ft_lefse_lda=humann2_ft_lefse_lda)
+            df = pd.read_csv(humann2_ft_lefse_lda, sep='\t',
+                             header=None, index_col=0)[2]
             df = df[df.notna()]
             bar_table = "{}table_for_stratification_bar.txt".format(bar_out)
             self.set_attr(bar_table=bar_table)

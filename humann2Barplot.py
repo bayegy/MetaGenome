@@ -1,4 +1,4 @@
-#!/home/cheng/softwares/miniconda2/bin/python
+#!/usr/bin/env python
 
 """
 HUMAnN2 Plotting Tool
@@ -21,7 +21,8 @@ try:
     import numpy as np
     import scipy.cluster.hierarchy as sch
 except:
-    sys.exit("This script requires the Python scientific stack: numpy, scipy, and matplotlib.")
+    sys.exit(
+        "This script requires the Python scientific stack: numpy, scipy, and matplotlib.")
 
 # ---------------------------------------------------------------
 # global constants
@@ -75,7 +76,8 @@ def get_args():
                         metavar="<sorting methods>",
                         nargs="+",
                         default=["none"],
-                        choices=["none", "sum", "dominant", "similarity", "usimilarity", "metadata"],
+                        choices=["none", "sum", "dominant",
+                                 "similarity", "usimilarity", "metadata"],
                         help=c_sort_help, )
     parser.add_argument("-l", "--last-metadatum",
                         metavar="<feature>",
@@ -208,7 +210,8 @@ class FeatureTable:
                     feature_id = feature.split(": ")[0]
                     if focus is None:
                         focus = feature_id
-                        sys.stderr.write("No feature selected; defaulting to 1st feature: " + feature + "\n")
+                        sys.stderr.write(
+                            "No feature selected; defaulting to 1st feature: " + feature + "\n")
                     if focus != feature_id:
                         continue
                     else:
@@ -233,11 +236,14 @@ class FeatureTable:
             self.rowmap[h] = i
         for i, h in zip(range(self.ncols), self.colheads):
             self.colmap[h] = i
-        assert self.nrows == len(self.rowheads) == len(self.rowmap), "row dim failure"
-        assert self.ncols == len(self.colheads) == len(self.colmap), "col dim failure"
+        assert self.nrows == len(self.rowheads) == len(
+            self.rowmap), "row dim failure"
+        assert self.ncols == len(self.colheads) == len(
+            self.colmap), "col dim failure"
 
     def as_genera(self):
-        sys.stderr.write("Regrouping to genera (before selecting/sorting strata)\n")
+        sys.stderr.write(
+            "Regrouping to genera (before selecting/sorting strata)\n")
         temp = {}
         for rowhead, row in zip(self.rowheads, self.data):
             rowhead = rowhead.split(".")[0]
@@ -260,10 +266,12 @@ class FeatureTable:
         elif method == "similarity":
             norm = self.data / (self.colsums + c_epsilon * np.ones(self.ncols))
             # note: linkage assumes things to cluster = rows; we want cols
-            order = sch.leaves_list(sch.linkage(norm.transpose(), metric="braycurtis"))
+            order = sch.leaves_list(sch.linkage(
+                norm.transpose(), metric="braycurtis"))
         elif method == "usimilarity":
             # note: linkage assumes things to cluster = rows; we want cols
-            order = sch.leaves_list(sch.linkage(self.data.transpose(), metric="braycurtis"))
+            order = sch.leaves_list(sch.linkage(
+                self.data.transpose(), metric="braycurtis"))
         elif method == "dominant":
             maxes = [(max(self.data[i, :]), i) for i in range(self.nrows)]
             maxes.sort()
@@ -272,10 +280,13 @@ class FeatureTable:
                 ranks[i2] = i
             argmax = []
             for c in range(self.ncols):
-                argmax.append(sorted(range(self.nrows), key=lambda r: self.data[r][c])[-1])
-            order = sorted(range(self.ncols), key=lambda c: (ranks[argmax[c]], self.data[argmax[c], c]), reverse=True)
+                argmax.append(sorted(range(self.nrows),
+                                     key=lambda r: self.data[r][c])[-1])
+            order = sorted(range(self.ncols), key=lambda c: (
+                ranks[argmax[c]], self.data[argmax[c], c]), reverse=True)
         elif method == "sum":
-            order = sorted(range(self.ncols), key=lambda c: self.colsums[c], reverse=True)
+            order = sorted(range(self.ncols),
+                           key=lambda c: self.colsums[c], reverse=True)
         elif method == "metadata":
             order = sorted(range(self.ncols), key=lambda c: self.metarow[c])
         else:
@@ -364,13 +375,18 @@ def main():
     fig = plt.figure()
     fig.set_size_inches(*args.dimensions)
     if table.metarow is not None:
-        main_ax = plt.subplot2grid((c_hunits, wunits), (0, 0), rowspan=c_hunits - 1, colspan=wunits - 1)
-        anno_ax = plt.subplot2grid((c_hunits, wunits), (0, wunits - 1), rowspan=c_hunits, colspan=1)
-        meta_ax = plt.subplot2grid((c_hunits, wunits), (c_hunits - 1, 0), rowspan=1, colspan=wunits - 1)
+        main_ax = plt.subplot2grid(
+            (c_hunits, wunits), (0, 0), rowspan=c_hunits - 1, colspan=wunits - 1)
+        anno_ax = plt.subplot2grid(
+            (c_hunits, wunits), (0, wunits - 1), rowspan=c_hunits, colspan=1)
+        meta_ax = plt.subplot2grid(
+            (c_hunits, wunits), (c_hunits - 1, 0), rowspan=1, colspan=wunits - 1)
         dummy(meta_ax, border=True)
     else:
-        main_ax = plt.subplot2grid((1, wunits), (0, 0), rowspan=1, colspan=wunits - 1)
-        anno_ax = plt.subplot2grid((1, wunits), (0, wunits - 1), rowspan=1, colspan=1)
+        main_ax = plt.subplot2grid(
+            (1, wunits), (0, 0), rowspan=1, colspan=wunits - 1)
+        anno_ax = plt.subplot2grid(
+            (1, wunits), (0, wunits - 1), rowspan=1, colspan=1)
     dummy(anno_ax)
     anno_ax.set_xlim(0, 1)
     anno_ax.set_ylim(0, 1)
@@ -378,7 +394,8 @@ def main():
     # setup: strata colors
     cdict = {"Other": "0.5", "Unclassified": "0.8"}
     if os.path.exists(args.colormap):
-        sys.stderr.write("Reading strata colors from file: {}\n".format(args.colormap))
+        sys.stderr.write(
+            "Reading strata colors from file: {}\n".format(args.colormap))
         for item, color in tsv_reader(args.colormap):
             if item not in cdict:
                 cdict[item] = color
@@ -404,11 +421,14 @@ def main():
         main_ax.set_ylim(0, 1)
     elif args.scaling == "pseudolog":
         ylabel = "log10(Relative abundance)"
-        ymin = min([k for k in table.colsums if k > 0]) if args.ylims[0] is None else args.ylims[0]
+        ymin = min([k for k in table.colsums if k > 0]
+                   ) if args.ylims[0] is None else args.ylims[0]
         floor = math.floor(np.log10(ymin))
-        floor = floor if abs(np.log10(ymin) - floor) >= c_epsilon else floor - 1
+        floor = floor if abs(
+            np.log10(ymin) - floor) >= c_epsilon else floor - 1
         floors = floor * np.ones(table.ncols)
-        crests = np.array([np.log10(k) if k > 10**floor else floor for k in table.colsums])
+        crests = np.array(
+            [np.log10(k) if k > 10**floor else floor for k in table.colsums])
         heights = crests - floors
         table.data = table.data / table.colsums * heights
         ymax = max(table.colsums) if args.ylims[1] is None else args.ylims[1]
@@ -434,7 +454,8 @@ def main():
     from getColors import get_colors as get_colors1
     if table.metarow is not None:
         if os.path.exists(args.meta_colormap):
-            sys.stderr.write("Reading meta colors from file: {}\n".format(args.meta_colormap))
+            sys.stderr.write(
+                "Reading meta colors from file: {}\n".format(args.meta_colormap))
             mcdict = {}
             for item, color in tsv_reader(args.meta_colormap):
                 mcdict[item] = color
@@ -477,8 +498,10 @@ def main():
     main_ax.set_title(table.fname, weight="bold")
     main_ax.set_ylabel(ylabel, size=12)
     # tick params
-    main_ax.tick_params(axis="x", which="major", direction="out", bottom="on", top="off")
-    main_ax.tick_params(axis="y", which="major", direction="out", left="on", right="off")
+    main_ax.tick_params(axis="x", which="major",
+                        direction="out", bottom="on", top="off")
+    main_ax.tick_params(axis="y", which="major",
+                        direction="out", left="on", right="off")
     main_ax.set_xticks([])
 
     # pseudolog note
@@ -512,7 +535,8 @@ def main():
 
     def add_items(title, labels, colors, ydex, bugmode=False):
         ydex -= ybuf
-        anno_ax.text(xmar, ydex, title, weight="bold", va="center", size=big_font)
+        anno_ax.text(xmar, ydex, title, weight="bold",
+                     va="center", size=big_font)
         ydex -= ybuf
         for l, c in zip(labels, colors):
             anno_ax.add_patch(
@@ -530,7 +554,8 @@ def main():
                 l,
                 size=sml_font,
                 va="center",
-                style="italic" if (bugmode and l not in ["Unclassified", "Other"]) else "normal",
+                style="italic" if (bugmode and l not in [
+                                   "Unclassified", "Other"]) else "normal",
             )
             ydex -= rech + ysep
         ydex += ysep

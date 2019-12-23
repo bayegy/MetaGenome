@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import pandas as pd
 import sys
 
 sp, lda2, lda4, thresh = sys.argv
