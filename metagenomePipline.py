@@ -418,7 +418,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         total_sample = len(self.new_ids)
         if not sam_num:
             sample_number = self.memery // memery_needs
-            sample_number = sample_number if sample_number < self.threads else self.threads
+            sample_number = sample_number if sample_number < settings.max_workers else settings.max_workers
             sample_number = sample_number if sample_number > 1 else 1
             sample_number = sample_number if sample_number < total_sample else total_sample
             runs = np.ceil(total_sample / sample_number)

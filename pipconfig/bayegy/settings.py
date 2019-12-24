@@ -55,3 +55,5 @@ memery = 900
 threads = 85
 
 use_sge = False
+
+max_workers = 10
