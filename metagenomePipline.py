@@ -248,7 +248,7 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
     def run_kraken2(self, fq_list, threads=2, mem=70):
         self.system("""
 echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.2 \
- --report {kraken2_out}/{sample}.report --paired {r1} {r2}' \
+ --report {kraken2_out}/{sample}.report --paired {r1} {r2} --output -' \
   | qsub -V -N {sample} -o {kraken2_out} -e {kraken2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
@@ -530,9 +530,10 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         self.run_kneaddata(
             self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=8)
+        """
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-        """
+
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
@@ -542,11 +543,11 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.join_gene()
             self.map_gene(threads=self.threads)
         else:
-            """
+
             self.run_humann2(
                 self.clean_r1_list, callback=self.humann2_callback, **self.alloc_src("humann2"))
             self.join_humann()
-            """
+
             self.fmap_wrapper(self.clean_r1_list,
                               run_type="AMR", **self.alloc_src("fmap"))
         self.visualize()
