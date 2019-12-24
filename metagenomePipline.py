@@ -525,14 +525,14 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-        """
+
         self.format_raw(processors=4)
         self.run_kneaddata(
             self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=8)
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-        """
+
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()

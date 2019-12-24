@@ -2,6 +2,7 @@ from visualizeFunction import VisualizeFunction
 import os
 import pandas as pd
 import re
+from osEnv import OSEnv
 # import pdb
 
 
@@ -67,10 +68,12 @@ class VisualizeHumann(VisualizeFunction):
             features = [re.search('^[^:\|]*', f).group().strip()
                         for f in pd.read_csv(self.bar_table, sep='\t', index_col=0).index if not f.find('|') == -1]
             features = list(set(features))
-            # pdb.set_trace()
-            for f in df.index:
-                print(f)
-                # f = f.replace('_', '-')
-                if f in features:
-                    self.system("{base_dir}/humann2_barplot --input {bar_table} --focal-feature {f} --focal-metadatum {g} --last-metadatum {g} --output {bar_out}/{prefix}{f}_stratification_bar.pdf",
-                                f=f, g=g)
+
+            with OSEnv(path=self.lefse_py_home, pythonpath=self.lefse_pylib_home):
+                # pdb.set_trace()
+                for f in df.index:
+                    print(f)
+                    # f = f.replace('_', '-')
+                    if f in features:
+                        self.system("{base_dir}/humann2_barplot --input {bar_table} --focal-feature {f} --focal-metadatum {g} --last-metadatum {g} --output {bar_out}/{prefix}{f}_stratification_bar.pdf",
+                                    f=f, g=g)
