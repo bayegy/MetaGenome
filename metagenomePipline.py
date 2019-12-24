@@ -337,7 +337,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         self.system("perl {fmap_home}/FMAP_table.pl {p} {args} > {fmap_out}/{all_name}",
                     p=p, args=" ".join(args), all_name=all_name)
 
-    def fmap_wrapper(self, fq_list, run_type="KEGG", threads=4, mem=10):
+    def fmap_wrapper(self, fq_list, run_type="KEGG", threads=6, mem=10, max_workers=10):
         fmap_db = {
             "KEGG": "orthology_uniref90_2_2157_4751.20190412161853",
             "AMR": "protein_fasta_protein_homolog_model_cleaned",
@@ -345,7 +345,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
             "MGE": "MGEs_FINAL_99perc_trim"
         }
         self.set_fmap_db(fmap_db[run_type])
-        self.run_fmap(fq_list=fq_list, threads=threads, mem=mem)
+        self.run_fmap(fq_list=fq_list, threads=threads, mem=mem, max_workers=max_workers)
         self.quantify_fmap(
             all_name="All.{}.abundance_unstratified.tsv".format(run_type))
 
@@ -525,14 +525,14 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-
+        """
         self.format_raw(processors=4)
         self.run_kneaddata(
             self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=8)
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-
+        """
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
@@ -542,9 +542,11 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.join_gene()
             self.map_gene(threads=self.threads)
         else:
+            """
             self.run_humann2(
                 self.clean_r1_list, callback=self.humann2_callback, **self.alloc_src("humann2"))
             self.join_humann()
+            """
             self.fmap_wrapper(self.clean_r1_list,
                               run_type="AMR", **self.alloc_src("fmap"))
         self.visualize()
