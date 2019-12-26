@@ -214,7 +214,6 @@ cp {base_dir}/Report_assembly/结题报告.html {categroy_dir}
             """.format(**self.context)
 
             self.system("""
-mkdir {report_dir}
 cd {report_dir}
 cp {taxa_dir}/1-AbundanceSummary/Classified_stat_relative.png Figure4-1.png
 cp {taxa_dir}/1-AbundanceSummary/2-Barplots/Taxa-bar-plots-top20/Phylum_{category}_barplot.pdf Figure4-2.pdf

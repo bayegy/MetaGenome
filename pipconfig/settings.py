@@ -57,4 +57,4 @@ threads = 63
 
 use_sge = False
 
-max_workers = 10
+max_workers = 3

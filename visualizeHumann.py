@@ -12,6 +12,7 @@ class VisualizeHumann(VisualizeFunction):
     def __init__(self, *args, regroup=False, prefix=False, id_with_name=False, custom_to=False, **kwargs):
         super(VisualizeHumann, self).__init__(*args, **kwargs, prefix=prefix)
         self.regroup = regroup
+        self.custom_to = custom_to
         self.set_attr(save_colon='T' if id_with_name else 'F')
 
         if regroup or custom_to:
@@ -64,7 +65,7 @@ class VisualizeHumann(VisualizeFunction):
             bar_table = "{}table_for_stratification_bar.txt".format(bar_out)
             self.set_attr(bar_table=bar_table)
             self.system("{R_path} {bayegy_home}/write_data_for_lefse.R -i  {pre_abundance_table} -m  {mapping_file} -c  {category} -o  {bar_table} -u f -j F -e {isenzyme} -n {save_colon}",
-                        category=g, isenzyme=("T" if (self.regroup == 'uniref90_level4ec' or self.regroup == 'uniref50_level4ec') else "F"))
+                        category=g, isenzyme=("T" if (self.custom_to == 'level4ec' or self.regroup == 'uniref90_level4ec') else "F"))
             features = [re.search('^[^:\|]*', f).group().strip()
                         for f in pd.read_csv(self.bar_table, sep='\t', index_col=0).index if not f.find('|') == -1]
             features = list(set(features))
