@@ -40,6 +40,7 @@ path = {
     "lefse_rlib_home": "/home/bayegy/pipelines/metagenome/miniconda2/lib/R/library",
     "lefse_py_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
     # sudo apt-get install ttf-mscorefonts-installer 安装字体
+    # /etc/ImageMagick-6/policy.xml replace the value of PDF rights to "read|write" 
 
 }
 
