@@ -554,4 +554,3 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
                               run_type="AMR", **self.alloc_src("fmap"))
         """
         self.visualize()
-        self.clean()

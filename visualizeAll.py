@@ -1,5 +1,4 @@
 import os
-import json
 import re
 from visualizeSpecies import VisualizeSpecies
 from visualizeFunction import VisualizeFunction

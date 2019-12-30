@@ -148,7 +148,7 @@ class VisualizeSpecies(Visualize):
         {perl_path} {bayegy_home}/bar_diagram.pl -table {tmp_dir}/Relative/otu_table.${{n7}}.relative.lastcolumn.trans -style 1 -x_title "Sample Name" -y_title "Sequence Number Percent (%)" -right -textup -rotate='-45' --y_mun 0.2,5 --micro_scale --percentage > {tmp_dir}/Relative/otu_table.${{n7}}.relative.svg
     done;
 
-    for svg_file in {tmp_dir}/Relative/*svg; do echo $svg_file; n=$(basename "$svg_file" .svg); echo $n; rsvg-convert -h 3200 -b white $svg_file > {tmp_dir}/Relative/${{n}}.png; done;
+    for svg_file in {tmp_dir}/Relative/*svg; do echo $svg_file; n=$(basename "$svg_file" .svg); echo $n; convert $svg_file {tmp_dir}/Relative/${{n}}.png; done;
 
 
     for category_1 in {category_set};
