@@ -100,9 +100,12 @@ class VisualizeAll(VisualizeSpecies):
                       )
         self.set_path(force=True,
                       kegg_dir=self.function_dir + '1-KEGG/',
-                      go_dir=self.function_dir + ('3-GO/' if asem else '4-GO/'),
-                      eggnog_dir=self.function_dir + ('2-EggNOG/' if asem else '3-EggNOG/'),
-                      cazy_dir=self.function_dir + ('4-CAZy/' if asem else '6-CAZy/'),
+                      go_dir=self.function_dir +
+                      ('3-GO/' if asem else '4-GO/'),
+                      eggnog_dir=self.function_dir +
+                      ('2-EggNOG/' if asem else '3-EggNOG/'),
+                      cazy_dir=self.function_dir +
+                      ('4-CAZy/' if asem else '6-CAZy/'),
                       )
 
     def visualize(self, exclude='none', base_on_assembly=False):
@@ -236,11 +239,14 @@ mv {kegg_dir}/5-CorrelationAnalysis {kegg_dir}6-CorrelationAnalysis
 if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do echo $pdfs; base=$(basename $pdfs .pdf); convert  -density 300 -quality 80 $pdfs ${{base}}.png; rm $pdfs;done;fi;
                 """, spec=asem_spec if base_on_assembly else reads_spec)
 
-            page = self.report_dir + 'src/pages/main_cleaned.html' if base_on_assembly else self.categroy_dir + "结题报告.html"
+            page = self.report_dir + \
+                'src/pages/main_cleaned.html' if base_on_assembly else self.categroy_dir + "结题报告.html"
 
             format_file(page, page, table1=read_to_html_table(
                 self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),
                 species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category)
 
-        self.system("{base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
-        self.system("{base_dir}/change_suffix.py {root_dir} -o tsv -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
+        self.system(
+            "{base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
+        self.system(
+            "{base_dir}/change_suffix.py {root_dir} -o tsv -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")

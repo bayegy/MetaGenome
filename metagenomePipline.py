@@ -345,7 +345,8 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
             "MGE": "MGEs_FINAL_99perc_trim"
         }
         self.set_fmap_db(fmap_db[run_type])
-        self.run_fmap(fq_list=fq_list, threads=threads, mem=mem, max_workers=max_workers)
+        self.run_fmap(fq_list=fq_list, threads=threads,
+                      mem=mem, max_workers=max_workers)
         self.quantify_fmap(
             all_name="All.{}.abundance_unstratified.tsv".format(run_type))
 
@@ -418,7 +419,8 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         total_sample = len(self.new_ids)
         if not sam_num:
             sample_number = self.memery // memery_needs
-            sample_number = sample_number if sample_number < settings.max_workers[proc] else settings.max_workers[proc]
+            sample_number = sample_number if sample_number < settings.max_workers[
+                proc] else settings.max_workers[proc]
             sample_number = sample_number if sample_number > 1 else 1
             sample_number = sample_number if sample_number < total_sample else total_sample
             runs = np.ceil(total_sample / sample_number)
@@ -533,7 +535,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-        """
+        
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
@@ -543,12 +545,13 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.join_gene()
             self.map_gene(threads=self.threads)
         else:
-            """
+            
             self.run_humann2(
                 self.clean_r1_list, callback=self.humann2_callback, **self.alloc_src("humann2"))
             self.join_humann()
-            """
+            
             self.fmap_wrapper(self.clean_r1_list,
                               run_type="AMR", **self.alloc_src("fmap"))
+        """
         self.visualize()
         self.clean()
