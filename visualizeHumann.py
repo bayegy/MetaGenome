@@ -76,5 +76,5 @@ class VisualizeHumann(VisualizeFunction):
                     print(f)
                     # f = f.replace('_', '-')
                     if f in features:
-                        self.system("{base_dir}/humann2_barplot --input {bar_table} --focal-feature {f} --focal-metadatum {g} --last-metadatum {g} --output {bar_out}/{prefix}{f}_stratification_bar.pdf",
+                        self.system("{base_dir}/humann2_barplot --input {bar_table} -s metadata --focal-feature {f} --focal-metadatum {g} --last-metadatum {g} --output {bar_out}/{prefix}{f}_stratification_bar.pdf",
                                     f=f, g=g)
