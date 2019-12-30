@@ -57,4 +57,10 @@ threads = 63
 
 use_sge = False
 
-max_workers = 3
+max_workers = {
+    "kneaddata": 8,
+    "kraken2": 6,
+    "humann2": 5,
+    "fmap": 10,
+    "salmon": 6
+}
