@@ -128,7 +128,7 @@ class MetagenomePipline(SystemMixin):
 
         self.set_attr(base_on_assembly=base_on_assembly,
                       mapping_file=self.out_dir + '/mapping_file.txt',
-                      host_db=host_db,
+                      host_db=' -db '.join(host_db.split(',')),
                       exclude=exclude,
                       base_dir=os.path.dirname(__file__) + '/',
                       **self.get_attrs(settings))
