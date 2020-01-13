@@ -24,7 +24,7 @@ path = {
     "metaphlan2_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
     "metaphlan2_database": "/home/bayegy/pipelines/metagenome/miniconda2/bin/databases",
     "diamond_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
-    "salmon_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/salmon",
+    "salmon_path": "/home/bayegy/pipelines/metagenome/softwares/salmon/salmon-latest_linux_x86_64/bin/salmon",
     "kraken2_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/kraken2",
     "adapters_path": "/home/bayegy/pipelines/metagenome/MetaGenome/data/adaptor_Illumina.fa",
     # conda install emboss
@@ -39,11 +39,15 @@ path = {
     "lefse_pylib_home": "/home/bayegy/pipelines/metagenome/miniconda2/share/lefse-1.0.8.post1-1",
     "lefse_rlib_home": "/home/bayegy/pipelines/metagenome/miniconda2/lib/R/library",
     "lefse_py_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
+    "prodigal_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/prodigal",
+    # sudo apt-get install ttf-mscorefonts-installer 安装字体
+    # /etc/ImageMagick-6/policy.xml replace the value of PDF rights to "read|write"
+    # do not use conda to install salmon, it's too old
 
 }
 
 memery_needs = {
-    "kneaddata": 100,
+    "kneaddata": 160,
     "kraken2": 70,
     "humann2": 45,
     "fmap": 30,
@@ -52,8 +56,14 @@ memery_needs = {
 
 memery = 900
 
-threads = 85
+threads = 96
 
 use_sge = False
 
-max_workers = 10
+max_workers = {
+    "kneaddata": 6,
+    "kraken2": 6,
+    "humann2": 5,
+    "fmap": 10,
+    "salmon": 6
+}
