@@ -352,7 +352,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
 
     def run_assembly(self, threads=50):
         self.system(
-            "{megahit_path} -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} -o {assembly_out}",
+            "{megahit_path} -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} --mem-flag others -o {assembly_out}",
             r1_list=','.join(self.map_list(
                 self.clean_paired_pattern, use_direction="R1")),
             r2_list=','.join(self.map_list(
@@ -363,13 +363,13 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         self.system(
             """
 cd {assembly_out}
-prodigal -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff
-{cdhit_path} -i final.contigs.fa.fna -c 0.9 -G 0 -aS 0.9 -g 1 -d 0 -M 0 -o NR.nucleotide.fa -T 0
+{prodigal_path} -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff
+{cdhit_path} -i final.contigs.fa.fna -d 0 -M 0 -o NR.nucleotide.fa -T 0
 grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header
 {cmd}
-Rscript ORF_header_summary.R -i {assembly_out}""",
+{R_path} {base_dir}/ORF_header_summary.R -i {assembly_out}""",
             cmd=self.homized_cmd(
-                "perl ORF_generate_input_stats_file.pl {assembly_out}/NR.nucleotide.fa.header".format(**self.context)),
+                "{perl_path} ORF_generate_input_stats_file.pl {assembly_out}/NR.nucleotide.fa.header".format(**self.context)),
         )
 
     def run_quast(self):
@@ -398,15 +398,16 @@ echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --met
     def diamond_gene(self, database, out_file, threads=66):
         self.system("""
 {diamond_home}/diamond blastp --db {database} --query {assembly_out}/NR.protein.fa --outfmt 6 --threads {threads} \
- -e 0.001 --max-target-seqs 1 --block-size 200 --index-chunks 1 --tmpdir /dev/shm/  --quiet --out {salmon_out}/{out_file}
+ -e 0.00001 --id 80 --query-cover 60 --max-target-seqs 1 --block-size 200 --index-chunks 1 --tmpdir {tmp_dir}  --quiet --out {salmon_out}/{out_file}
             """, out_file=out_file, threads=threads, database=database)
 
     def map_gene(self, threads=70):
         self.system('''
-{emapper_path} -m diamond --no_annot --no_file_comments --data_dir {emapper_database} --cpu {threads} \
-  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override
+{emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
+  --data_dir {emapper_database} --cpu {threads} \
+  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override --temp_dir {tmp_dir}
 
-{emapper_path} --annotate_hits_table {salmon_out}/genes.emapper.seed_orthologs --no_file_comments \
+# {emapper_path} --annotate_hits_table {salmon_out}/genes.emapper.seed_orthologs --no_file_comments \
   -o {salmon_out}/genes --cpu {threads} --data_dir {emapper_database} --usemem --override
 sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG\tCOG\tAnnotation' {salmon_out}/genes.emapper.annotations
             ''', threads=threads)
@@ -527,7 +528,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-        """
+
         self.format_raw(processors=3)
         self.run_kneaddata(
             self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
@@ -535,7 +536,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-        
+
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
@@ -545,12 +546,12 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.join_gene()
             self.map_gene(threads=self.threads)
         else:
-            
+
             self.run_humann2(
                 self.clean_r1_list, callback=self.humann2_callback, **self.alloc_src("humann2"))
             self.join_humann()
-            
+
             self.fmap_wrapper(self.clean_r1_list,
                               run_type="AMR", **self.alloc_src("fmap"))
-        """
+
         self.visualize()

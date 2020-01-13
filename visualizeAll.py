@@ -83,6 +83,8 @@ class VisualizeAll(VisualizeSpecies):
 
         mi.mapping(self.cazy_dir + '/All.CAZY.abundance_unstratified.tsv',
                    [self.FMAP_data + '/fam_description.txt'])
+        mi.mapping(self.amr_dir + 'All.AMR.abundance_unstratified.tsv',
+                   [self.FMAP_data + '/aro.csv'], map_column=-1)
 
     def init_out_dir(self, category):
         asem = self.base_on_assembly
