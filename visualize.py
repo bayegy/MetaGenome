@@ -1,10 +1,8 @@
 import os
 import re
-import json
 from abc import ABCMeta, abstractmethod
 import pandas as pd
 import shutil
-import pdb
 from pipconfig import settings
 from systemMixin import SystemMixin
 
@@ -36,7 +34,9 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
 
             abd_df = pd.read_csv(abundance_table, sep='\t')
             map_df = pd.read_csv(mapping_file, sep='\t')
-            # not_sample = [c not in map_df.iloc[:, 0].values for c in abd_df.columns]
+            not_sample = [c not in map_df.iloc[:,
+                                               0].values for c in abd_df.columns]
+            abd_df_other = abd_df.iloc[:, not_sample]
             map_df = map_df.loc[map_df[categories].notna(), :]
             has_group = [c in map_df.iloc[:, 0].values for c in abd_df.columns]
             has_group[0] = True
@@ -48,6 +48,13 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
             # pdb.set_trace()
             self.abundance_df = self.abundance_df.loc[self.abundance_df.T.sum(
             ) > 0, :]
+            if sum(not_sample) > 1:
+                abd_df_other = abd_df_other.iloc[self.array_not(
+                    abd_df_other.iloc[:, 0].duplicated()), :]
+                abd_df_other.index = abd_df_other.iloc[:, 0]
+                abd_df_other.drop(
+                    abd_df_other.columns[0], axis=1, inplace=True)
+                self.abundance_df = self.abundance_df.join(abd_df_other)
             abundance_table = self.tmp_dir + os.path.basename(abundance_table)
             mapping_file = self.tmp_dir + os.path.basename(mapping_file)
             self.mapping_df.to_csv(mapping_file, sep='\t', index=False)
@@ -89,6 +96,6 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
         result_abundance = self.out_dir + \
             os.path.basename(self.abundance_table)
         if not os.path.exists(result_abundance):
-            self.abundance_df.to_csv(result_abundance, sep='\t', index=False)
+            self.abundance_df.to_csv(result_abundance, sep='\t', index=True)
         if os.path.exists(self.tmp_dir):
             shutil.rmtree(self.tmp_dir)
