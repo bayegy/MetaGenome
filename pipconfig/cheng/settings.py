@@ -39,10 +39,11 @@ path = {
     "lefse_pylib_home": "/home/cheng/softwares/miniconda2/share/lefse-1.0.8.post1-1",
     "lefse_rlib_home": "/home/cheng/softwares/miniconda2/envs/lefse/lib/R/library/",
     "lefse_py_home": "/home/cheng/softwares/miniconda2/envs/lefse/bin",
+    "prodigal_path": "/home/cheng/softwares/miniconda2/bin/prodigal",
 }
 
 memery_needs = {
-    "kneaddata": 100,
+    "kneaddata": 150,
     "kraken2": 70,
     "humann2": 45,
     "fmap": 40,
@@ -58,7 +59,7 @@ threads = 63
 use_sge = False
 
 max_workers = {
-    "kneaddata": 8,
+    "kneaddata": 5,
     "kraken2": 6,
     "humann2": 5,
     "fmap": 10,
