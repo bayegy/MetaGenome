@@ -23,12 +23,10 @@ class VisualizeAll(VisualizeSpecies):
         self.set_path(force=True,
                       root_dir=root_dir,
                       qc_dir=root_dir + '00-QCStats',
-                      table_dir=root_dir + '01-BaseTables',
                       )
         self.set_path(force=False,
                       FMAP_data=self.fmap_home + '/FMAP_data/',
                       )
-        self.set_attr(asem_dir=self.root_dir + '01-Assembly/')
 
         self.mi = MapInfo()
 
@@ -44,12 +42,7 @@ class VisualizeAll(VisualizeSpecies):
 
     @staticmethod
     def extract_empper_cog(annotation):
-        cog = re.search('([^,]+)@NOG', annotation)
-        if cog:
-            cog = cog.group(1)
-            return 'ENOG41' + cog if not cog.startswith('COG') else cog
-        else:
-            return ""
+        return ['ENOG41' + c if not c.startswith('COG') else c for c in re.findall('([^,]+)@NOG', annotation)]
 
     def map_func_definition(self):
         FMAP_data = self.FMAP_data
@@ -114,6 +107,11 @@ class VisualizeAll(VisualizeSpecies):
         self.system("{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} -p {bayegy_home}/piputils/group_color.list -o {out_dir}colors_plan.json")
         os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
 
+        if base_on_assembly:
+            self.set_path(force=True, asem_dir=self.root_dir + '01-Assembly')
+        else:
+            self.set_path(force=True, table_dir=self.root_dir + '01-BaseTables')
+
         reads_spec = """
 cp {out_dir}Metagenome/Humann/RPK.All.UniRef90.genefamilies.tsv {table_dir}
 cp {out_dir}Metagenome/Metaphlan/All.Metaphlan2.profile.txt {table_dir}/All.Metaphlan2.taxa.txt
@@ -125,6 +123,7 @@ cp {out_dir}Kraken2/All.Taxa.OTU.txt  {table_dir}/All.Kraken2.taxa.txt
 mkdir -p {asem_dir}/2-ORFPrediction/ {asem_dir}/1-Quast/
 cp {out_dir}Assembly_out/ORF* {asem_dir}/2-ORFPrediction/
 cp -r {out_dir}Assembly_out/quast_results/* {asem_dir}/1-Quast/
+cp {out_dir}/salmon_out/All.genes.abundance.txt {out_dir}Assembly_out/NR.nucleotide.fa {asem_dir}/
         """.format(**self.context)
 
         self.system("""
