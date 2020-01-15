@@ -398,7 +398,7 @@ echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --met
     def diamond_gene(self, database, out_file, threads=66):
         self.system("""
 {diamond_home}/diamond blastp --db {database} --query {assembly_out}/NR.protein.fa --outfmt 6 --threads {threads} \
- -e 0.00001 --id 80 --query-cover 60 --max-target-seqs 1 --block-size 200 --index-chunks 1 --tmpdir {tmp_dir}  --quiet --out {salmon_out}/{out_file}
+ -e 0.00001 --id 80 --query-cover 80 --block-size 200 --index-chunks 1 --tmpdir {tmp_dir}  --quiet --out {salmon_out}/{out_file}
             """, out_file=out_file, threads=threads, database=database)
 
     def map_gene(self, threads=70):
