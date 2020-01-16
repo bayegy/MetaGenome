@@ -398,7 +398,7 @@ echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --met
     def diamond_gene(self, database, out_file, threads=66):
         self.system("""
 {diamond_home}/diamond blastp --db {database} --query {assembly_out}/NR.protein.fa --outfmt 6 --threads {threads} \
- -e 0.00001 --id 80 --query-cover 80 --block-size 200 --index-chunks 1 --tmpdir {tmp_dir}  --quiet --out {salmon_out}/{out_file}
+ -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --tmpdir {tmp_dir}  --quiet --out {salmon_out}/{out_file}
             """, out_file=out_file, threads=threads, database=database)
 
     def map_gene(self, threads=70):
@@ -528,7 +528,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-        
+
         self.format_raw(processors=3)
         self.run_kneaddata(
             self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
@@ -553,5 +553,5 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             self.fmap_wrapper(self.clean_r1_list,
                               run_type="AMR", **self.alloc_src("fmap"))
-        
+
         self.visualize()
