@@ -76,8 +76,6 @@ class VisualizeAll(VisualizeSpecies):
 
         mi.mapping(self.cazy_dir + '/All.CAZY.abundance_unstratified.tsv',
                    [self.FMAP_data + '/fam_description.txt'])
-        # mi.mapping(self.amr_dir + 'All.AMR.abundance_unstratified.tsv',
-        #            [self.FMAP_data + '/aro.csv'], map_column=-1)
 
     def init_out_dir(self, category):
         asem = self.base_on_assembly
@@ -109,22 +107,24 @@ class VisualizeAll(VisualizeSpecies):
 
         if base_on_assembly:
             self.set_path(force=True, asem_dir=self.root_dir + '01-Assembly')
-        else:
-            self.set_path(force=True, table_dir=self.root_dir + '01-BaseTables')
-
-        reads_spec = """
-cp {out_dir}Metagenome/Humann/RPK.All.UniRef90.genefamilies.tsv {table_dir}
-cp {out_dir}Metagenome/Metaphlan/All.Metaphlan2.profile.txt {table_dir}/All.Metaphlan2.taxa.txt
-cp {out_dir}Kraken2/All.Taxa.OTU.txt  {table_dir}/All.Kraken2.taxa.txt
-{humann2_home}/humann2_split_stratified_table -i {table_dir}/RPK.All.UniRef90.genefamilies.tsv -o {table_dir}
-        """.format(**self.context)
-
-        asem_spec = """
+            spec = """
 mkdir -p {asem_dir}/2-ORFPrediction/ {asem_dir}/1-Quast/
 cp {out_dir}Assembly_out/ORF* {asem_dir}/2-ORFPrediction/
 cp -r {out_dir}Assembly_out/quast_results/* {asem_dir}/1-Quast/
 cp {out_dir}/salmon_out/All.genes.abundance.txt {out_dir}Assembly_out/NR.nucleotide.fa {asem_dir}/
-        """.format(**self.context)
+            """.format(**self.context)
+        else:
+            self.set_path(force=True, table_dir=self.root_dir + '01-BaseTables')
+            self.system('''
+{humann2_home}/humann2_renorm_table --input {b}/RPK.All.UniRef90.genefamilies.tsv --units cpm -o {b}/All.UniRef90.genefamilies.tsv -s n
+{humann2_home}/humann2_renorm_table --input {b}/RPK.All.Metacyc.pathabundance.tsv --units cpm -o {b}/All.Metacyc.pathabundance.tsv -s n
+            ''', b=self.out_dir + 'Metagenome/Humann')
+            spec = """
+cp {out_dir}Metagenome/Humann/All.UniRef90.genefamilies.tsv {table_dir}
+cp {out_dir}Metagenome/Metaphlan/All.Metaphlan2.profile.txt {table_dir}/All.Metaphlan2.taxa.txt
+cp {out_dir}Kraken2/All.Taxa.OTU.txt  {table_dir}/All.Kraken2.taxa.txt
+{humann2_home}/humann2_split_stratified_table -i {table_dir}/All.UniRef90.genefamilies.tsv -o {table_dir}
+            """.format(**self.context)
 
         self.system("""
 mkdir -p {qc_dir}/1-QC_report_Rawfastq/ {qc_dir}/2-QC_report_Filtered/
@@ -134,12 +134,11 @@ rm {qc_dir}/1-QC_report_Rawfastq/*unmatched*
 mv {qc_dir}/1-QC_report_Rawfastq/*kneaddata* {qc_dir}/2-QC_report_Filtered/
 cp {out_dir}Report/reads_summary.txt {qc_dir}/
 {spec}
-            """, spec=asem_spec if base_on_assembly else reads_spec)
+            """, spec=spec)
         for g in self.categories.split(','):
             self.init_out_dir(g)
 
             if base_on_assembly:
-
                 VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
                                   'salmon_out/genes.emapper.annotations', prefix='KO_', annotation_column=6, out_dir=self.function_dir + '1-KEGG').visualize(exclude)
                 VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
@@ -152,15 +151,9 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                 vcard = VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
                                           'salmon_out/genes_card.f6', prefix='AMR_', out_dir=self.amr_dir, adjust_func=False)
             else:
-                self.system('''
-{humann2_home}/humann2_renorm_table --input {b}/RPK.All.UniRef90.genefamilies.tsv --units cpm -o {b}/All.UniRef90.genefamilies.tsv -s n
-{humann2_home}/humann2_renorm_table --input {b}/RPK.All.Metacyc.pathabundance.tsv --units cpm -o {b}/All.Metacyc.pathabundance.tsv -s n
-        ''', b=self.out_dir + 'Metagenome/Humann')
-
                 for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog', 'cazy'], ['1-KEGG', '5-EC', '4-GO', '3-EggNOG', '6-CAZy']):
                     VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
                                     self.category, custom_to=group, out_dir=self.function_dir + out_dir).visualize(exclude)
-
                 VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.Metacyc.pathabundance.tsv',
                                 self.mapping_file, self.category, id_with_name=True, out_dir=self.function_dir + '2-Metacyc').visualize(exclude)
 
