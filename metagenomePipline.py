@@ -121,12 +121,13 @@ class MetagenomePipline(SystemMixin):
                       amr_out=out_dir + '/AMR',
                       humann2_out=out_dir + '/Metagenome/Humann/',
                       fmap_out=out_dir + '/FMAP/',
-                      assembly_out=out_dir + "/Assembly_out",
+                      # assembly_out=out_dir + "/Assembly_out",
                       metaphlan_out=out_dir + "/Metagenome/Metaphlan",
                       report_out=out_dir + "/Report",
                       )
 
         self.set_attr(base_on_assembly=base_on_assembly,
+                      assembly_out=out_dir + "/Assembly_out",
                       mapping_file=self.out_dir + '/mapping_file.txt',
                       host_db=' -db '.join(host_db.split(',')),
                       exclude=exclude,
@@ -352,7 +353,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
 
     def run_assembly(self, threads=50):
         self.system(
-            "{megahit_path} -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} --mem-flag others -o {assembly_out}",
+            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.8 --mem-flag 0 -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} -o {assembly_out}",
             r1_list=','.join(self.map_list(
                 self.clean_paired_pattern, use_direction="R1")),
             r2_list=','.join(self.map_list(
@@ -366,9 +367,9 @@ cd {assembly_out}
 {prodigal_path} -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff
 {cdhit_path} -i final.contigs.fa.fna -d 0 -M 0 -o NR.nucleotide.fa -T 0
 grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header
-{cmd}
+{acmd}
 {R_path} {base_dir}/ORF_header_summary.R -i {assembly_out}""",
-            cmd=self.homized_cmd(
+            acmd=self.homized_cmd(
                 "{perl_path} ORF_generate_input_stats_file.pl {assembly_out}/NR.nucleotide.fa.header".format(**self.context)),
         )
 
@@ -528,6 +529,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
+        """
 
         self.format_raw(processors=3)
         self.run_kneaddata(
@@ -536,7 +538,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-
+        """
         if self.base_on_assembly:
             self.run_assembly(threads=self.threads)
             self.run_quast()
