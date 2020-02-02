@@ -158,6 +158,8 @@ class MetagenomePipline(SystemMixin):
         self.clean_paired_list = self.paired_data(self.clean_paired_pattern)
         self.kracken2_reports_pattern = "%s/{sample_id}.report" % (
             self.kraken2_out)
+        self.unassembled_pattern = "%s/{sample_id}/{sample_id}_R{direction_num}_unassembled.fastq" % (
+            self.assembly_out)
         self.kracken2_reports_list = self.map_list(
             self.kracken2_reports_pattern, use_direction='R1')
         self.running_list = self.out_dir + '.running_list'
@@ -351,19 +353,38 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         self.quantify_fmap(
             all_name="All.{}.abundance_unstratified.tsv".format(run_type))
 
-    def run_assembly(self, threads=50):
+    @synchronize
+    def assembly(self, fq_list, threads=4, mem=24):
+        # 单样品组装
+        self.system("""
+echo '{megahit_path} --continue --presets meta-large -m {mem_p} --mem-flag 1 \
+ -1 {r1} -2 {r2} --min-contig-len 1000 -t {threads} -o {assembly_out}/{sample} && \
+{bowtie2_home}/bowtie2-build {assembly_out}/{sample}/final.contigs.fa {assembly_out}/{sample}/bowtie2_db/{sample} && \
+{bowtie2_home}/bowtie2 -x {assembly_out}/{sample}/bowtie2_db/{sample}  -1 {r1} -2 {r2} --end-to-end --sensitive -S {sam_out} \
+ --un-conc {assembly_out}/{sample}/{sample}_R%_unassembled.fastq && \
+rm -r {assembly_out}/{sample}/bowtie2_db' | \
+ qsub -V -N {sample} -o {assembly_out} -e {assembly_out}
+            """, **self.parse_fq_list(fq_list), threads=threads, mem_p=np.round(mem / self.memery, 2),
+                    escape_sge=self.escape_sge,
+                    sam_out=os.devnull)
+
+    def sum_assembly(self, threads=50):
+        # 混合组装
         self.system(
-            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.8 --mem-flag 0 -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} -o {assembly_out}",
+            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.9 --mem-flag 0 \
+             -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} -o {assembly_out}/mixed_assembly",
             r1_list=','.join(self.map_list(
-                self.clean_paired_pattern, use_direction="R1")),
+                self.unassembled_pattern, use_direction="R1")),
             r2_list=','.join(self.map_list(
-                self.clean_paired_pattern, use_direction="R2")),
+                self.unassembled_pattern, use_direction="R2")),
             threads=threads
         )
 
+        # 基因预测，去冗余
         self.system(
             """
 cd {assembly_out}
+cat */final.contigs.fa > final.contigs.fa
 {prodigal_path} -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff
 {cdhit_path} -i final.contigs.fa.fna -d 0 -M 0 -o NR.nucleotide.fa -T 0
 grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header
@@ -540,7 +561,8 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         self.run_bracken()
         """
         if self.base_on_assembly:
-            self.run_assembly(threads=self.threads)
+            self.assembly(self.clean_paired_list, **self.alloc_src("megahit"))
+            self.sum_assembly(threads=self.threads)
             self.run_quast()
             self.create_gene_db(threads=self.threads)
             self.quant_gene(self.clean_paired_list,

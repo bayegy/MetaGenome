@@ -51,10 +51,11 @@ memery_needs = {
     "kraken2": 70,
     "humann2": 45,
     "fmap": 30,
-    "salmon": 80
+    "salmon": 80,
+    "megahit": 100
 }
 
-memery = 900
+memery = 1000
 
 threads = 96
 
@@ -65,5 +66,6 @@ max_workers = {
     "kraken2": 6,
     "humann2": 5,
     "fmap": 10,
-    "salmon": 6
+    "salmon": 6,
+    "megahit": 9
 }

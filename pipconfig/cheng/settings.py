@@ -47,7 +47,8 @@ memery_needs = {
     "kraken2": 70,
     "humann2": 45,
     "fmap": 40,
-    "salmon": 80
+    "salmon": 80,
+    "megahit": 100
 }
 
 
@@ -63,5 +64,6 @@ max_workers = {
     "kraken2": 6,
     "humann2": 5,
     "fmap": 10,
-    "salmon": 6
+    "salmon": 6,
+    "megahit": 4
 }
