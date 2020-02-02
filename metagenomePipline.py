@@ -359,10 +359,10 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         self.system("""
 echo '{megahit_path} --continue --presets meta-large -m {mem_p} --mem-flag 1 \
  -1 {r1} -2 {r2} --min-contig-len 1000 -t {threads} -o {assembly_out}/{sample} && \
-{bowtie2_home}/bowtie2-build {assembly_out}/{sample}/final.contigs.fa {assembly_out}/{sample}/bowtie2_db/{sample} && \
-{bowtie2_home}/bowtie2 -x {assembly_out}/{sample}/bowtie2_db/{sample}  -1 {r1} -2 {r2} --end-to-end --sensitive -S {sam_out} \
+{bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {assembly_out}/{sample}/bowtie2_db/{sample} && \
+{bowtie2_home}/bowtie2 --threads {threads} -x {assembly_out}/{sample}/bowtie2_db/{sample}  -1 {r1} -2 {r2} --end-to-end --sensitive -S {sam_out} \
  --un-conc {assembly_out}/{sample}/{sample}_R%_unassembled.fastq && \
-rm -r {assembly_out}/{sample}/bowtie2_db' | \
+rm -r {assembly_out}/{sample}/bowtie2_db {assembly_out}/{sample}/intermediate_contigs' | \
  qsub -V -N {sample} -o {assembly_out} -e {assembly_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem_p=np.round(mem / self.memery, 2),
                     escape_sge=self.escape_sge,
