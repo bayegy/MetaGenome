@@ -364,7 +364,7 @@ echo '{megahit_path} --continue --presets meta-large -m {mem_p} --mem-flag 1 \
  --un-conc {assembly_out}/{sample}/{sample}_R%_unassembled.fastq && \
 rm -r {assembly_out}/{sample}/bowtie2_db {assembly_out}/{sample}/intermediate_contigs' | \
  qsub -V -N {sample} -o {assembly_out} -e {assembly_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem_p=np.round(mem / self.memery, 2),
+            """, **self.parse_fq_list(fq_list), threads=threads, mem_p=mem * 1000000000,
                     escape_sge=self.escape_sge,
                     sam_out=os.devnull)
 
