@@ -121,13 +121,13 @@ class MetagenomePipline(SystemMixin):
                       amr_out=out_dir + '/AMR',
                       humann2_out=out_dir + '/Metagenome/Humann/',
                       fmap_out=out_dir + '/FMAP/',
-                      # assembly_out=out_dir + "/Assembly_out",
+                      assembly_out=out_dir + "/Assembly_out",
                       metaphlan_out=out_dir + "/Metagenome/Metaphlan",
                       report_out=out_dir + "/Report",
                       )
 
         self.set_attr(base_on_assembly=base_on_assembly,
-                      assembly_out=out_dir + "/Assembly_out",
+                      # assembly_out=out_dir + "/Assembly_out",
                       mapping_file=self.out_dir + '/mapping_file.txt',
                       host_db=' -db '.join(host_db.split(',')),
                       exclude=exclude,
