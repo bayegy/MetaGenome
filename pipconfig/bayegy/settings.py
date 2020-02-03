@@ -67,5 +67,5 @@ max_workers = {
     "humann2": 5,
     "fmap": 10,
     "salmon": 6,
-    "megahit": 1
+    "megahit": 9
 }

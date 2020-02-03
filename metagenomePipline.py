@@ -357,15 +357,14 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
     def assembly(self, fq_list, threads=4, mem=24):
         # 单样品组装
         self.system("""
-echo '{megahit_path} --presets meta-large --tmp-dir {tmp_dir}  -m {mem_p} --mem-flag 1 \
+echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --presets meta-large --tmp-dir {tmp_dir}/{sample} -m {mem_p} --mem-flag 1 \
  -1 {r1} -2 {r2} --min-contig-len 1000 -t {threads} -o {assembly_out}/{sample} && \
-mkdir {assembly_out}/{sample}/bowtie2_db && \
-{bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {assembly_out}/{sample}/bowtie2_db/{sample} && \
-{bowtie2_home}/bowtie2 --threads {threads} -x {assembly_out}/{sample}/bowtie2_db/{sample}  -U {r1} --end-to-end --sensitive -S {sam_out} \
+{bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {tmp_dir}/{sample}/bowtie2_db/{sample} && \
+{bowtie2_home}/bowtie2 --threads {threads} -x {tmp_dir}/{sample}/bowtie2_db/{sample}  -U {r1} --end-to-end --sensitive -S {sam_out} \
  --un {assembly_out}/{sample}/{sample}_R1_unassembled.fastq && \
-{bowtie2_home}/bowtie2 --threads {threads} -x {assembly_out}/{sample}/bowtie2_db/{sample}  -U {r2} --end-to-end --sensitive -S {sam_out} \
+{bowtie2_home}/bowtie2 --threads {threads} -x {tmp_dir}/{sample}/bowtie2_db/{sample}  -U {r2} --end-to-end --sensitive -S {sam_out} \
  --un {assembly_out}/{sample}/{sample}_R2_unassembled.fastq && \
-rm -r {assembly_out}/{sample}/bowtie2_db {assembly_out}/{sample}/intermediate_contigs' | \
+rm -r {assembly_out}/{sample}/intermediate_contigs {tmp_dir}/{sample}' | \
  qsub -V -N {sample} -o {assembly_out} -e {assembly_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem_p=mem * 1000000000,
                     escape_sge=self.escape_sge,
