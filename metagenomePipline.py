@@ -158,7 +158,7 @@ class MetagenomePipline(SystemMixin):
         self.clean_paired_list = self.paired_data(self.clean_paired_pattern)
         self.kracken2_reports_pattern = "%s/{sample_id}.report" % (
             self.kraken2_out)
-        self.unassembled_pattern = "%s/{sample_id}/{sample_id}_R{direction_num}_unassembled.fastq" % (
+        self.unassembled_pattern = "%s/{sample_id}/{sample_id}_R{direction_num}_unassembled.fastq.gz" % (
             self.assembly_out)
         self.kracken2_reports_list = self.map_list(
             self.kracken2_reports_pattern, use_direction='R1')
@@ -359,9 +359,12 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         self.system("""
 echo '{megahit_path} --continue --presets meta-large -m {mem_p} --mem-flag 1 \
  -1 {r1} -2 {r2} --min-contig-len 1000 -t {threads} -o {assembly_out}/{sample} && \
+mkdir {assembly_out}/{sample}/bowtie2_db && \
 {bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {assembly_out}/{sample}/bowtie2_db/{sample} && \
-{bowtie2_home}/bowtie2 --threads {threads} -x {assembly_out}/{sample}/bowtie2_db/{sample}  -1 {r1} -2 {r2} --end-to-end --sensitive -S {sam_out} \
- --un-conc {assembly_out}/{sample}/{sample}_R%_unassembled.fastq && \
+{bowtie2_home}/bowtie2 --threads {threads} -x {assembly_out}/{sample}/bowtie2_db/{sample}  -U {r1} --end-to-end --sensitive -S {sam_out} \
+ --un-gz {assembly_out}/{sample}/{sample}_R1_unassembled.fastq.gz && \
+{bowtie2_home}/bowtie2 --threads {threads} -x {assembly_out}/{sample}/bowtie2_db/{sample}  -U {r2} --end-to-end --sensitive -S {sam_out} \
+ --un-gz {assembly_out}/{sample}/{sample}_R2_unassembled.fastq.gz && \
 rm -r {assembly_out}/{sample}/bowtie2_db {assembly_out}/{sample}/intermediate_contigs' | \
  qsub -V -N {sample} -o {assembly_out} -e {assembly_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem_p=mem * 1000000000,
@@ -371,7 +374,7 @@ rm -r {assembly_out}/{sample}/bowtie2_db {assembly_out}/{sample}/intermediate_co
     def sum_assembly(self, threads=50):
         # 混合组装
         self.system(
-            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.9 --mem-flag 0 \
+            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.94 --mem-flag 0 \
              -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} -o {assembly_out}/mixed_assembly",
             r1_list=','.join(self.map_list(
                 self.unassembled_pattern, use_direction="R1")),
