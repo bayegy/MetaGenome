@@ -53,14 +53,21 @@ def pool_decorator(func):
         fq_list = split_list(fq_list, max_workers)
         print("######################Running " + str(func))
         start_time = time.time()
-        for fqs in fq_list:
+        if not callback:
             executor = ThreadPoolExecutor(max_workers=max_workers)
+        for fqs in fq_list:
+            if callback:
+                executor = ThreadPoolExecutor(max_workers=max_workers)
             for fq in fqs:
                 executor.submit(func, self, fq_list=fq, **kwargs)
-            executor.shutdown(True)
-            print("This run done! checking callback...")
             if callback:
+                executor.shutdown(True)
+                print("This run done! checking callback...")
                 callback(**callback_kwargs)
+                if os.listdir(self.tmp_dir):
+                    self.system("rm -r {tmp_dir}/*")
+        if not callback:
+            executor.shutdown(True)
             if os.listdir(self.tmp_dir):
                 self.system("rm -r {tmp_dir}/*")
         end_time = time.time()
