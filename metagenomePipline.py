@@ -357,7 +357,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
     def assembly(self, fq_list, threads=4, mem=24):
         # 单样品组装
         self.system("""
-echo '{megahit_path} --presets meta-large -m {mem_p} --mem-flag 1 \
+echo '{megahit_path} --presets meta-large --tmp-dir {tmp_dir}  -m {mem_p} --mem-flag 1 \
  -1 {r1} -2 {r2} --min-contig-len 1000 -t {threads} -o {assembly_out}/{sample} && \
 mkdir {assembly_out}/{sample}/bowtie2_db && \
 {bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {assembly_out}/{sample}/bowtie2_db/{sample} && \
