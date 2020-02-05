@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import argparse
 
@@ -51,3 +52,4 @@ with open(options.out % (1), 'w') as pe1, open(options.out % (2), 'w') as pe2:
 if options.removeinput:
     os.remove(options.se1)
     os.remove(options.se2)
+
