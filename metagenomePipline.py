@@ -167,7 +167,7 @@ class MetagenomePipline(SystemMixin):
         self.clean_paired_list = self.paired_data(self.clean_paired_pattern)
         self.kracken2_reports_pattern = "%s/{sample_id}.report" % (
             self.kraken2_out)
-        self.unassembled_pattern = "%s/{sample_id}/{sample_id}_R{direction_num}_unassembled_merged.fastq" % (
+        self.unassembled_pattern = "%s/{sample_id}/{sample_id}_R{direction_num}_unassembled_merged.fq.gz" % (
             self.assembly_out)
         self.kracken2_reports_list = self.map_list(
             self.kracken2_reports_pattern, use_direction='R1')
@@ -379,7 +379,7 @@ echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-min 27 --k-max 
  --un {assembly_out}/{sample}/{sample}_R2_unassembled.fastq && \
 rm -r {assembly_out}/{sample}/intermediate_contigs {tmp_dir}/{sample} && \
 {base_dir}/merge_se_to_pe.py -1 {assembly_out}/{sample}/{sample}_R1_unassembled.fastq -2 {assembly_out}/{sample}/{sample}_R2_unassembled.fastq \
--o {assembly_out}/{sample}/{sample}_R%s_unassembled_merged.fastq  --removeinput && \
+-o {assembly_out}/{sample}/{sample}_R%s_unassembled_merged.fq.gz  --removeinput && \
 echo {sample}_done > {assembly_out}/{sample}/all_done' | \
  qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {assembly_out} -e {assembly_out}
             """, **parsed_fqs, threads=threads, mem_p=mem * 1000000000, mem=mem,
