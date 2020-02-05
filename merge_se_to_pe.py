@@ -53,3 +53,4 @@ if options.removeinput:
     os.remove(options.se1)
     os.remove(options.se2)
 
+print("SE merged to PE")

@@ -52,14 +52,18 @@ memery_needs = {
     "humann2": 45,
     "fmap": 30,
     "salmon": 80,
-    "megahit": 100
+    "megahit": 300
 }
 
-memery = 1000
+memery = 2000
 
-threads = 96
+threads = 190
 
-use_sge = False
+use_sge = True
+
+sge_pe = "smp"
+
+sge_queue = "metagqueue"
 
 max_workers = {
     "kneaddata": 6,
@@ -67,5 +71,5 @@ max_workers = {
     "humann2": 5,
     "fmap": 10,
     "salmon": 6,
-    "megahit": 3
+    "megahit": 6
 }

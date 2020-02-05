@@ -33,7 +33,4 @@ options = p.parse_args()
 m = MetagenomePipline(raw_fqs_dir=options.input, pre_mapping_file=options.map, categories=False if options.category == 'auto' else options.category, host_db=options.host, sample_regex=options.sp,
                       forward_regex=options.fp, reverse_regex=options.rp, out_dir=options.outdir, base_on_assembly=True if options.assembly == 'yes' else False, exclude=options.exclude)
 
-try:
-    m.run()
-finally:
-    m.clean()
+m.run()

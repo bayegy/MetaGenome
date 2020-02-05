@@ -10,7 +10,15 @@ from pipconfig import settings
 from lxml import html
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
-import uuid
+# import uuid
+
+
+def wait_sge(first_check=1):
+    time.sleep(first_check * 60)
+    while True:
+        if not list(os.popen("qstat")):
+            break
+        time.sleep(60)
 
 
 def sge_decorator(func):
@@ -19,23 +27,19 @@ def sge_decorator(func):
     对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
     """
 
-    def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
+    def wfunc(self, fq_list, first_check=10, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
         fq_list = split_list(fq_list, max_workers)
         print("######################Running " + str(func))
         start_time = time.time()
         for fqs in fq_list:
             for fq in fqs:
                 func(self, fq_list=fq, **kwargs)
-            time.sleep(first_check * 60)
-            while True:
-                if not list(os.popen("qstat")):
-                    break
-                time.sleep(60)
-            print("This run done! checking callback...")
             if callback:
+                wait_sge(first_check)
+                print("This run done! checking callback...")
                 callback(**callback_kwargs)
-            if os.listdir(self.tmp_dir):
-                self.system("rm -r {tmp_dir}/*")
+        if not callback:
+            wait_sge(first_check)
         end_time = time.time()
         time_used = (end_time - start_time) / 60
         print("######################" + str(func) +
@@ -64,12 +68,8 @@ def pool_decorator(func):
                 executor.shutdown(True)
                 print("This run done! checking callback...")
                 callback(**callback_kwargs)
-                if os.listdir(self.tmp_dir):
-                    self.system("rm -r {tmp_dir}/*")
         if not callback:
             executor.shutdown(True)
-            if os.listdir(self.tmp_dir):
-                self.system("rm -r {tmp_dir}/*")
         end_time = time.time()
         time_used = (end_time - start_time) / 60
         print("######################" + str(func) +
@@ -141,9 +141,11 @@ class MetagenomePipline(SystemMixin):
                       base_dir=os.path.dirname(__file__) + '/',
                       **self.get_attrs(settings))
 
+        # not nessesary for:
+        # tmp_dir=os.path.join('/dev/shm/', str(uuid.uuid1()) + '_metagenomepipeline_tmp_dir')
+
         if not hasattr(self, 'tmp_dir'):
-            self.set_path(force=True, tmp_dir=os.path.join(
-                '/dev/shm/', str(uuid.uuid1()) + '_metagenomepipeline_tmp_dir'))
+            self.set_path(force=True, tmp_dir="/dev/shm/")
 
         self.set_path(force=False, **self.path)
         self.parsed_map = parse_premap(
@@ -248,8 +250,8 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
  --trimmomatic {trimmomatic_home} --trimmomatic-options "ILLUMINACLIP:{adapters_path}:2:30:10 SLIDINGWINDOW:4:20 MINLEN:50" --max-memory {mem}g \
  --bowtie2 {bowtie2_home} \
  --fastqc  {fastqc_home}' \
- | qsub -V -N {sample} -o {kneaddata_out} -e {kneaddata_out}
-            """, **self.parse_fq_list(fq_list), kneaddata_out=self.tmp_dir, threads=threads, mem=mem, escape_sge=self.escape_sge)
+ | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {kneaddata_out} -e {kneaddata_out}
+            """, **self.parse_fq_list(fq_list), kneaddata_out=self.kneaddata_out, threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def kneaddata_callback(self):
         self.mirror_move(self.tmp_dir, self.kneaddata_out)
@@ -259,7 +261,7 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
         self.system("""
 echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.2 \
  --report {kraken2_out}/{sample}.report --paired {r1} {r2} --output -' \
-  | qsub -V -N {sample} -o {kraken2_out} -e {kraken2_out}
+  | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {kraken2_out} -e {kraken2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def run_bracken(self):
@@ -285,7 +287,7 @@ echo '{metaphlan2_home}/metaphlan2.py --input_type multifastq --bowtie2_exe {bow
  --bowtie2db {metaphlan2_database} \
  --nproc {threads} --bowtie2out {tmp_dir}/{sample}.bt2.out.txt {r1} \
  -o {metaphlan_out}/{sample}.metaphlan.profile.txt --sample_id {sample}' \
-  | qsub -V -N {sample} -o {metaphlan_out} -e {metaphlan_out}
+  | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {metaphlan_out} -e {metaphlan_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def join_metaphlan(self):
@@ -304,7 +306,7 @@ echo '{humann2_home}/humann2 --input {r1} \
   --output-basename {sample} \
   --output {humann2_out} \
   --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database} --sample_id {sample}" ' \
-  | qsub -V -N {sample} -o {humann2_out} -e {humann2_out}
+  | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {humann2_out} -e {humann2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def humann2_callback(self):
@@ -334,7 +336,7 @@ echo '{humann2_home}/humann2 --input {r1} \
     def run_fmap(self, fq_list, threads=4, mem=24):
         self.system("""
 echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
- qsub -V -N {sample} -o {fmap_out} -e {fmap_out}
+ qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {fmap_out} -e {fmap_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def quantify_fmap(self, all_name="all.txt", print_definition=False):
@@ -363,25 +365,30 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
     @synchronize
     def assembly(self, fq_list, threads=4, mem=24):
         # 单样品组装
+        parsed_fqs = self.parse_fq_list(fq_list)
+        if os.path.exists(os.path.join(self.assembly_out, parsed_fqs['sample'], 'all_done')):
+            return
         self.system("""
-echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --presets meta-large --tmp-dir {tmp_dir}/{sample} -m {mem_p} --mem-flag 1 \
- -1 {r1} -2 {r2} --min-contig-len 1000 -t {threads} -o {assembly_out}/{sample} && \
+echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-min 27 --k-max 127 --k-step 20 \
+ --tmp-dir {tmp_dir}/{sample} -m {mem_p} --mem-flag 1 --continue \
+ -1 {r1} -2 {r2} --min-contig-len 500 -t {threads} -o {assembly_out}/{sample} && \
 {bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {tmp_dir}/{sample}/bowtie2_db/{sample} && \
 {bowtie2_home}/bowtie2 --threads {threads} -x {tmp_dir}/{sample}/bowtie2_db/{sample}  -U {r1} --end-to-end --sensitive -S {sam_out} \
  --un {assembly_out}/{sample}/{sample}_R1_unassembled.fastq && \
 {bowtie2_home}/bowtie2 --threads {threads} -x {tmp_dir}/{sample}/bowtie2_db/{sample}  -U {r2} --end-to-end --sensitive -S {sam_out} \
  --un {assembly_out}/{sample}/{sample}_R2_unassembled.fastq && \
-rm -r {assembly_out}/{sample}/intermediate_contigs {tmp_dir}/{sample}' | \
- qsub -V -N {sample} -o {assembly_out} -e {assembly_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem_p=mem * 1000000000,
+rm -r {assembly_out}/{sample}/intermediate_contigs {tmp_dir}/{sample} && \
+echo {sample}_done > {assembly_out}/{sample}/all_done' | \
+ qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {assembly_out} -e {assembly_out}
+            """, **parsed_fqs, threads=threads, mem_p=mem * 1000000000, mem=mem,
                     escape_sge=self.escape_sge,
                     sam_out=os.devnull)
 
     def sum_assembly(self, threads=50):
         # 混合组装
         self.system(
-            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.9 --mem-flag 0 \
-             -1 {r1_list} -2 {r2_list} --min-contig-len 1000 -t {threads} -o {assembly_out}/mixed_assembly",
+            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.94 --mem-flag 0 \
+             -1 {r1_list} -2 {r2_list} --min-contig-len 500 -t {threads} -o {assembly_out}/mixed_assembly",
             r1_list=','.join(self.map_list(
                 self.unassembled_pattern, use_direction="R1")),
             r2_list=','.join(self.map_list(
@@ -417,7 +424,7 @@ sed -i 's/_1 / /' {assembly_out}/NR.protein.fa
     def quant_gene(self, fq_list, threads=7, mem=80):
         self.system("""
 echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} -o {salmon_out}/{sample}.quant' \
-| qsub -V -N {sample} -o {salmon_out} -e {salmon_out}
+| qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {salmon_out} -e {salmon_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def join_gene(self):
@@ -543,8 +550,8 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         VisualizeAll(self.mapping_file, self.categories, out_dir=self.out_dir).visualize(
             self.exclude, self.base_on_assembly)
 
-    def clean(self):
-        self.system("rm -r {tmp_dir}")
+    # def clean(self):
+    #     self.system("rm -r {tmp_dir}")
 
     def run(self):
         """
@@ -563,7 +570,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
         self.format_raw(processors=3)
         self.run_kneaddata(
-            self.raw_list, callback=self.kneaddata_callback, **self.alloc_src("kneaddata"))
+            self.raw_list, callback=False, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=3)
 
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))

@@ -59,6 +59,10 @@ threads = 63
 
 use_sge = False
 
+sge_pe = "smp"
+
+sge_queue = "metagqueue"
+
 max_workers = {
     "kneaddata": 5,
     "kraken2": 6,

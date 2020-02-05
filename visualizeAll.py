@@ -147,7 +147,7 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                 VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
                                   'salmon_out/genes.emapper.annotations', prefix='EGGNOG_', annotation_column=9, out_dir=self.function_dir + '2-EggNOG', adjust_func=self.extract_empper_cog).visualize(exclude)
                 VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
-                                  'salmon_out/genes_cazy.f6', prefix='CAZY_', out_dir=self.function_dir + '4-CAZy', adjust_func=lambda x: re.search('\|([^\|]+)', x).group(1)).visualize(exclude)
+                                  'salmon_out/genes_cazy.f6', prefix='CAZY_', out_dir=self.function_dir + '4-CAZy', adjust_func=lambda x: re.search('\|([^\|_]+)', x).group(1)).visualize(exclude)
                 vcard = VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
                                           'salmon_out/genes_card.f6', prefix='AMR_', out_dir=self.amr_dir, adjust_func=False)
             else:
