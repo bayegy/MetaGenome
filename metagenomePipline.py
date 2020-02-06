@@ -379,7 +379,8 @@ echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-min 27 --k-max 
  --un {assembly_out}/{sample}/{sample}_R2_unassembled.fastq && \
 rm -r {assembly_out}/{sample}/intermediate_contigs {tmp_dir}/{sample} && \
 {base_dir}/merge_se_to_pe.py -1 {assembly_out}/{sample}/{sample}_R1_unassembled.fastq -2 {assembly_out}/{sample}/{sample}_R2_unassembled.fastq \
--o {assembly_out}/{sample}/{sample}_R%s_unassembled_merged.fq.gz  --removeinput && \
+-o {assembly_out}/{sample}/{sample}_R%s_unassembled_merged.fq  --removeinput && \
+gzip {assembly_out}/{sample}/{sample}_R*_unassembled_merged.fq && \
 echo {sample}_done > {assembly_out}/{sample}/all_done' | \
  qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {assembly_out} -e {assembly_out}
             """, **parsed_fqs, threads=threads, mem_p=mem * 1000000000, mem=mem,

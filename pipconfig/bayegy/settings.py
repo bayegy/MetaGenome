@@ -52,7 +52,7 @@ memery_needs = {
     "humann2": 45,
     "fmap": 30,
     "salmon": 80,
-    "megahit": 300
+    "megahit": 200
 }
 
 memery = 2000
