@@ -56,6 +56,7 @@ memery = 500
 
 threads = 63
 
+hosts = 1
 
 use_sge = False
 

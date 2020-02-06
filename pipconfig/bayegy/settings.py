@@ -52,12 +52,14 @@ memery_needs = {
     "humann2": 45,
     "fmap": 30,
     "salmon": 80,
-    "megahit": 200
+    "megahit": 300
 }
 
 memery = 2000
 
 threads = 190
+
+hosts = 2
 
 use_sge = True
 
@@ -70,6 +72,6 @@ max_workers = {
     "kraken2": 6,
     "humann2": 5,
     "fmap": 10,
-    "salmon": 6,
+    "salmon": 10,
     "megahit": 6
 }

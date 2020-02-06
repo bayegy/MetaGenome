@@ -173,6 +173,7 @@ class MetagenomePipline(SystemMixin):
             self.kracken2_reports_pattern, use_direction='R1')
         self.running_list = self.out_dir + '.running_list'
         self.escape_sge = not settings.use_sge
+        self.threads_single = int(self.threads / self.hosts)
 
     def format_raw(self, processors=3):
         executor = ThreadPoolExecutor(max_workers=processors)
@@ -299,19 +300,21 @@ echo '{metaphlan2_home}/metaphlan2.py --input_type multifastq --bowtie2_exe {bow
     @synchronize
     def run_humann2(self, fq_list, threads=2, mem=40):
         self.system("""
-echo '{humann2_home}/humann2 --input {r1} \
+echo 'mkdir -p {humann2_out}/{sample}&&{humann2_home}/humann2 --input {r1} \
   --bowtie2 {bowtie2_home} --metaphlan {metaphlan2_home} --diamond {diamond_home} \
   --protein-database {humann2_protein_database} --nucleotide-database {humann2_nucleotide_database} \
   --threads {threads} --memory-use  maximum \
   --output-basename {sample} \
-  --output {humann2_out} \
-  --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database} --sample_id {sample}" ' \
+  --output {humann2_out}/{sample} \
+  --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database} --sample_id {sample}" && \
+mv {humann2_out}/{sample}/*/*bugs_list.tsv {humann2_out}/{sample}/*genefamilies.tsv {humann2_out}/{sample}/*pathabundance.tsv {humann2_out}/&& \
+rm -r {humann2_out}/{sample}' \
   | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {humann2_out} -e {humann2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def humann2_callback(self):
         self.system(
-            "mv {humann2_out}/*/*bugs_list.tsv {humann2_out}/")
+            "mv {humann2_out}/*/*/*bugs_list.tsv {humann2_out}/")
         for e in os.listdir(self.humann2_out):
             path = os.path.join(self.humann2_out, e)
             if os.path.isdir(path):
@@ -581,17 +584,17 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         """
         if self.base_on_assembly:
             self.assembly(self.clean_paired_list, **self.alloc_src("megahit"))
-            self.sum_assembly(threads=self.threads)
+            self.sum_assembly(threads=self.threads_single)
             self.run_quast()
-            self.create_gene_db(threads=self.threads)
+            self.create_gene_db(threads=self.threads_single)
             self.quant_gene(self.clean_paired_list,
                             first_check=5, **self.alloc_src("salmon"))
             self.join_gene()
-            self.map_gene(threads=self.threads)
+            self.map_gene(threads=self.threads_single)
         else:
 
             self.run_humann2(
-                self.clean_r1_list, callback=self.humann2_callback, **self.alloc_src("humann2"))
+                self.clean_r1_list, callback=False, **self.alloc_src("humann2"))
             self.join_humann()
 
             self.fmap_wrapper(self.clean_r1_list,
