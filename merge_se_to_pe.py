@@ -43,8 +43,8 @@ for lines in read_file_n_lines(options.se1, 4):
     se1[k] = lines
 
 
-with gzip.open(options.out % (1), 'w') as ppe1, gzip.open(options.out % (2), 'w') as ppe2:
-    with io.TextIOWrapper(ppe1, encoding='utf-8') as pe1, io.TextIOWrapper(ppe2, encoding='utf-8') as pe2:
+with gzip.open(options.out % (1), 'wb') as ppe1, gzip.open(options.out % (2), 'wb') as ppe2:
+    with io.TextIOWrapper(ppe1, encoding='ascii') as pe1, io.TextIOWrapper(ppe2, encoding='ascii') as pe2:
         for lines in read_file_n_lines(options.se2, 4):
             k = lines[0].split("/")[0]
             if k in se1:
