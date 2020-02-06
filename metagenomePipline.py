@@ -372,7 +372,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
         if os.path.exists(os.path.join(self.assembly_out, parsed_fqs['sample'], 'all_done')):
             return
         self.system("""
-echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-min 27 --k-max 127 --k-step 20 \
+echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-list 21,29,39,59,79,99,119,141 \
  --tmp-dir {tmp_dir}/{sample} -m {mem_p} --mem-flag 1 --continue \
  -1 {r1} -2 {r2} --min-contig-len 500 -t {threads} -o {assembly_out}/{sample} && \
 {bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {tmp_dir}/{sample}/bowtie2_db/{sample} && \
