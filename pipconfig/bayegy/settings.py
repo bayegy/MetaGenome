@@ -57,7 +57,7 @@ memery_needs = {
 
 memery = 2000
 
-threads = 190
+threads = 196
 
 hosts = 2
 
