@@ -369,11 +369,14 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.m
     def assembly(self, fq_list, threads=4, mem=24):
         # 单样品组装
         parsed_fqs = self.parse_fq_list(fq_list)
-        if os.path.exists(os.path.join(self.assembly_out, parsed_fqs['sample'], 'all_done')):
+        sample_out = os.path.join(self.assembly_out, parsed_fqs['sample'])
+        if os.path.exists(os.path.join(sample_out, 'all_done')):
             return
+        if os.path.exists(sample_out):
+            self.system("rm -r {}".format(sample_out))
         self.system("""
 echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-list 21,29,39,59,79,99,119,141 \
- --tmp-dir {tmp_dir}/{sample} -m {mem_p} --mem-flag 1 --continue \
+ --tmp-dir {tmp_dir}/{sample} -m {mem_p} --mem-flag 1  \
  -1 {r1} -2 {r2} --min-contig-len 500 -t {threads} -o {assembly_out}/{sample} && \
 {bowtie2_home}/bowtie2-build --threads {threads} {assembly_out}/{sample}/final.contigs.fa {tmp_dir}/{sample}/bowtie2_db/{sample} && \
 {bowtie2_home}/bowtie2 --threads {threads} -x {tmp_dir}/{sample}/bowtie2_db/{sample}  -U {r1} --end-to-end --sensitive -S {sam_out} \

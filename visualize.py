@@ -48,6 +48,13 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
             # pdb.set_trace()
             self.abundance_df = self.abundance_df.loc[self.abundance_df.T.sum(
             ) > 0, :]
+
+            """
+            # some sample do not contain any genes
+            if sum(self.abundance_df.sum() == 0) > 0:
+                self.abundance_df = self.abundance_df + 1
+            """
+
             if sum(not_sample) > 1:
                 abd_df_other = abd_df_other.iloc[self.array_not(
                     abd_df_other.iloc[:, 0].duplicated()), :]
