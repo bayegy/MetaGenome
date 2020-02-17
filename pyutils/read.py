@@ -41,12 +41,13 @@ def read_to_html_table(file_path, table_class=False, thead_class=False):
 
 def get_kingdom_ratio(species_abundance_table):
     df = read_abundance(species_abundance_table, index_col=-1, return_sum=1)
-    kingdom = [re.search('^[^;]+', s).group().replace('k__', '') for s in df.index]
+    kingdom = [re.search('^[^;]+', s).group().replace('k__', '')
+               for s in df.index]
     # pdb.set_trace()
     df = df.groupby(kingdom).sum()
     try:
         del df['Environmentalsamples']
-    except Exception as e:
+    except Exception:
         pass
 
     def series_to_str(series, value_format=':.2%'):
@@ -83,7 +84,8 @@ def update_html_properties(html_fp, format_dict, out_fp, filter_function=False, 
         else:
             tag = re.search('^[^\[]+', k).group()
             attrs = re.search('\[(.+)\]', k)
-            attrs = dict([attr.split('=') for attr in attrs.group(1).split('&')]) if attrs else {}
+            attrs = dict([attr.split('=')
+                          for attr in attrs.group(1).split('&')]) if attrs else {}
             label_list = sp.findAll(tag, attrs=attrs)
         for label in label_list:
             for p, n in v.items():

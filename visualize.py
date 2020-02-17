@@ -10,7 +10,7 @@ from systemMixin import SystemMixin
 class Visualize(SystemMixin, metaclass=ABCMeta):
     """docstring for Visualize"""
 
-    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False):
+    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False, filter_abc_description=False):
         out_dir = out_dir if out_dir else os.path.dirname(
             mapping_file or abundance_table)
         self.set_path(force=True,
@@ -62,6 +62,17 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
                 abd_df_other.drop(
                     abd_df_other.columns[0], axis=1, inplace=True)
                 self.abundance_df = self.abundance_df.join(abd_df_other)
+                # filter abundance table description
+                if filter_abc_description:
+                    flag, ftaxa = filter_abc_description.split(':')
+                    ftaxa = ftaxa.split(',')
+                    if flag == "keep":
+                        self.abundance_df = self.abundance_df.iloc[self.iterfind(
+                            self.abundance_df.iloc[:, -1], ftaxa), :]
+                    else:
+                        self.abundance_df = self.abundance_df.iloc[[
+                            not b for b in self.iterfind(self.abundance_df.iloc[:, -1], ftaxa)], :]
+
             abundance_table = self.tmp_dir + os.path.basename(abundance_table)
             mapping_file = self.tmp_dir + os.path.basename(mapping_file)
             self.mapping_df.to_csv(mapping_file, sep='\t', index=False)
@@ -106,3 +117,15 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
             self.abundance_df.to_csv(result_abundance, sep='\t', index=True)
         if os.path.exists(self.tmp_dir):
             shutil.rmtree(self.tmp_dir)
+
+    @staticmethod
+    def iterfind(a, b):
+        out = []
+        for i in a:
+            found = False
+            for j in b:
+                if re.search(j, i, flags=re.IGNORECASE):
+                    found = True
+                    break
+            out.append(found)
+        return out

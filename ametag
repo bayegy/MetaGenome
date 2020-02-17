@@ -20,10 +20,10 @@ p.add_argument('-r', '--reverse-file-pattern', dest='rp', default=r'_2\.fq', met
                help='The regular expression representing reverse sequence in file names,Supply this parameter together with -i -s -f.')
 p.add_argument('-e', '--exclude', dest='exclude', default='none', metavar='<str>',
                help='The variables excluded from RDA and correlation heatmap analysis, if more than one variable is expected, you should use comma as delimeters. if more than one run is expected, use semicolon as delimeters. example: "Var1,Var2;Var1,Var3". default is none, meaning no variable will be excluded.')
-p.add_argument('-n', '--number', dest='number', default=10, metavar='<int>',
-               help='Control the max number of jobs submitted to sge each time.')
+p.add_argument('-k', '--filter', dest='filter', default="none", metavar='[keep|exclude]:species1,species2',
+               help='Taxon to be filtered. use "keep:taxon1,taxon2" to keep noly taxon1, taxon2. or use "exclude:taxon1,taxon2" to filter taxon1, taxon2. For multi-strategies, use ";" as delimeters: "keep:taxon1,taxon2;exclude:taxon1,taxon2" ')
 p.add_argument('-t', '--host-db', dest='host', default="/home/cheng/Databases/hg38/hg38", metavar='<str>',
-               help='Path to the host genone bowtie2 database.')
+               help='Comma seprated path to the host genome bowtie2 database.')
 p.add_argument('-a', '--assembly', dest='assembly', default="no", metavar='<str>',
                help='Analyze base on assembly. yes (use assembly) or no. Default is no')
 p.add_argument('-o', '--outdir', dest='outdir', metavar='<directory>', default='./',
@@ -31,6 +31,7 @@ p.add_argument('-o', '--outdir', dest='outdir', metavar='<directory>', default='
 
 options = p.parse_args()
 m = MetagenomePipline(raw_fqs_dir=options.input, pre_mapping_file=options.map, categories=False if options.category == 'auto' else options.category, host_db=options.host, sample_regex=options.sp,
-                      forward_regex=options.fp, reverse_regex=options.rp, out_dir=options.outdir, base_on_assembly=True if options.assembly == 'yes' else False, exclude=options.exclude)
+                      forward_regex=options.fp, reverse_regex=options.rp, out_dir=options.outdir, base_on_assembly=True if options.assembly == 'yes' else False, exclude=options.exclude,
+                      filter_species=False if options.filter == "none" else options.filter)
 
 m.run()

@@ -116,7 +116,7 @@ class MetagenomePipline(SystemMixin):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none'):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False):
         self.context = dict()
 
         self.set_path(force=True,
@@ -174,6 +174,7 @@ class MetagenomePipline(SystemMixin):
         self.running_list = self.out_dir + '.running_list'
         self.escape_sge = not settings.use_sge
         self.threads_single = int(self.threads / self.hosts)
+        self.filter_species = filter_species
 
     def format_raw(self, processors=3):
         executor = ThreadPoolExecutor(max_workers=processors)
@@ -556,7 +557,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
                 f.write('\t'.join(vals) + '\n')
 
     def visualize(self):
-        VisualizeAll(self.mapping_file, self.categories, out_dir=self.out_dir).visualize(
+        VisualizeAll(self.mapping_file, self.categories, out_dir=self.out_dir, filter_species=self.filter_species).visualize(
             self.exclude, self.base_on_assembly)
 
     # def clean(self):

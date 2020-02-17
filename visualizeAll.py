@@ -7,6 +7,7 @@ from visualizeAssembly import VisualizeAssembly
 from pyutils.read import read_to_html_table, get_kingdom_ratio, format_file
 from colorMap import ColorMap
 from mapInfo import MapInfo
+from reportConfig import *
 
 
 class VisualizeAll(VisualizeSpecies):
@@ -16,9 +17,9 @@ class VisualizeAll(VisualizeSpecies):
         VisualizeAll("/home/cheng/Projects/rll_testdir/mapping_file.txt","Group1").visualize()
     """
 
-    def __init__(self, mapping_file, categories=False, out_dir=False, exclude_species="Environmentalsamples"):
+    def __init__(self, mapping_file, categories=False, out_dir=False, filter_species=False):
         super(VisualizeAll, self).__init__("multi_table", mapping_file,
-                                           categories, out_dir=out_dir, exclude_species=exclude_species)
+                                           categories, out_dir=out_dir)
         root_dir = self.out_dir + 'Result/'
         self.set_path(force=True,
                       root_dir=root_dir,
@@ -27,7 +28,7 @@ class VisualizeAll(VisualizeSpecies):
         self.set_path(force=False,
                       FMAP_data=self.fmap_home + '/FMAP_data/',
                       )
-
+        self.filter_species = filter_species
         self.mi = MapInfo()
 
     def map_ko_annotation(self):
@@ -114,7 +115,8 @@ cp -r {out_dir}Assembly_out/quast_results/* {asem_dir}/1-Quast/
 cp {out_dir}/salmon_out/All.genes.abundance.txt {out_dir}Assembly_out/NR.nucleotide.fa {asem_dir}/
             """.format(**self.context)
         else:
-            self.set_path(force=True, table_dir=self.root_dir + '01-BaseTables')
+            self.set_path(
+                force=True, table_dir=self.root_dir + '01-BaseTables')
             self.system('''
 {humann2_home}/humann2_renorm_table --input {b}/RPK.All.UniRef90.genefamilies.tsv --units cpm -o {b}/All.UniRef90.genefamilies.tsv -s n
 {humann2_home}/humann2_renorm_table --input {b}/RPK.All.Metacyc.pathabundance.tsv --units cpm -o {b}/All.Metacyc.pathabundance.tsv -s n
@@ -190,7 +192,16 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                                   out_dir=self.function_dir + '1-KEGG').visualize(exclude)
 
             VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,
-                             self.category, exclude_species=self.exclude_species, out_dir=self.taxa_dir, tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude)
+                             self.category, out_dir=self.taxa_dir, tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude)
+            if self.filter_species:
+                for filter_object in self.filter_species.split(';'):
+                    if filter_object.startswith('exclude'):
+                        filter_object += ',Environmentalsamples'
+                    VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,
+                                     self.category, filter_species=filter_object,
+                                     out_dir=os.path.join(self.taxa_dir, re.sub(
+                                         '[,:]', '_', filter_object)),
+                                     tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude)
 
             self.map_func_definition()
 
@@ -198,15 +209,14 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                      ko_abundance_table=self.function_dir + '1-KEGG/All.KO.abundance_unstratified.tsv', mapping_file=self.mapping_file, category=g, out_dir=self.function_dir + '1-KEGG/5-ColoredMaps/').plot_all(map_level=self.function_dir + '1-KEGG/All.KEGG.Pathway.mapping.txt')
 
             reads_spec = """
-cp -rp {base_dir}/Report/src {report_dir}
-cp {base_dir}/Report/结题报告.html {categroy_dir}
 cp {function_dir}/2-Metacyc/1-Barplots/Metacyc_{category}_barplot.pdf  Figure5-5.pdf
 cpfirst "{function_dir}/5-EC/4-SignificanceAnalysis/LEfSe/SignificantFeatures/.pdf"   Figure5-8.pdf
+cpfirst "{function_dir}/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/.pdf"   Figure5-4.pdf
             """.format(**self.context)
 
             asem_spec = """
-cp -rp {base_dir}/Report_assembly/src {report_dir}
-cp {base_dir}/Report_assembly/结题报告.html {categroy_dir}
+# cp -rp {base_dir}/Report_assembly/src {report_dir}
+# cp {base_dir}/Report_assembly/结题报告.html {categroy_dir}
             """.format(**self.context)
 
             self.system("""
@@ -218,7 +228,6 @@ cp {taxa_dir}/2-AbundanceComparison/LEfSe/Genus/{category}_Genus_lefse_LDA2.pdf 
 cp {taxa_dir}/2-AbundanceComparison/VennAndFlower/{category}_Venn_plot.png Figure4-5.png
 cp {function_dir}/1-KEGG/1-Barplots/KEGG.Pathway.Level1_{category}_barplot.pdf Figure5-1.pdf
 cp {function_dir}/1-KEGG/4-SignificanceAnalysis/LEfSe/KEGG.Pathway_{category}_lefse_LDA2.pdf   Figure5-2.pdf
-cpfirst "{function_dir}/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/.pdf"   Figure5-4.pdf
 cp {eggnog_dir}/2-Heatmaps/EGGNOG_{category}_clustered_heatmap.pdf   Figure5-6.pdf
 cp {go_dir}/3-Circos/GO_{category}_circos.png   Figure5-7.png
 cp {cazy_dir}/4-SignificanceAnalysis/LEfSe/CAZY_{category}_lefse_LDA2.pdf   Figure5-9.pdf
@@ -228,16 +237,52 @@ cp {amr_dir}/3-Circos/AMR_{category}_circos.png Figure6-3.png
 cp {taxa_dir}/4-CorrelationAnalysis/RDA/Genus/{category}_RDA_features_location_plot.pdf Figure7-1.pdf
 cp {amr_dir}/5-CorrelationAnalysis/CorrelationHeatmap/AMR_Correlation_heatmap.pdf Figure7-2.pdf
 mv {kegg_dir}/5-CorrelationAnalysis {kegg_dir}6-CorrelationAnalysis
+cp -rp {base_dir}/Report/src {report_dir}
+cp {base_dir}/Report/结题报告.html {categroy_dir}
 {spec}
 if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do echo $pdfs; base=$(basename $pdfs .pdf); convert  -density 300 -quality 80 $pdfs ${{base}}.png; rm $pdfs;done;fi;
                 """, spec=asem_spec if base_on_assembly else reads_spec)
 
-            page = self.report_dir + \
-                'src/pages/main_cleaned.html' if base_on_assembly else self.categroy_dir + "结题报告.html"
+            # page = self.report_dir + \
+            #     'src/pages/main_cleaned.html' if base_on_assembly else self.categroy_dir + "结题报告.html"
 
-            format_file(page, page, table1=read_to_html_table(
-                self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),
-                species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category)
+            page = self.categroy_dir + "结题报告.html"
+            if base_on_assembly:
+                format_file(page, page, table1=read_to_html_table(
+                    self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),
+                    species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category,
+                    nav5=nav5_asem,
+                    nav3=nav3_asem,
+                    sum_steps=sum_steps_asem,
+                    find_gene=find_gene_asem,
+                    func_steps=func_steps_asem,
+                    func_source=func_source_asem,
+                    eggnog_od="2",
+                    eggnog_fig="图5-4",
+                    go_od="3",
+                    go_fig="图5-5",
+                    ec_doc="",
+                    cazy_od="4",
+                    cazy_fig="图5-6",
+                )
+            else:
+                format_file(page, page, table1=read_to_html_table(
+                    self.out_dir + 'Report/reads_summary.txt', table_class=['table', 'table-striped', 'table-sm'], thead_class=['thead-dark']),
+                    species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category,
+                    nav3="",
+                    nav5=nav5_reads,
+                    sum_steps=sum_steps_reads,
+                    find_gene="",
+                    func_steps=func_steps_reads,
+                    func_source=func_source_reads,
+                    eggnog_od="3",
+                    eggnog_fig="图5-6",
+                    go_od="4",
+                    go_fig="图5-7",
+                    ec_doc=ec_doc_reads,
+                    cazy_od="6",
+                    cazy_fig="图5-9",
+                )
 
         self.system(
             "{base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")

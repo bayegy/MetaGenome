@@ -1,18 +1,18 @@
 import os
 from visualize import Visualize
-from systemMixin import SystemMixin
 from osEnv import OSEnv
 
 
 class VisualizeSpecies(Visualize):
     """docstring for VisualizeSpecies"""
 
-    def __init__(self, abundance_table, mapping_file, categories=False, prefix=False, out_dir=False, exclude_species="UNREALTAX", tmp_dir='./'):
-        super(VisualizeSpecies, self).__init__(abundance_table, mapping_file, categories, prefix, out_dir)
+    def __init__(self, abundance_table, mapping_file, categories=False, prefix=False, out_dir=False, filter_species="exclude:Environmentalsamples", tmp_dir='./'):
+        super(VisualizeSpecies, self).__init__(
+            abundance_table, mapping_file, categories, prefix, out_dir, filter_abc_description=filter_species)
 
         self.set_attr(
             sample_name=os.path.basename(self.abundance_table).rstrip('.txt'),
-            exclude_species=exclude_species
+            # exclude_species=exclude_species
         )
 
     def __visualize_with_group__(self, exclude='none'):
@@ -49,8 +49,9 @@ class VisualizeSpecies(Visualize):
     qiime tools import   --input-path {tmp_dir}/{sample_name}.taxonomy.biom --type "FeatureData[Taxonomy]"   --input-format BIOMV210Format   --output-path {tmp_dir}/{sample_name}.taxonomy.qza
 
     echo -e "\n#Filter OTU table by taxonomy"
-    qiime taxa filter-table   --i-table {tmp_dir}/{sample_name}.count.qza --i-taxonomy {tmp_dir}/{sample_name}.taxonomy.qza --p-exclude {exclude_species} --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.temp.qza
-    qiime feature-table filter-features --i-table {tmp_dir}/{sample_name}.count.filtered.temp.qza --p-min-frequency 10 --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.qza
+    # qiime taxa filter-table   --i-table {tmp_dir}/{sample_name}.count.qza --i-taxonomy {tmp_dir}/{sample_name}.taxonomy.qza --p-exclude {exclude_species} --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.temp.qza
+    # qiime feature-table filter-features --i-table {tmp_dir}/{sample_name}.count.filtered.temp.qza --p-min-frequency 10 --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.qza
+    qiime feature-table filter-features --i-table {tmp_dir}/{sample_name}.count.qza --p-min-frequency 10 --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.qza
 
     echo -e "\n#Generate barplot"
     qiime taxa barplot --i-table {tmp_dir}/{sample_name}.count.filtered.qza --i-taxonomy {tmp_dir}/{sample_name}.taxonomy.qza  --m-metadata-file {mapping_file} --o-visualization {tmp_dir}/{sample_name}.taxa-bar-plots.qzv
@@ -212,6 +213,6 @@ class VisualizeSpecies(Visualize):
 
     def __visualize_without_group__(self):
         os.system("bash {}visualize_otu_table_without_group.sh {} {} none {} {} {} {}".format(
-            self._base_dir, self.abundance_table, self.mapping_file, self.prefix, self.exclude_species, self.path[
+            self._base_dir, self.abundance_table, self.mapping_file, self.prefix, "NONE", self.path[
                 'bayegy_home'], self.tmp_dir
         ))
