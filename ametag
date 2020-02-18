@@ -20,7 +20,7 @@ p.add_argument('-r', '--reverse-file-pattern', dest='rp', default=r'_2\.fq', met
                help='The regular expression representing reverse sequence in file names,Supply this parameter together with -i -s -f.')
 p.add_argument('-e', '--exclude', dest='exclude', default='none', metavar='<str>',
                help='The variables excluded from RDA and correlation heatmap analysis, if more than one variable is expected, you should use comma as delimeters. if more than one run is expected, use semicolon as delimeters. example: "Var1,Var2;Var1,Var3". default is none, meaning no variable will be excluded.')
-p.add_argument('-k', '--filter', dest='filter', default="none", metavar='[keep|exclude]:species1,species2',
+p.add_argument('-k', '--filter', dest='filter', default="none", metavar='<str>',
                help='Taxon to be filtered. use "keep:taxon1,taxon2" to keep noly taxon1, taxon2. or use "exclude:taxon1,taxon2" to filter taxon1, taxon2. For multi-strategies, use ";" as delimeters: "keep:taxon1,taxon2;exclude:taxon1,taxon2" ')
 p.add_argument('-t', '--host-db', dest='host', default="/home/cheng/Databases/hg38/hg38", metavar='<str>',
                help='Comma seprated path to the host genome bowtie2 database.')

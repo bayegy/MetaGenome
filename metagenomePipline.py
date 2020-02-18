@@ -339,7 +339,7 @@ rm -r {humann2_out}/{sample}' \
     @synchronize
     def run_fmap(self, fq_list, threads=4, mem=24):
         self.system("""
-echo 'perl {fmap_home}/FMAP_mapping.pl -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
+echo 'perl {fmap_home}/FMAP_mapping.pl -e 0.00001 -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
  qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {fmap_out} -e {fmap_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 

@@ -49,8 +49,6 @@ class VisualizeSpecies(Visualize):
     qiime tools import   --input-path {tmp_dir}/{sample_name}.taxonomy.biom --type "FeatureData[Taxonomy]"   --input-format BIOMV210Format   --output-path {tmp_dir}/{sample_name}.taxonomy.qza
 
     echo -e "\n#Filter OTU table by taxonomy"
-    # qiime taxa filter-table   --i-table {tmp_dir}/{sample_name}.count.qza --i-taxonomy {tmp_dir}/{sample_name}.taxonomy.qza --p-exclude {exclude_species} --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.temp.qza
-    # qiime feature-table filter-features --i-table {tmp_dir}/{sample_name}.count.filtered.temp.qza --p-min-frequency 10 --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.qza
     qiime feature-table filter-features --i-table {tmp_dir}/{sample_name}.count.qza --p-min-frequency 10 --o-filtered-table {tmp_dir}/{sample_name}.count.filtered.qza
 
     echo -e "\n#Generate barplot"
