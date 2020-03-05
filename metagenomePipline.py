@@ -116,7 +116,7 @@ class MetagenomePipline(SystemMixin):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True, mix_asem=True):
         self.context = dict()
 
         self.set_path(force=True,
@@ -180,6 +180,7 @@ class MetagenomePipline(SystemMixin):
         self.threads_single = int(self.threads / self.hosts)
         self.filter_species = filter_species
         self.zip_kneaddata = zip_kneaddata
+        self.mix_asem = mix_asem
 
     def format_raw(self, processors=3):
         executor = ThreadPoolExecutor(max_workers=processors)
@@ -403,7 +404,7 @@ echo {sample}_done > {assembly_out}/{sample}/all_done' | \
                     escape_sge=self.escape_sge,
                     sam_out=os.devnull)
 
-    def sum_assembly(self, threads=50):
+    def mix_assembly(self, threads=50):
         # 混合组装
         self.system(
             "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.94 --mem-flag 0 \
@@ -415,6 +416,7 @@ echo {sample}_done > {assembly_out}/{sample}/all_done' | \
             threads=threads
         )
 
+    def prodigal(self):
         # 基因预测，去冗余
         self.system(
             """
@@ -598,12 +600,14 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         self.run_bracken()
         """
         if self.base_on_assembly:
-            """
+
             self.assembly(self.clean_paired_list, **self.alloc_src("megahit"))
-            self.sum_assembly(threads=self.threads_single)
+            if self.mix_asem:
+                self.mix_assembly(threads=self.threads_single)
+            self.prodigal()
             self.run_quast()
             self.create_gene_db(threads=self.threads_single)
-            """
+
             self.quant_gene(self.clean_paired_list,
                             first_check=5, **self.alloc_src("salmon"))
             self.join_gene()
