@@ -61,7 +61,7 @@ find_gene_asem = """
 
 			<p>运用prodigal<sup>[18]</sup>软件，预测组装得到的所有contigs中的基因序列；预测参数：-p meta（宏基因组模式）。</p>
 			<p>使用Cd-hit<sup>[43]</sup>的默认参数，对prodigal预测得到的基因进行去冗余，得到去冗余基因；去冗余参数： -G 1（使用全局序列identity阈值） -c 0.9（默认的全局identity阈值）。</p>
-			<p>使用Salmon<sup>[44]</sup>软件，将质控和去宿主后的Clean Data比对到去冗余基因上，从而计算去冗余基因的相对丰度RPM（reads per million）。Salmon定量参数: --meta (宏基因组模式)。</p>
+			<p>使用Salmon<sup>[44]</sup>软件，将质控和去宿主后的Clean Data比对到去冗余基因上，从而计算去冗余基因的相对丰度RPM（reads per million）。Salmon定量参数: --validateMappings (增加敏感性和特异性) --meta (宏基因组模式)。</p>
 			<p>使用emboss软件的transeq命令，将去冗余后的基因翻译为蛋白质序列，用于后续的比对和注释。</p>
 """
 

@@ -116,7 +116,7 @@ class MetagenomePipline(SystemMixin):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True):
         self.context = dict()
 
         self.set_path(force=True,
@@ -160,11 +160,15 @@ class MetagenomePipline(SystemMixin):
 
         self.raw_pattern = "%s/{sample_id}_{direction}.fq" % (self.raw_dir)
         self.raw_list = self.paired_data(self.raw_pattern)
-        self.clean_paired_pattern = "%s/{sample_id}_R1_kneaddata_paired_{direction_num}.fastq" % (
+        self.unzip_clean_paired_pattern = "%s/{sample_id}_R1_kneaddata_paired_{direction_num}.fastq" % (
             self.kneaddata_out)
+        self.clean_paired_pattern = self.unzip_clean_paired_pattern + \
+            '.gz' if zip_kneaddata else self.unzip_clean_paired_pattern
         self.clean_r1_list = self.map_list(
             self.clean_paired_pattern, use_direction='R1')
         self.clean_paired_list = self.paired_data(self.clean_paired_pattern)
+        self.unzip_clean_paired_list = self.paired_data(
+            self.unzip_clean_paired_pattern)
         self.kracken2_reports_pattern = "%s/{sample_id}.report" % (
             self.kraken2_out)
         self.unassembled_pattern = "%s/{sample_id}/{sample_id}_R{direction_num}_unassembled_merged.fq.gz" % (
@@ -175,6 +179,7 @@ class MetagenomePipline(SystemMixin):
         self.escape_sge = not settings.use_sge
         self.threads_single = int(self.threads / self.hosts)
         self.filter_species = filter_species
+        self.zip_kneaddata = zip_kneaddata
 
     def format_raw(self, processors=3):
         executor = ThreadPoolExecutor(max_workers=processors)
@@ -257,6 +262,10 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
 
     def kneaddata_callback(self):
         self.mirror_move(self.tmp_dir, self.kneaddata_out)
+
+    @pool_decorator
+    def gzip_kneaddata(self, fq_list):
+        self.system("gzip {r1}&&gzip {r2}", **self.parse_fq_list(fq_list))
 
     @synchronize
     def run_kraken2(self, fq_list, threads=2, mem=70):
@@ -433,7 +442,7 @@ sed -i 's/_1 / /' {assembly_out}/NR.protein.fa
     @synchronize
     def quant_gene(self, fq_list, threads=7, mem=80):
         self.system("""
-echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} -o {salmon_out}/{sample}.quant' \
+echo '{salmon_path} quant --validateMappings -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} -o {salmon_out}/{sample}.quant' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {salmon_out} -e {salmon_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
@@ -446,14 +455,14 @@ echo '{salmon_path} quant -i {assembly_out}/salmon_index -l A -p {threads} --met
     def diamond_gene(self, database, out_file, threads=66):
         self.system("""
 {diamond_home}/diamond blastp --db {database} --query {assembly_out}/NR.protein.fa --outfmt 6 --threads {threads} \
- -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --tmpdir {tmp_dir}  --quiet --out {salmon_out}/{out_file}
+ -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {salmon_out}/{out_file}
             """, out_file=out_file, threads=threads, database=database)
 
     def map_gene(self, threads=70):
         self.system('''
 {emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
   --data_dir {emapper_database} --cpu {threads} \
-  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override --temp_dir {tmp_dir}
+  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override 
 
 # {emapper_path} --annotate_hits_table {salmon_out}/genes.emapper.seed_orthologs --no_file_comments \
   -o {salmon_out}/genes --cpu {threads} --data_dir {emapper_database} --usemem --override
@@ -576,20 +585,25 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-
+        """
         self.format_raw(processors=3)
         self.run_kneaddata(
             self.raw_list, callback=False, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=3)
-
+        """
+        if self.zip_kneaddata:
+            self.gzip_kneaddata(self.unzip_clean_paired_list, max_workers=6)
+        """
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-
+        """
         if self.base_on_assembly:
+            """
             self.assembly(self.clean_paired_list, **self.alloc_src("megahit"))
             self.sum_assembly(threads=self.threads_single)
             self.run_quast()
             self.create_gene_db(threads=self.threads_single)
+            """
             self.quant_gene(self.clean_paired_list,
                             first_check=5, **self.alloc_src("salmon"))
             self.join_gene()
