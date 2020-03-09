@@ -54,6 +54,17 @@ find_gene_asem = """
 				<li>对于单样品和混合组装生成的 contigs，过滤掉 500bp以下的片段，并进行统计分析和后续基因预测。</li>
 
 			</ol>
+
+
+			<p align="center">
+				<iframe src="../01-Assembly/1-Quast/report.html" width="900" height="900"></iframe>
+			</p>
+			<p align="center"><strong> QUAST结果展示<a href="../01-Assembly/1-Quast/report.html">（点击此处打开新窗口查看)</a></strong></p>
+			<dd align="center" style="font-size:80%;">
+				图中展示了组装得到的contigs 长度分布情况。N50: Reads组装后会获得一些不同长度的Contigs。将所有的Contigs按照从长到短进行排序，然后把Contigs的长度按照这个顺序依次相加，当相加的长度达到Contig总长度的一半时，最后一个加上的Contig长度即为Contig N50。
+			</dd>
+
+
 			<div id="a3.3" class="anchor"></div>
 			<h3>
 				3.3 基因预测，基因去冗余，基因定量
@@ -63,6 +74,14 @@ find_gene_asem = """
 			<p>使用Cd-hit<sup>[43]</sup>的默认参数，对prodigal预测得到的基因进行去冗余，得到去冗余基因；去冗余参数： -G 1（使用全局序列identity阈值） -c 0.9（默认的全局identity阈值）。</p>
 			<p>使用Salmon<sup>[44]</sup>软件，将质控和去宿主后的Clean Data比对到去冗余基因上，从而计算去冗余基因的相对丰度RPM（reads per million）。Salmon定量参数: --validateMappings (增加敏感性和特异性) --meta (宏基因组模式)。</p>
 			<p>使用emboss软件的transeq命令，将去冗余后的基因翻译为蛋白质序列，用于后续的比对和注释。</p>
+
+			<p align="center">
+				<img src="../01-Assembly/2-ORFPrediction/ORF_summary.png" width="900">
+			</p>
+			<p align="center"><strong>图3-1 预测得到的基因基本信息统计</strong></p>
+			<dd align="center" style="font-size:80%;">
+				说明：左上为预测基因的长度分布柱形图；右上为预测基因GC比例的分布柱形图；左下为预测基因起始位点类型（Edge表示预测基因起始密码子未知）饼图；右下为预测基因完整性饼图，其中，10只有终止密码子，01只有起始密码子，11都没有，00表示有起始有终止的完整基因。
+			</dd>
 """
 
 func_steps_asem = """

@@ -217,6 +217,10 @@ cpfirst "{function_dir}/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/
             asem_spec = """
 # cp -rp {base_dir}/Report_assembly/src {report_dir}
 # cp {base_dir}/Report_assembly/结题报告.html {categroy_dir}
+mkdir -p {out_dir}/Sub_Result
+mv {root_dir}/*/2-FuctionAnalysis/*/map_*_to_genes.xls {root_dir}/*/*/map_*_to_genes.xls \
+ {root_dir}/01-Assembly/All.genes.abundance.xls {root_dir}/01-Assembly/NR.nucleotide.fa \
+ {out_dir}/Sub_Result -f
             """.format(**self.context)
 
             self.system("""

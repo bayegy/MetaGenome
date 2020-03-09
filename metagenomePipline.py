@@ -464,7 +464,7 @@ echo '{salmon_path} quant --validateMappings -i {assembly_out}/salmon_index -l A
         self.system('''
 {emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
   --data_dir {emapper_database} --cpu {threads} \
-  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override 
+  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override
 
 # {emapper_path} --annotate_hits_table {salmon_out}/genes.emapper.seed_orthologs --no_file_comments \
   -o {salmon_out}/genes --cpu {threads} --data_dir {emapper_database} --usemem --override
@@ -587,18 +587,18 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-        """
+
         self.format_raw(processors=3)
         self.run_kneaddata(
             self.raw_list, callback=False, **self.alloc_src("kneaddata"))
         self.generate_qc_report(processors=3)
-        """
+
         if self.zip_kneaddata:
             self.gzip_kneaddata(self.unzip_clean_paired_list, max_workers=6)
-        """
+
         self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
         self.run_bracken()
-        """
+
         if self.base_on_assembly:
 
             self.assembly(self.clean_paired_list, **self.alloc_src("megahit"))
