@@ -48,10 +48,10 @@ find_gene_asem = """
 			<p>组装步骤如下：</p>
 			<ol>
 				<li>经过质控和去宿主得到 Clean Data，使用MEGAHIT 组装软件进行组装分析( Assembly Analysis )；</li>
-				<li>对于单个样品，组装时选取 MEGAHIT<sup>[46]</sup> 的默认参数进行组装，得到该样品的contigs；组装参数：--k-list 21,29,39,59,79,99,119,141 --min-contig-len 500</li>
+				<li>对于单个样品，组装时选取 MEGAHIT<sup>[46]</sup> 的默认参数（MEGAHIT默认参数组装得到的contigs N50较高，质量较好）进行组装，得到该样品的contigs；组装参数：--k-list 21,29,39,59,79,99,119,141 --min-contig-len 500</li>
 				<li>将各样品质控和去宿主后的 Clean Data 采用 Bowtie2 软件比对至各样品组装后的contigs上，获取未被利用上的 PE reads；比对参数：--end-to-end, --sensitive</li>
-				<li>将各样品未被利用上的 reads 放在一起，选取MEGAHIT 适合组装复杂的大型的宏基因组的参数进行组装，得到所有样品混合组装的contigs；组装参数：--presets meta-large --k-min 27 --k-max 127 --k-step 10 --min-contig-len 500</li>
-				<li>对于单样品和混合组装生成的 contigs，过滤掉 500bp以下的片段，并进行统计分析和后续基因预测；</li>
+				<li>将各样品未被利用上的 reads 放在一起，使用MEGAHIT进行混合组装，得到所有样品混合组装的contigs；组装参数与单样本组装相同；</li>
+				<li>对于单样品和混合组装生成的 contigs，过滤掉 500bp以下的片段，并进行统计分析和后续基因预测。</li>
 
 			</ol>
 			<div id="a3.3" class="anchor"></div>

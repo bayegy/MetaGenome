@@ -407,7 +407,7 @@ echo {sample}_done > {assembly_out}/{sample}/all_done' | \
     def mix_assembly(self, threads=50):
         # 混合组装
         self.system(
-            "{megahit_path} --continue  --kmin-1pass --presets meta-large -m 0.94 --mem-flag 0 \
+            "{megahit_path} --continue  --kmin-1pass --k-list 21,29,39,59,79,99,119,141 -m 0.94 --mem-flag 0 \
              -1 {r1_list} -2 {r2_list} --min-contig-len 500 -t {threads} -o {assembly_out}/mixed_assembly",
             r1_list=','.join(self.map_list(
                 self.unassembled_pattern, use_direction="R1")),

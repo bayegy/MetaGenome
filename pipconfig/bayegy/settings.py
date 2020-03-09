@@ -51,8 +51,8 @@ memery_needs = {
     "kraken2": 70,
     "humann2": 45,
     "fmap": 30,
-    "salmon": 80,
-    "megahit": 300
+    "salmon": 500,
+    "megahit": 200
 }
 
 memery = 2000
@@ -72,6 +72,6 @@ max_workers = {
     "kraken2": 6,
     "humann2": 5,
     "fmap": 10,
-    "salmon": 10,
+    "salmon": 2,
     "megahit": 6
 }
