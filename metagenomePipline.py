@@ -530,14 +530,14 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             target_dir, "^reformatted_identifier.+_{}_R1_fastqc.html$".format(sample_id))
         print("The raw fastqc file of {} is {}".format(sample_id, raw_fqc))
         raw_num_reads, raw_gc_content = self.search_fqc(raw_fqc)
-        clean_fqc = self.find_file(
-            target_dir, "^{}_R1_kneaddata_paired_1_fastqc.html$".format(sample_id))
+
+        clean_fqc = os.path.join(target_dir, "{}_R1_kneaddata_paired_1_fastqc.html".format(sample_id))
         print("The clean fastqc file of {} is {}".format(sample_id, clean_fqc))
         clean_num_reads, clean_gc_content = self.search_fqc(clean_fqc)
         raw_q20, raw_q30 = self.q20_q30(
             self.raw_pattern.format(sample_id=sample_id, direction="R1"))
         clean_q20, clean_q30 = self.q20_q30(
-            self.clean_paired_pattern.format(sample_id=sample_id, direction_num=1))
+            self.unzip_clean_paired_pattern.format(sample_id=sample_id, direction_num=1))
 
         results.update([
             ("RawReads(#)", raw_num_reads),
@@ -587,10 +587,11 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-
+                
         self.format_raw(processors=3)
         self.run_kneaddata(
             self.raw_list, callback=False, **self.alloc_src("kneaddata"))
+        
         self.generate_qc_report(processors=3)
 
         if self.zip_kneaddata:
