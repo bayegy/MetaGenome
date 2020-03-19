@@ -21,18 +21,37 @@ def wait_sge(first_check=1):
         time.sleep(60)
 
 
+def all_path_exists(paths):
+    for path in paths:
+        if not os.path.exists(path):
+            return False
+    return True
+
+
 def sge_decorator(func):
     """
     对于被修饰的函数：fq_list参数值应是单个fq文件的路径（或路径对）
     对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
     """
 
-    def wfunc(self, fq_list, first_check=10, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
+    def wfunc(self, fq_list, first_check=10, callback=False, callback_kwargs={}, max_workers=10, pass_if_exists=[], clean_before=[], **kwargs):
         fq_list = split_list(fq_list, max_workers)
         print("######################Running " + str(func))
         start_time = time.time()
         for fqs in fq_list:
             for fq in fqs:
+
+                parsed_fqs = self.parse_fq_list(fq)
+                if pass_if_exists:
+                    paths = [p.format(**parsed_fqs, **self.context) for p in pass_if_exists]
+                    if all_path_exists(paths):
+                        continue
+                if clean_before:
+                    for path in clean_before:
+                        path = path.format(**parsed_fqs, **self.context)
+                        if os.path.exists(path):
+                            self.system("rm -r {}".format(path))
+
                 func(self, fq_list=fq, **kwargs)
             if callback:
                 wait_sge(first_check)
@@ -53,7 +72,10 @@ def pool_decorator(func):
     对于最终函数：fq_list参数是多个fq文件路径的二(至少)维数组(list)
     """
 
-    def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, **kwargs):
+    def wfunc(self, fq_list, first_check=1, callback=False, callback_kwargs={}, max_workers=10, pass_if_exists=[], clean_before=[], **kwargs):
+        """
+        pass_if_exists: 路径列表， 如果列表中的路径都存在，的跳过相应样本的处理，路径中的{sample}及MetagenomePipline的context将会被相应属性替代
+        """
         fq_list = split_list(fq_list, max_workers)
         print("######################Running " + str(func))
         start_time = time.time()
@@ -63,6 +85,16 @@ def pool_decorator(func):
             if callback:
                 executor = ThreadPoolExecutor(max_workers=max_workers)
             for fq in fqs:
+                parsed_fqs = self.parse_fq_list(fq)
+                if pass_if_exists:
+                    paths = [p.format(**parsed_fqs, **self.context) for p in pass_if_exists]
+                    if all_path_exists(paths):
+                        continue
+                if clean_before:
+                    for path in clean_before:
+                        path = path.format(**parsed_fqs, **self.context)
+                        if os.path.exists(path):
+                            self.system("rm -r {}".format(path))
                 executor.submit(func, self, fq_list=fq, **kwargs)
             if callback:
                 executor.shutdown(True)
@@ -347,11 +379,11 @@ rm -r {humann2_out}/{sample}' \
             f.write(database)
 
     @synchronize
-    def run_fmap(self, fq_list, threads=4, mem=24):
+    def run_fmap(self, fq_list, threads=4, mem=24, evalue=0.00001):
         self.system("""
-echo 'perl {fmap_home}/FMAP_mapping.pl -e 0.00001 -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
+echo 'perl {fmap_home}/FMAP_mapping.pl -e {evalue}  -p {threads} {r1} > {fmap_out}/{sample}.mapping.txt' | \
  qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {fmap_out} -e {fmap_out}
-            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
+            """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, evalue=evalue, escape_sge=self.escape_sge)
 
     def quantify_fmap(self, all_name="all.txt", print_definition=False):
         p = "" if print_definition else "-n"
@@ -363,7 +395,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -e 0.00001 -p {threads} {r1} > {fmap_out}
         self.system("perl {fmap_home}/FMAP_table.pl {p} {args} > {fmap_out}/{all_name}",
                     p=p, args=" ".join(args), all_name=all_name)
 
-    def fmap_wrapper(self, fq_list, run_type="KEGG", threads=6, mem=10, max_workers=10):
+    def fmap_wrapper(self, fq_list, run_type="KEGG", threads=6, mem=10, max_workers=10, evalue=0.00001):
         fmap_db = {
             "KEGG": "orthology_uniref90_2_2157_4751.20190412161853",
             "AMR": "protein_fasta_protein_homolog_model_cleaned",
@@ -372,7 +404,7 @@ echo 'perl {fmap_home}/FMAP_mapping.pl -e 0.00001 -p {threads} {r1} > {fmap_out}
         }
         self.set_fmap_db(fmap_db[run_type])
         self.run_fmap(fq_list=fq_list, threads=threads,
-                      mem=mem, max_workers=max_workers)
+                      mem=mem, evalue=evalue, max_workers=max_workers)
         self.quantify_fmap(
             all_name="All.{}.abundance_unstratified.tsv".format(run_type))
 
@@ -587,11 +619,11 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
             FMAP每个样本需要内存：数据库大小（uniref90, 2.5G; ARDB, 100M）× threads 个数
         """
-                
+
         self.format_raw(processors=3)
         self.run_kneaddata(
             self.raw_list, callback=False, **self.alloc_src("kneaddata"))
-        
+
         self.generate_qc_report(processors=3)
 
         if self.zip_kneaddata:
@@ -614,9 +646,15 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.join_gene()
             self.map_gene(threads=self.threads_single)
         else:
-
             self.run_humann2(
-                self.clean_r1_list, callback=False, **self.alloc_src("humann2"))
+                self.clean_r1_list, callback=False,
+                pass_if_exists=[
+                    "{humann2_out}/{sample}_genefamilies.tsv",
+                    "{humann2_out}/{sample}_metaphlan_bugs_list.tsv",
+                    "{humann2_out}/{sample}_pathabundance.tsv"
+                ],
+                clean_before=["{humann2_out}/{sample}"],
+                **self.alloc_src("humann2"))
             self.join_humann()
 
             self.fmap_wrapper(self.clean_r1_list,

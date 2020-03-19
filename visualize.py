@@ -113,7 +113,7 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
             self.__visualize_without_group__()
         result_abundance = self.out_dir + \
             os.path.basename(self.abundance_table)
-        if not os.path.exists(result_abundance):
+        if not os.path.exists(result_abundance) and hasattr(self, "abundance_df"):
             self.abundance_df.to_csv(result_abundance, sep='\t', index=True)
         if os.path.exists(self.tmp_dir):
             shutil.rmtree(self.tmp_dir)
