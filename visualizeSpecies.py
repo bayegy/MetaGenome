@@ -6,9 +6,11 @@ from osEnv import OSEnv
 class VisualizeSpecies(Visualize):
     """docstring for VisualizeSpecies"""
 
-    def __init__(self, abundance_table, mapping_file, categories=False, prefix=False, out_dir=False, filter_species="exclude:Environmentalsamples", tmp_dir='./'):
+    def __init__(self, abundance_table, mapping_file, categories=False, prefix=False, out_dir=False, filter_species="exclude:Environmentalsamples", normalize_sp_name=True, tmp_dir='./'):
         super(VisualizeSpecies, self).__init__(
-            abundance_table, mapping_file, categories, prefix, out_dir, filter_abc_description=filter_species)
+            abundance_table, mapping_file, categories, prefix, out_dir,
+            filter_abc_description=filter_species,
+            normalize_abc_description=normalize_sp_name)
 
         self.set_attr(
             sample_name=os.path.basename(self.abundance_table).rstrip('.txt'),

@@ -453,8 +453,7 @@ echo {sample}_done > {assembly_out}/{sample}/all_done' | \
         self.system(
             """
 cd {assembly_out}
-cat */final.contigs.fa > mix.contigs.fa
-{base_dir}/rename_contigs.py -i mix.contigs.fa -o final.contigs.fa --replaceinput
+cat */final.contigs.fa > final.contigs.fa
 {prodigal_path} -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff
 {cdhit_path} -i final.contigs.fa.fna -d 0 -M 0 -o NR.nucleotide.fa -T 0
 grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header
@@ -643,7 +642,7 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.create_gene_db(threads=self.threads_single)
 
             self.quant_gene(self.clean_paired_list,
-                            first_check=10, **self.alloc_src("salmon"))
+                            first_check=5, **self.alloc_src("salmon"))
             self.join_gene()
             self.map_gene(threads=self.threads_single)
         else:

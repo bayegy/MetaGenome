@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import pdb
 from bs4 import BeautifulSoup
+import gzip
 # import matplotlib.pyplot as plt
 
 
@@ -93,3 +94,19 @@ def update_html_properties(html_fp, format_dict, out_fp, filter_function=False, 
                     label[p] = n.format(value=label[p])
     with open(out_fp, "w", encoding="utf-8") as out:
         out.write(sp.prettify())
+
+
+def read_file_n_lines(file, n):
+    """ Read a file n lines at a time """
+
+    line_set = []
+    with (gzip.open(file, 'r') if file.endswith('.gz') else open(file, 'r')) as file_handle:
+        for line in file_handle:
+            if len(line_set) == n:
+                yield line_set
+                line_set = []
+            line_set.append(line)
+
+    # yield the last set
+    if len(line_set) == n:
+        yield line_set

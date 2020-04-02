@@ -10,7 +10,7 @@ from systemMixin import SystemMixin
 class Visualize(SystemMixin, metaclass=ABCMeta):
     """docstring for Visualize"""
 
-    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False, filter_abc_description=False):
+    def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False, filter_abc_description=False, normalize_abc_description=False):
         out_dir = out_dir if out_dir else os.path.dirname(
             mapping_file or abundance_table)
         self.set_path(force=True,
@@ -72,6 +72,10 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
                     else:
                         self.abundance_df = self.abundance_df.iloc[[
                             not b for b in self.iterfind(self.abundance_df.iloc[:, -1], ftaxa)], :]
+
+                if normalize_abc_description:
+                    self.abundance_df.iloc[:, -1] = list(map(lambda x: x.replace("; ", ";").replace(" ", "_"),
+                                                             self.abundance_df.iloc[:, -1]))
 
             abundance_table = self.tmp_dir + os.path.basename(abundance_table)
             mapping_file = self.tmp_dir + os.path.basename(mapping_file)
