@@ -10,6 +10,7 @@ from pipconfig import settings
 from lxml import html
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
+from pyutils.read import trunc_fa
 # import uuid
 
 
@@ -26,6 +27,45 @@ def all_path_exists(paths):
         if not os.path.exists(path):
             return False
     return True
+
+
+def sge_parallel(func):
+    def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=True, **kwargs):
+        if max_workers == 1:
+            func(self, fa, out_dir, **kwargs)
+            wait_sge(first_check)
+            return
+        fa = os.path.abspath(fa)
+        out_dir = os.path.abspath(out_dir)
+        tmp_dir = tmp_dir or os.path.join(out_dir, func.__name__ + '_tmpdir')
+        # dirname = os.path.dirname(fa)
+        basename = os.path.basename(fa)
+        trunc_fa(fa, max_workers, out_dir=tmp_dir)
+        print("######################Running " + str(func))
+        start_time = time.time()
+        for i in range(max_workers):
+            trunk_out = os.path.join(tmp_dir, "{basename}.trunk{i}".format(**locals()))
+            fa_trunk = os.path.join(trunk_out, basename)
+            func(self, fa=fa_trunk, out_dir=trunk_out, **kwargs)
+        wait_sge(first_check)
+        args = locals()
+        del args['self']
+        if cat_file:
+            self.system("cat {tmp_dir}/{basename}.trunk*/{cat_file} > {out_dir}/{cat_file}", **args)
+        if remove_tmp and os.path.exists(os.path.join(out_dir, cat_file)):
+            self.system("rm -r {tmp_dir}", **args)
+        end_time = time.time()
+        time_used = (end_time - start_time) / 60
+        print("######################" + str(func) +
+              " done; time used: {} min".format(time_used))
+    return wfunc
+
+
+def default_decorator(func):
+    def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=True, **kwargs):
+        print("decorator did nothing")
+        return func(self, fa, out_dir, **kwargs)
+    return wfunc
 
 
 def sge_decorator(func):
@@ -110,6 +150,7 @@ def pool_decorator(func):
 
 
 synchronize = sge_decorator if settings.use_sge else pool_decorator
+parallel = sge_parallel if settings.use_sge else default_decorator
 
 
 class RawDataNotPairedError(Exception):
@@ -171,6 +212,11 @@ class MetagenomePipline(SystemMixin):
                       host_db=' -db '.join(host_db.split(',')),
                       exclude=exclude,
                       base_dir=os.path.dirname(__file__) + '/',
+                      contigs_path=self.assembly_out + 'final.contigs.fa',
+                      orf_path=self.assembly_out + 'final.contigs.fa.fna',
+                      nucleotide_path=self.assembly_out + 'NR.nucleotide.fa',
+                      protein_path=self.assembly_out + 'NR.protein.fa',
+                      # cdhit_out=self.assembly_out + "NR.nucleotide.fa",
                       **self.get_attrs(settings))
 
         # not nessesary for:
@@ -448,25 +494,64 @@ echo {sample}_done > {assembly_out}/{sample}/all_done' | \
             threads=threads
         )
 
-    def prodigal(self):
+    def cat_assembly(self, threads=50):
         # 基因预测，去冗余
         self.system(
             """
 cd {assembly_out}
 cat */final.contigs.fa > mix.contigs.fa
 {base_dir}/rename_contigs.py -i mix.contigs.fa -o final.contigs.fa --replaceinput
-{prodigal_path} -i final.contigs.fa -a final.contigs.fa.faa -d final.contigs.fa.fna  -f gff -p meta -o final.contigs.fa.gff
-{cdhit_path} -i final.contigs.fa.fna -d 0 -M 0 -o NR.nucleotide.fa -T 0
+""",
+            threads=threads
+        )
+
+    @parallel
+    def prodigal(self, fa, out_dir, threads=4, mem=24):
+        args = locals()
+        del args['self']
+        self.system("""
+echo '{prodigal_path}  -q -i {fa} -a {out_dir}/final.contigs.fa.faa -d {out_dir}/final.contigs.fa.fna \
+  -f gff -p meta -o {out_dir}/final.contigs.fa.gff' \
+| qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N prodigal -o {out_dir} -e {out_dir}
+            """, **args, escape_sge=self.escape_sge)
+
+    def run_prodigal(self):
+        self.prodigal(fa=self.contigs_path,
+                      out_dir=self.assembly_out,
+                      cat_file="final.contigs.fa.fna",
+                      **self.alloc_src_para("prodigal")
+                      )
+
+    @parallel
+    def cdhit(self, fa, out_dir, threads=4, mem=24):
+        mem_mb = mem * 1000
+        # name = out_dir.strip('/').split('/')[-1]
+        args = locals()
+        del args['self']
+        self.system("""
+echo '{cdhit_path} -T {threads} -i {fa} -d 0 -M {mem_mb} -o {out_dir}/NR.nucleotide.fa' \
+| qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N cdhit -o {out_dir} -e {out_dir}
+            """, **args, escape_sge=self.escape_sge)
+
+    def run_cdhit(self):
+        self.cdhit(fa=self.orf_path,
+                   out_dir=self.assembly_out,
+                   cat_file="NR.nucleotide.fa",
+                   **self.alloc_src_para("cdhit")
+                   )
+
+    def plot_orf(self):
+        self.system("""
+cd {assembly_out}
 grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header
 {acmd}
-{R_path} {base_dir}/ORF_header_summary.R -i {assembly_out}""",
-            acmd=self.homized_cmd(
-                "{perl_path} ORF_generate_input_stats_file.pl {assembly_out}/NR.nucleotide.fa.header".format(**self.context)),
-        )
+{R_path} {base_dir}/ORF_header_summary.R -i {assembly_out}
+            """, acmd=self.homized_cmd(
+            "{perl_path} ORF_generate_input_stats_file.pl {assembly_out}/NR.nucleotide.fa.header".format(**self.context)))
 
     def run_quast(self):
         self.system(
-            "python2 {quast_path} -o {assembly_out}/quast_results/  {assembly_out}/final.contigs.fa")
+            "python2 {quast_path} -o {assembly_out}/quast_results/  {contigs_path}")
 
     def create_gene_db(self, threads=7):
         self.system('''
@@ -487,25 +572,68 @@ echo '{salmon_path} quant --validateMappings -i {assembly_out}/salmon_index -l A
         self.clean_header(
             self.out_dir + "salmon_out/All.genes.abundance.txt", ".quant$")
 
-    def diamond_gene(self, database, out_file, threads=66):
+    @parallel
+    def diamond_cazy(self, fa, out_dir, threads=4, mem=24):
+        args = locals()
+        del args['self']
         self.system("""
-{diamond_home}/diamond blastp --db {database} --query {assembly_out}/NR.protein.fa --outfmt 6 --threads {threads} \
- -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {salmon_out}/{out_file}
-            """, out_file=out_file, threads=threads, database=database)
+echo '{diamond_home}/diamond blastp --db {cazy_database} --query {fa} --outfmt 6 --threads {threads} \
+ -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {out_dir}/genes_cazy.f6' \
+| qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N diamond_cazy -o {out_dir} -e {out_dir}
+            """, **args, escape_sge=self.escape_sge)
 
-    def map_gene(self, threads=70):
-        self.system('''
-{emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
+    def run_diamond_cazy(self):
+        self.diamond_cazy(
+            fa=self.protein_path,
+            out_dir=self.salmon_out,
+            cat_file="genes_cazy.f6",
+            **self.alloc_src_para("diamond_cazy")
+        )
+
+    @parallel
+    def diamond_card(self, fa, out_dir, threads=4, mem=24):
+        args = locals()
+        del args['self']
+        self.system("""
+echo '{diamond_home}/diamond blastp --db {fmap_home}/FMAP_data/protein_fasta_protein_homolog_model_cleaned.dmnd \
+ --query {fa} --outfmt 6 --threads {threads} \
+ -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {out_dir}/genes_card.f6' \
+| qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N diamond_card -o {out_dir} -e {out_dir}
+            """, **args, escape_sge=self.escape_sge)
+
+    def run_diamond_card(self):
+        self.diamond_card(
+            fa=self.protein_path,
+            out_dir=self.salmon_out,
+            cat_file="genes_card.f6",
+            **self.alloc_src_para("diamond_card")
+        )
+
+    @parallel
+    def emapper(self, fa, out_dir, threads=4, mem=24):
+        args = locals()
+        del args['self']
+        self.system("""
+echo '{emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
   --data_dir {emapper_database} --cpu {threads} \
-  -i {assembly_out}/NR.protein.fa -o {salmon_out}/genes --usemem --override
+  -i {fa} -o {out_dir}/genes --usemem --override' \
+| qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N emapper -o {out_dir} -e {out_dir}
+            """, **args, escape_sge=self.escape_sge)
 
+    def run_emapper(self):
+        self.emapper(
+            fa=self.protein_path,
+            out_dir=self.salmon_out,
+            cat_file="genes.emapper.annotations",
+            **self.alloc_src_para("emapper")
+        )
+
+    def add_emapper_header(self, threads=70):
+        self.system('''
 # {emapper_path} --annotate_hits_table {salmon_out}/genes.emapper.seed_orthologs --no_file_comments \
   -o {salmon_out}/genes --cpu {threads} --data_dir {emapper_database} --usemem --override
 sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG\tCOG\tAnnotation' {salmon_out}/genes.emapper.annotations
             ''', threads=threads)
-        self.diamond_gene(self.cazy_database, 'genes_cazy.f6', threads)
-        self.diamond_gene(self.fmap_home + '/FMAP_data/protein_fasta_protein_homolog_model_cleaned.dmnd',
-                          'genes_card.f6', threads)
 
     def alloc_src(self, proc, threads=False, sam_num=False):
         memery_needs = self.memery_needs[proc]
@@ -528,6 +656,16 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             "threads": threads,
             "mem": memery_needs
 
+        }
+
+    def alloc_src_para(self, proc):
+        max_workers = self.max_workers[proc] if settings.use_sge else 1
+        threads = self.threads_single if max_workers == 1 else (self.threads // max_workers)
+        memery_needs = self.memery // max_workers
+        return {
+            "max_workers": max_workers,
+            "threads": threads,
+            "mem": memery_needs
         }
 
     def find_file(self, directory, pattern):
@@ -638,14 +776,19 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.assembly(self.clean_paired_list, **self.alloc_src("megahit"))
             if self.mix_asem:
                 self.mix_assembly(threads=self.threads_single)
-            self.prodigal()
+
+            self.cat_assembly()
+            self.run_prodigal()
+            self.run_cdhit()
+            self.plot_orf()
             self.run_quast()
             self.create_gene_db(threads=self.threads_single)
-
             self.quant_gene(self.clean_paired_list,
                             first_check=10, **self.alloc_src("salmon"))
             self.join_gene()
-            self.map_gene(threads=self.threads_single)
+            self.run_diamond_card()
+            self.run_diamond_cazy()
+            self.run_emapper()
         else:
             self.run_humann2(
                 self.clean_r1_list, callback=False,

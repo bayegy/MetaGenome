@@ -7,7 +7,7 @@ path = {
     "de_host_home": "/home/cheng/pipelines/IlluminaPipeline/SE_map_host_subtract/",
     "merge_se_home": "/home/cheng/pipelines/IlluminaPipeline/PE_assembly/",
     "megahit_path": "/home/cheng/softwares/megahit/megahit/megahit",
-    "cdhit_path": "/home/cheng/softwares/cdhit/cdhit/cd-hit-est",
+    "cdhit_path": "/home/cheng/softwares/cd-hit-v4.8.1-2019-0228/cd-hit-est",
     "circos_path": "/home/cheng/softwares/miniconda2/envs/circos/bin/circos",
     "circos_etc": "/home/cheng/softwares/miniconda2/envs/circos/etc/",
     "ncbi_taxaID_path": "/home/cheng/Databases/taxid2OTU_ranks.txt",
@@ -48,7 +48,12 @@ memery_needs = {
     "humann2": 45,
     "fmap": 40,
     "salmon": 250,
-    "megahit": 100
+    "megahit": 100,
+    "prodigal": 50,
+    "cdhit": 400,
+    "diamond_cazy": 400,
+    "diamond_card": 400,
+    "emapper": 400,
 }
 
 
@@ -58,11 +63,11 @@ threads = 63
 
 hosts = 1
 
-use_sge = False
+use_sge = True
 
 sge_pe = "smp"
 
-sge_queue = "metagqueue"
+sge_queue = "queue1"
 
 max_workers = {
     "kneaddata": 5,
@@ -70,5 +75,10 @@ max_workers = {
     "humann2": 5,
     "fmap": 10,
     "salmon": 2,
-    "megahit": 4
+    "megahit": 4,
+    "prodigal": 10,
+    "cdhit": 1,
+    "diamond_cazy": 1,
+    "diamond_card": 1,
+    "emapper": 1,
 }

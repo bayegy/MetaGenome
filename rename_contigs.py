@@ -7,7 +7,7 @@ import re
 
 
 p = argparse.ArgumentParser(
-    description="Change the file name suffix of all files under a specific directory. ")
+    description="rename the contigs name to contig_1, contig_2, and so on")
 
 
 p.add_argument('--input', '-i', help="input contigs fasta",

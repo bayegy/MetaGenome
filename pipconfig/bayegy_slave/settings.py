@@ -5,7 +5,7 @@ path = {
     "bayegy_home": "/home/bayegy/pipelines/metagenome/Bayegy/",
     "megahit_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/megahit",
     # conda install -c bioconda cd-hit
-    "cdhit_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/cd-hit-est",
+    "cdhit_path": "/home/bayegy/pipelines/metagenome/softwares/cd-hit-v4.8.1-2019-0228/cd-hit-est",
     "circos_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/circos",
     "circos_etc": "/home/bayegy/pipelines/metagenome/miniconda2/pkgs/circos-0.69.8-0/etc",
     "ncbi_taxaID_path": "/home/bayegy/Databases/kraken_bracken/taxid2OTU_ranks.txt",
@@ -52,7 +52,12 @@ memery_needs = {
     "humann2": 45,
     "fmap": 30,
     "salmon": 500,
-    "megahit": 200
+    "megahit": 200,
+    "prodigal": 50,
+    "cdhit": 400,
+    "diamond_cazy": 400,
+    "diamond_card": 400,
+    "emapper": 400,
 }
 
 memery = 1000
@@ -73,5 +78,10 @@ max_workers = {
     "humann2": 5,
     "fmap": 10,
     "salmon": 2,
-    "megahit": 3
+    "megahit": 3,
+    "prodigal": 10,
+    "cdhit": 1,
+    "diamond_cazy": 1,
+    "diamond_card": 1,
+    "emapper": 1,
 }

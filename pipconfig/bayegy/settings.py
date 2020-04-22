@@ -4,8 +4,8 @@ path = {
     "fmap_home": "/home/bayegy/pipelines/metagenome/softwares/FMAP/",
     "bayegy_home": "/home/bayegy/pipelines/metagenome/Bayegy/",
     "megahit_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/megahit",
-    # conda install -c bioconda cd-hit
-    "cdhit_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/cd-hit-est",
+    # conda install -c bioconda cd-hit # cd-hit installed by conda does not suport multi-threading
+    "cdhit_path": "/home/bayegy/pipelines/metagenome/softwares/cd-hit-v4.8.1-2019-0228/cd-hit-est",
     "circos_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/circos",
     "circos_etc": "/home/bayegy/pipelines/metagenome/miniconda2/pkgs/circos-0.69.8-0/etc",
     "ncbi_taxaID_path": "/home/bayegy/Databases/kraken_bracken/taxid2OTU_ranks.txt",
@@ -14,6 +14,7 @@ path = {
     "emapper_database": "/home/bayegy/Databases/emapper/eggnog",
     "cazy_database": "/home/bayegy/Databases/diamond/CAZyDB.07312018.dmnd",
     "humann2_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
+    # conda install humann2 -c biobackery # do not use bioconda channel
     "humann2_protein_database": "/home/bayegy/Databases/humann2/uniref90_full",
     "humann2_nucleotide_database": "/home/bayegy/Databases/humann2/chocophlan_full",
     "humann2_utility_mapping": "/home/bayegy/Databases/humann2/utility_mapping",
@@ -40,9 +41,11 @@ path = {
     "lefse_rlib_home": "/home/bayegy/pipelines/metagenome/miniconda2/lib/R/library",
     "lefse_py_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
     "prodigal_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/prodigal",
-    # sudo apt-get install ttf-mscorefonts-installer 安装字体
+    # sudo apt-get install ttf-mscorefonts-installer #安装字体
     # /etc/ImageMagick-6/policy.xml replace the value of PDF rights to "read|write"
     # do not use conda to install salmon, it's too old
+    # sudo apt-get install mpich #cd-hit nedd this
+    # humann2 installed by bioconda is too old!
 
 }
 
@@ -51,8 +54,13 @@ memery_needs = {
     "kraken2": 70,
     "humann2": 45,
     "fmap": 30,
-    "salmon": 500,
-    "megahit": 200
+    "salmon": 1000,
+    "megahit": 200,
+    "prodigal": 50,
+    "cdhit": 50,
+    "diamond_cazy": 800,
+    "diamond_card": 800,
+    "emapper": 800,
 }
 
 memery = 2000
@@ -73,5 +81,10 @@ max_workers = {
     "humann2": 5,
     "fmap": 10,
     "salmon": 2,
-    "megahit": 6
+    "megahit": 6,
+    "prodigal": 20,
+    "cdhit": 30,
+    "diamond_cazy": 2,
+    "diamond_card": 2,
+    "emapper": 2,
 }

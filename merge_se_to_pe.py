@@ -5,7 +5,7 @@ import argparse
 from pyutils.read import read_file_n_lines
 
 p = argparse.ArgumentParser(
-    description="Change the file name suffix of all files under a specific directory. ")
+    description="merge the unpaired reads(eg. bowtie2 output) to paired reads")
 
 
 p.add_argument('--se1', '-1', help="reads 1",

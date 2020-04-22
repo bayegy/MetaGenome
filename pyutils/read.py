@@ -4,6 +4,7 @@ import re
 import pdb
 from bs4 import BeautifulSoup
 import gzip
+import os
 # import matplotlib.pyplot as plt
 
 
@@ -110,3 +111,40 @@ def read_file_n_lines(file, n):
     # yield the last set
     if len(line_set) == n:
         yield line_set
+
+
+def iter_fa(fasta, trim_line_break=False):
+    with open(fasta, 'r') as file_handle:
+        l1 = file_handle.readline()
+        header = l1.rstrip('\n') if trim_line_break else l1
+        if not header.startswith('>'):
+            raise Exception("File is not a standard fasta!")
+        seq_set = []
+        for line in file_handle:
+            li = line.rstrip('\n') if trim_line_break else line
+            if line.startswith('>'):
+                yield header, "".join(seq_set)
+                header = li
+                seq_set = []
+            else:
+                seq_set.append(li)
+
+        # yield the last seq
+        yield header, "".join(seq_set)
+
+
+def trunc_fa(fasta, n, out_dir=False):
+    dirname = out_dir or os.path.dirname(fasta)
+    basename = os.path.basename(fasta)
+    out_files = []
+    for i in range(n):
+        out_dir = os.path.join(dirname, "{basename}.trunk{i}".format(**locals()))
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        out_files.append(open(os.path.join(out_dir, basename), 'w'))
+    ln = 0
+    for h, s in iter_fa(fasta, trim_line_break=False):
+        out_files[ln % n].write(h + s)
+        ln += 1
+    for fh in out_files:
+        fh.close()
