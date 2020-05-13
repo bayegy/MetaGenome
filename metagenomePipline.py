@@ -17,7 +17,7 @@ from pyutils.read import trunc_fa
 def wait_sge(first_check=1):
     time.sleep(first_check * 60)
     while True:
-        if not list(os.popen("qstat")):
+        if not list(os.popen("qstat 2>&1")):
             break
         time.sleep(60)
 
@@ -30,7 +30,7 @@ def all_path_exists(paths):
 
 
 def sge_parallel(func):
-    def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=True, **kwargs):
+    def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=False, each=2, **kwargs):
         if max_workers == 1:
             func(self, fa, out_dir, **kwargs)
             wait_sge(first_check)
@@ -40,14 +40,25 @@ def sge_parallel(func):
         tmp_dir = tmp_dir or os.path.join(out_dir, func.__name__ + '_tmpdir')
         # dirname = os.path.dirname(fa)
         basename = os.path.basename(fa)
-        trunc_fa(fa, max_workers, out_dir=tmp_dir)
+        if os.path.exists(tmp_dir):
+            print("Tmp_dir already exists, presume you have trunk the fasta and skip trunk step.")
+        else:
+            trunc_fa(fa, max_workers, out_dir=tmp_dir)
         print("######################Running " + str(func))
         start_time = time.time()
+
         for i in range(max_workers):
             trunk_out = os.path.join(tmp_dir, "{basename}.trunk{i}".format(**locals()))
             fa_trunk = os.path.join(trunk_out, basename)
-            func(self, fa=fa_trunk, out_dir=trunk_out, **kwargs)
+            if not os.path.exists(fa_trunk):
+                raise Exception("Looks like the tmp_dir is not correct, remove tmp_dir and try again.")
+            if not os.path.exists(os.path.join(trunk_out, "done")):
+                func(self, fa=fa_trunk, out_dir=trunk_out, **kwargs)
+
         wait_sge(first_check)
+        number_done = len(list(os.popen("ls {tmp_dir}/*/done".format(tmp_dir=tmp_dir))))
+        if not number_done == max_workers:
+            raise Exception("Not all workers exit correctly, simply run again will solve this problem.")
         args = locals()
         del args['self']
         if cat_file:
@@ -56,8 +67,7 @@ def sge_parallel(func):
             self.system("rm -r {tmp_dir}", **args)
         end_time = time.time()
         time_used = (end_time - start_time) / 60
-        print("######################" + str(func) +
-              " done; time used: {} min".format(time_used))
+        print("######################" + str(func) + " done; time used: {} min".format(time_used))
     return wfunc
 
 
@@ -101,8 +111,7 @@ def sge_decorator(func):
             wait_sge(first_check)
         end_time = time.time()
         time_used = (end_time - start_time) / 60
-        print("######################" + str(func) +
-              " done; time used: {} min".format(time_used))
+        print("######################" + str(func) + " done; time used: {} min".format(time_used))
     return wfunc
 
 
@@ -144,8 +153,7 @@ def pool_decorator(func):
             executor.shutdown(True)
         end_time = time.time()
         time_used = (end_time - start_time) / 60
-        print("######################" + str(func) +
-              " done; time used: {} min".format(time_used))
+        print("######################" + str(func) + " done; time used: {} min".format(time_used))
     return wfunc
 
 
@@ -189,7 +197,7 @@ class MetagenomePipline(SystemMixin):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex="(.+)_.*_[12]\.fq\.?g?z?", forward_regex="_1\.fq\.?g?z?$", reverse_regex="_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True, mix_asem=True):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex=r"(.+)_.*_[12]\.fq\.?g?z?", forward_regex=r"_1\.fq\.?g?z?$", reverse_regex=r"_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True, mix_asem=True):
         self.context = dict()
 
         self.set_path(force=True,
@@ -281,7 +289,7 @@ class MetagenomePipline(SystemMixin):
         out = []
         for fq_path, new_id, direction in self.fq_info:
             ele = pattern.format(sample_id=new_id, direction=direction, direction_num=re.search(
-                "\d$", direction).group()) if pattern else [new_id, direction]
+                r"\d$", direction).group()) if pattern else [new_id, direction]
             if direction == "R2" and (use_direction == "both" or use_direction == "R2"):
                 out.append(ele)
             elif direction == "R1" and (use_direction == "both" or use_direction == "R1"):
@@ -355,7 +363,7 @@ echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
     def run_bracken(self):
-        bracken_list = [l + '.bracken' for l in self.kracken2_reports_list]
+        bracken_list = [e + '.bracken' for e in self.kracken2_reports_list]
         for report in self.kracken2_reports_list:
             self.system(
                 "python2 {bracken_path} -i {report} -k {bracken_database} -l S -o {report}.bracken", report=report)
@@ -384,7 +392,7 @@ echo '{metaphlan2_home}/metaphlan2.py --input_type multifastq --bowtie2_exe {bow
         tb_name = self.metaphlan_out + '/All.Metaphlan2.profile.txt'
         self.system(
             "python2 {base_dir}/merge_metaphlan_tables.py {metaphlan_out}/*profile.txt > {tb_name}", tb_name=tb_name)
-        self.clean_header(tb_name, pattern='\.metaphlan\.profile$', skip=[0])
+        self.clean_header(tb_name, pattern=r'\.metaphlan\.profile$', skip=[0])
 
     @synchronize
     def run_humann2(self, fq_list, threads=2, mem=40):
@@ -414,10 +422,8 @@ rm -r {humann2_out}/{sample}' \
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.UniRef90.genefamilies.tsv --file_name genefamilies.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {humann2_out}/RPK.All.Metacyc.pathabundance.tsv --file_name pathabundance.tsv
 {humann2_home}/humann2_join_tables -i {humann2_out}/ -o {metaphlan_out}/All.Metaphlan2.profile.txt --file_name bugs_list.tsv''')
-        self.clean_header(self.humann2_out +
-                          "/RPK.All.UniRef90.genefamilies.tsv")
-        self.clean_header(self.humann2_out +
-                          "/RPK.All.Metacyc.pathabundance.tsv")
+        self.clean_header(self.humann2_out + "/RPK.All.UniRef90.genefamilies.tsv")
+        self.clean_header(self.humann2_out + "/RPK.All.Metacyc.pathabundance.tsv")
         self.clean_header(self.metaphlan_out + "/All.Metaphlan2.profile.txt")
 
     def set_fmap_db(self, database):
@@ -511,7 +517,7 @@ cat */final.contigs.fa > mix.contigs.fa
         del args['self']
         self.system("""
 echo '{prodigal_path}  -q -i {fa} -a {out_dir}/final.contigs.fa.faa -d {out_dir}/final.contigs.fa.fna \
-  -f gff -p meta -o {out_dir}/final.contigs.fa.gff' \
+  -f gff -p meta -o {out_dir}/final.contigs.fa.gff && touch {out_dir}/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N prodigal -o {out_dir} -e {out_dir}
             """, **args, escape_sge=self.escape_sge)
 
@@ -529,7 +535,7 @@ echo '{prodigal_path}  -q -i {fa} -a {out_dir}/final.contigs.fa.faa -d {out_dir}
         args = locals()
         del args['self']
         self.system("""
-echo '{cdhit_path} -T {threads} -i {fa} -d 0 -M {mem_mb} -o {out_dir}/NR.nucleotide.fa' \
+echo '{cdhit_path} -T {threads} -i {fa} -d 0 -M {mem_mb} -o {out_dir}/NR.nucleotide.fa && touch {out_dir}/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N cdhit -o {out_dir} -e {out_dir}
             """, **args, escape_sge=self.escape_sge)
 
@@ -578,7 +584,7 @@ echo '{salmon_path} quant --validateMappings -i {assembly_out}/salmon_index -l A
         del args['self']
         self.system("""
 echo '{diamond_home}/diamond blastp --db {cazy_database} --query {fa} --outfmt 6 --threads {threads} \
- -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {out_dir}/genes_cazy.f6' \
+ -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {out_dir}/genes_cazy.f6 && touch {out_dir}/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N diamond_cazy -o {out_dir} -e {out_dir}
             """, **args, escape_sge=self.escape_sge)
 
@@ -597,7 +603,7 @@ echo '{diamond_home}/diamond blastp --db {cazy_database} --query {fa} --outfmt 6
         self.system("""
 echo '{diamond_home}/diamond blastp --db {fmap_home}/FMAP_data/protein_fasta_protein_homolog_model_cleaned.dmnd \
  --query {fa} --outfmt 6 --threads {threads} \
- -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {out_dir}/genes_card.f6' \
+ -e 0.00001 --id 80 --top 3 --block-size 200 --index-chunks 1 --quiet --out {out_dir}/genes_card.f6 && touch {out_dir}/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N diamond_card -o {out_dir} -e {out_dir}
             """, **args, escape_sge=self.escape_sge)
 
@@ -616,7 +622,7 @@ echo '{diamond_home}/diamond blastp --db {fmap_home}/FMAP_data/protein_fasta_pro
         self.system("""
 echo '{emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
   --data_dir {emapper_database} --cpu {threads} \
-  -i {fa} -o {out_dir}/genes --usemem --override' \
+  -i {fa} -o {out_dir}/genes --usemem --override && touch {out_dir}/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N emapper -o {out_dir} -e {out_dir}
             """, **args, escape_sge=self.escape_sge)
 
@@ -660,8 +666,11 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
     def alloc_src_para(self, proc):
         max_workers = self.max_workers[proc] if settings.use_sge else 1
-        threads = self.threads_single if max_workers == 1 else (self.threads // max_workers)
-        memery_needs = self.memery // max_workers
+        each = self.each[proc]
+        each = min(each, max_workers)
+
+        threads = self.threads_single if max_workers == 1 else (self.threads // each)
+        memery_needs = self.memery // self.hosts if max_workers == 1 else (self.memery // each)
         return {
             "max_workers": max_workers,
             "threads": threads,

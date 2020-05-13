@@ -85,3 +85,11 @@ max_workers = {
     "diamond_card": 1,
     "emapper": 1,
 }
+
+each = {
+    "prodigal": 30,
+    "cdhit": 6,
+    "diamond_cazy": 2,
+    "diamond_card": 2,
+    "emapper": 2,
+}

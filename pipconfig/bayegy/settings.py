@@ -58,14 +58,14 @@ memery_needs = {
     "megahit": 200,
     "prodigal": 50,
     "cdhit": 50,
-    "diamond_cazy": 800,
-    "diamond_card": 800,
-    "emapper": 800,
+    "diamond_cazy": 100,
+    "diamond_card": 100,
+    "emapper": 100,
 }
 
 memery = 2000
 
-threads = 196
+threads = 180
 
 hosts = 2
 
@@ -82,8 +82,17 @@ max_workers = {
     "fmap": 10,
     "salmon": 2,
     "megahit": 6,
-    "prodigal": 20,
-    "cdhit": 30,
+    "prodigal": 30,
+    "cdhit": 80,
+    "diamond_cazy": 10,
+    "diamond_card": 10,
+    "emapper": 10,
+}
+
+
+each = {
+    "prodigal": 30,
+    "cdhit": 6,
     "diamond_cazy": 2,
     "diamond_card": 2,
     "emapper": 2,
