@@ -30,7 +30,7 @@ def all_path_exists(paths):
 
 
 def sge_parallel(func):
-    def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=False, each=2, **kwargs):
+    def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=False, **kwargs):
         if max_workers == 1:
             func(self, fa, out_dir, **kwargs)
             wait_sge(first_check)
