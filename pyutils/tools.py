@@ -40,7 +40,7 @@ def split_list(init_list, each=5):
     return [init_list[l[0]:l[1]] for l in index]
 
 
-def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex) ->dict:
+def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex) -> dict:
     # get the mapping relation of id to description
     print("Assert no duplicated sample names: please make sure no duplicated sample names and did not use capital and small letter to distinguish samples if error happened\n")
     id_map = {}

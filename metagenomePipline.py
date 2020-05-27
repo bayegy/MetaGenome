@@ -9,8 +9,9 @@ import numpy as np
 from pipconfig import settings
 from lxml import html
 from collections import OrderedDict
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from pyutils.read import trunc_fa
+from groupGene import GroupGene
 # import uuid
 
 
@@ -261,6 +262,8 @@ class MetagenomePipline(SystemMixin):
             self.assembly_out)
         self.kracken2_reports_list = self.map_list(
             self.kracken2_reports_pattern, use_direction='R1')
+        self.salmon_quant_pattern = "%s/{sample_id}.quant/quant.sf" % (self.salmon_out)
+        # self.salmon_quant_list = self.map_list(self.salmon_quant_pattern, use_direction="R1")
         self.running_list = self.out_dir + '.running_list'
         self.escape_sge = not settings.use_sge
         self.threads_single = int(self.threads / self.hosts)
@@ -343,7 +346,7 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
  --remove-intermediate-output  -t {threads} --run-fastqc-start --run-fastqc-end \
  --trimmomatic {trimmomatic_home} --trimmomatic-options "ILLUMINACLIP:{adapters_path}:2:30:10 SLIDINGWINDOW:4:20 MINLEN:50" --max-memory {mem}g \
  --bowtie2 {bowtie2_home} \
- --fastqc  {fastqc_home}' \
+ --fastqc  {fastqc_home} && touch {kneaddata_out}/{sample}_done' \
  | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {kneaddata_out} -e {kneaddata_out}
             """, **self.parse_fq_list(fq_list), kneaddata_out=self.kneaddata_out, threads=threads, mem=mem, escape_sge=self.escape_sge)
 
@@ -358,7 +361,7 @@ echo '{kneaddata_path} -i {r1} -i {r2} -o {kneaddata_out} -v -db {host_db} \
     def run_kraken2(self, fq_list, threads=2, mem=70):
         self.system("""
 echo '{kraken2_path} --db {kraken2_database} --threads {threads} --confidence 0.2 \
- --report {kraken2_out}/{sample}.report --paired {r1} {r2} --output -' \
+ --report {kraken2_out}/{sample}.report --paired {r1} {r2} --output - && touch {kraken2_out}/{sample}_done' \
   | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {kraken2_out} -e {kraken2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
@@ -405,7 +408,7 @@ echo 'mkdir -p {humann2_out}/{sample}&&{humann2_home}/humann2 --input {r1} \
   --output {humann2_out}/{sample} \
   --metaphlan-options "-t rel_ab --bowtie2db {metaphlan2_database} --sample_id {sample}" && \
 mv {humann2_out}/{sample}/*/*bugs_list.tsv {humann2_out}/{sample}/*genefamilies.tsv {humann2_out}/{sample}/*pathabundance.tsv {humann2_out}/&& \
-rm -r {humann2_out}/{sample}' \
+rm -r {humann2_out}/{sample} && touch {humann2_out}/{sample}_done' \
   | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {humann2_out} -e {humann2_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
@@ -561,14 +564,16 @@ grep '>' NR.nucleotide.fa > NR.nucleotide.fa.header
 
     def create_gene_db(self, threads=7):
         self.system('''
-{transeq_path} -sequence {assembly_out}/NR.nucleotide.fa -outseq {assembly_out}/NR.protein.fa -trim Y
-sed -i 's/_1 / /' {assembly_out}/NR.protein.fa
-{salmon_path} index -t {assembly_out}/NR.nucleotide.fa -p {threads} -k 31 -i {assembly_out}/salmon_index''', threads=threads)
+{salmon_path} index -t {assembly_out}/NR.nucleotide.fa -p {threads} -k 31 -i {assembly_out}/salmon_index --keepFixedFasta
+{transeq_path} -sequence {assembly_out}/salmon_index/ref_k31_fixed.fa -outseq {assembly_out}/NR.protein.fa -trim Y
+sed -i 's/_1\\b//' {assembly_out}/NR.protein.fa
+        ''', threads=threads)
 
     @synchronize
     def quant_gene(self, fq_list, threads=7, mem=80):
         self.system("""
-echo '{salmon_path} quant --validateMappings -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} -o {salmon_out}/{sample}.quant' \
+echo '{salmon_path} quant --validateMappings -i {assembly_out}/salmon_index -l A -p {threads} --meta -1 {r1} -2 {r2} \
+ -o {salmon_out}/{sample}.quant && touch {salmon_out}/{sample}.quant/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {salmon_out} -e {salmon_out}
             """, **self.parse_fq_list(fq_list), threads=threads, mem=mem, escape_sge=self.escape_sge)
 
@@ -747,6 +752,45 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
                 vals = [str(v) for v in stat.values()]
                 f.write('\t'.join(vals) + '\n')
 
+    def group_gene(self, db, processors=10):
+        annotation_files = {
+            "AMR": os.path.join(self.salmon_out, "genes_card.f6"),
+            "CAZY": os.path.join(self.salmon_out, "genes_cazy.f6"),
+            "KO": os.path.join(self.salmon_out, "genes.emapper.annotations"),
+            "EGGNOG": os.path.join(self.salmon_out, "genes.emapper.annotations"),
+            "GO": os.path.join(self.salmon_out, "genes.emapper.annotations")
+        }
+        adjust_funcs = {
+            "KO": lambda x: x.split(','),
+            "GO": lambda x: x.split(','),
+            "EGGNOG": lambda x: ['ENOG41' + c if not c.startswith('COG') else c for c in re.findall('([^,]+)@NOG', x)],
+            "CAZY": lambda x: [c.split("_")[0] for c in x.split("|")[1:] if re.search("^[A-Z]", c)],
+            "AMR": False
+        }
+        columns = {
+            "KO": 6,
+            "GO": 5,
+            "EGGNOG": 9,
+            "CAZY": 1,
+            "AMR": 1
+        }
+        gg = GroupGene(annotation_file=annotation_files[db],
+                       by=columns[db],
+                       adjust_func=adjust_funcs[db])
+        executor = ProcessPoolExecutor(max_workers=processors)
+        # futures = []
+        for sample_id in self.new_ids:
+            gene_abundance = self.salmon_quant_pattern.format(sample_id=sample_id)
+            out_file = os.path.join(self.salmon_out, "{}_{}_abundance.txt".format(sample_id, db))
+            executor.submit(gg.group, gene_abundance, out_file)
+            # futures.append(future)
+        executor.shutdown(True)
+        self.system("""
+{humann2_home}/humann2_join_tables -i {salmon_out}/ -o {salmon_out}/All.{db}.abundance_unstratified.tsv --file_name _{db}_abundance.txt
+            """, db=db)
+        self.clean_header(os.path.join(self.salmon_out,
+                                       "All.{}.abundance_unstratified.tsv".format(db)))
+
     def visualize(self):
         VisualizeAll(self.mapping_file, self.categories, out_dir=self.out_dir, filter_species=self.filter_species).visualize(
             self.exclude, self.base_on_assembly)
@@ -770,14 +814,18 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
 
         self.format_raw(processors=3)
         self.run_kneaddata(
-            self.raw_list, callback=False, **self.alloc_src("kneaddata"))
+            self.raw_list, callback=False,
+            pass_if_exists=["{kneaddata_out}/{sample}_done"],
+            **self.alloc_src("kneaddata"))
 
         self.generate_qc_report(processors=3)
 
         if self.zip_kneaddata:
             self.gzip_kneaddata(self.unzip_clean_paired_list, max_workers=6)
 
-        self.run_kraken2(self.clean_paired_list, **self.alloc_src("kraken2"))
+        self.run_kraken2(self.clean_paired_list,
+                         pass_if_exists=["{kraken2_out}/{sample}_done"],
+                         **self.alloc_src("kraken2"))
         self.run_bracken()
 
         if self.base_on_assembly:
@@ -793,19 +841,18 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.run_quast()
             self.create_gene_db(threads=self.threads_single)
             self.quant_gene(self.clean_paired_list,
+                            pass_if_exists=["{salmon_out}/{sample}.quant/done"],
+                            clean_before=["{salmon_out}/{sample}.quant"],
                             first_check=10, **self.alloc_src("salmon"))
-            self.join_gene()
             self.run_diamond_card()
             self.run_diamond_cazy()
             self.run_emapper()
+            for db in ["KO", "GO", "EGGNOG", "CAZY", "AMR"]:
+                self.group_gene(db, processors=10)
         else:
             self.run_humann2(
                 self.clean_r1_list, callback=False,
-                pass_if_exists=[
-                    "{humann2_out}/{sample}_genefamilies.tsv",
-                    "{humann2_out}/{sample}_metaphlan_bugs_list.tsv",
-                    "{humann2_out}/{sample}_pathabundance.tsv"
-                ],
+                pass_if_exists=["{humann2_out}/{sample}_done"],
                 clean_before=["{humann2_out}/{sample}"],
                 **self.alloc_src("humann2"))
             self.join_humann()

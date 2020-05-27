@@ -7,6 +7,7 @@ path = {
     "de_host_home": "/home/cheng/pipelines/IlluminaPipeline/SE_map_host_subtract/",
     "merge_se_home": "/home/cheng/pipelines/IlluminaPipeline/PE_assembly/",
     "megahit_path": "/home/cheng/softwares/megahit/megahit/megahit",
+    # "cdhit_path": "/home/cheng/softwares/cd-hit-v4.8.1-2019-0228/cd-hit-est",
     "cdhit_path": "/home/cheng/softwares/cd-hit-v4.8.1-2019-0228/cd-hit-est",
     "circos_path": "/home/cheng/softwares/miniconda2/envs/circos/bin/circos",
     "circos_etc": "/home/cheng/softwares/miniconda2/envs/circos/etc/",
@@ -26,7 +27,7 @@ path = {
     "bowtie2_home": "/home/cheng/softwares/miniconda2/bin/",
     "metaphlan2_home": "/home/cheng/softwares/miniconda2/bin/",
     "diamond_home": "/home/cheng/softwares/miniconda2/bin/",
-    "salmon_path": "/usr/bin/salmon",
+    "salmon_path": "/home/cheng/softwares/salmon-latest_linux_x86_64/bin/salmon",
     "kraken2_path": "/home/cheng/softwares/kraken2/kraken2/kraken2",
     "adapters_path": "/home/cheng/pipelines/MetaGenome/data/adaptor_Illumina.fa",
     "transeq_path": "/home/cheng/softwares/miniconda2/bin/transeq",
@@ -63,7 +64,7 @@ threads = 63
 
 hosts = 1
 
-use_sge = True
+use_sge = False
 
 sge_pe = "smp"
 
@@ -81,4 +82,12 @@ max_workers = {
     "diamond_cazy": 1,
     "diamond_card": 1,
     "emapper": 1,
+}
+
+each = {
+    "prodigal": 30,
+    "cdhit": 6,
+    "diamond_cazy": 2,
+    "diamond_card": 2,
+    "emapper": 2,
 }

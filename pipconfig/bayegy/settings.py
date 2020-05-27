@@ -25,7 +25,7 @@ path = {
     "metaphlan2_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
     "metaphlan2_database": "/home/bayegy/pipelines/metagenome/miniconda2/bin/databases",
     "diamond_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
-    "salmon_path": "/home/bayegy/pipelines/metagenome/softwares/salmon/salmon-latest_linux_x86_64/bin/salmon",
+    "salmon_path": "/home/bayegy/pipelines/metagenome/softwares/salmon-latest_linux_x86_64/bin/salmon",
     "kraken2_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/kraken2",
     "adapters_path": "/home/bayegy/pipelines/metagenome/MetaGenome/data/adaptor_Illumina.fa",
     # conda install emboss

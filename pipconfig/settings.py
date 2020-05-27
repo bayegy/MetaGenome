@@ -27,7 +27,7 @@ path = {
     "bowtie2_home": "/home/cheng/softwares/miniconda2/bin/",
     "metaphlan2_home": "/home/cheng/softwares/miniconda2/bin/",
     "diamond_home": "/home/cheng/softwares/miniconda2/bin/",
-    "salmon_path": "/usr/bin/salmon",
+    "salmon_path": "/home/cheng/softwares/salmon-latest_linux_x86_64/bin/salmon",
     "kraken2_path": "/home/cheng/softwares/kraken2/kraken2/kraken2",
     "adapters_path": "/home/cheng/pipelines/MetaGenome/data/adaptor_Illumina.fa",
     "transeq_path": "/home/cheng/softwares/miniconda2/bin/transeq",

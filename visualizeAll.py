@@ -27,6 +27,7 @@ class VisualizeAll(VisualizeSpecies):
                       )
         self.set_path(force=False,
                       FMAP_data=self.fmap_home + '/FMAP_data/',
+                      salmon_out=self.out_dir + "salmon_out/",
                       )
         self.filter_species = filter_species
         self.mi = MapInfo()
@@ -64,12 +65,11 @@ class VisualizeAll(VisualizeSpecies):
                                                                                                     "2-EggNOG" if asem else"3-EggNOG"),
                                                                                                 "{}/All.GO.abundance_unstratified.tsv".format("3-GO" if asem else "4-GO")]]
 
-        mapping_sources = [FMAP_data +
-                           f for f in ["KEGG_orthology.txt",
-                                       "KEGG_module.txt",
-                                       "KEGG_pathway.txt"]] + [self.path['humann2_utility_mapping'] + '/' + f for f in ["map_level4ec_name.txt.gz",
-                                                                                                                        "map_eggnog_name.txt.gz",
-                                                                                                                        "map_go_name.txt.gz"]]
+        mapping_sources = [FMAP_data + f for f in ["KEGG_orthology.txt",
+                                                   "KEGG_module.txt",
+                                                   "KEGG_pathway.txt"]] + [self.path['humann2_utility_mapping'] + '/' + f for f in ["map_level4ec_name.txt.gz",
+                                                                                                                                    "map_eggnog_name.txt.gz",
+                                                                                                                                    "map_go_name.txt.gz"]]
 
         for data, mapping_source in zip(datas, mapping_sources):
             if os.path.exists(data):
@@ -93,12 +93,9 @@ class VisualizeAll(VisualizeSpecies):
                       )
         self.set_path(force=True,
                       kegg_dir=self.function_dir + '1-KEGG/',
-                      go_dir=self.function_dir +
-                      ('3-GO/' if asem else '4-GO/'),
-                      eggnog_dir=self.function_dir +
-                      ('2-EggNOG/' if asem else '3-EggNOG/'),
-                      cazy_dir=self.function_dir +
-                      ('4-CAZy/' if asem else '6-CAZy/'),
+                      go_dir=self.function_dir + ('3-GO/' if asem else '4-GO/'),
+                      eggnog_dir=self.function_dir + ('2-EggNOG/' if asem else '3-EggNOG/'),
+                      cazy_dir=self.function_dir + ('4-CAZy/' if asem else '6-CAZy/'),
                       )
 
     def visualize(self, exclude='none', base_on_assembly=False):
@@ -112,7 +109,7 @@ class VisualizeAll(VisualizeSpecies):
 mkdir -p {asem_dir}/2-ORFPrediction/ {asem_dir}/1-Quast/
 cp {out_dir}Assembly_out/ORF* {asem_dir}/2-ORFPrediction/
 cp -r {out_dir}Assembly_out/quast_results/* {asem_dir}/1-Quast/
-cp {out_dir}/salmon_out/All.genes.abundance.txt {out_dir}Assembly_out/NR.nucleotide.fa {asem_dir}/
+# cp {out_dir}/salmon_out/All.genes.abundance.txt {out_dir}Assembly_out/NR.nucleotide.fa {asem_dir}/
             """.format(**self.context)
         else:
             self.set_path(
@@ -141,17 +138,17 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
             self.init_out_dir(g)
 
             if base_on_assembly:
-                VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
-                                  'salmon_out/genes.emapper.annotations', prefix='KO_', annotation_column=6, out_dir=self.function_dir + '1-KEGG').visualize(exclude)
-                VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
-                                  'salmon_out/genes.emapper.annotations', prefix='GO_', annotation_column=5, out_dir=self.function_dir + '3-GO').visualize(exclude)
+                out_dir_dict = {
+                    "KO": self.kegg_dir,
+                    "GO": self.go_dir,
+                    "EGGNOG": self.eggnog_dir,
+                    "CAZY": self.cazy_dir,
+                }
+                for db, func_out in out_dir_dict.items():
+                    VisualizeFunction(self.salmon_out + 'All.{}.abundance_unstratified.tsv'.format(db),
+                                      self.mapping_file, self.category,
+                                      out_dir=func_out).visualize(exclude)
 
-                VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
-                                  'salmon_out/genes.emapper.annotations', prefix='EGGNOG_', annotation_column=9, out_dir=self.function_dir + '2-EggNOG', adjust_func=self.extract_empper_cog).visualize(exclude)
-                VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
-                                  'salmon_out/genes_cazy.f6', prefix='CAZY_', out_dir=self.function_dir + '4-CAZy', adjust_func=lambda x: re.search('\|([^\|_]+)', x).group(1)).visualize(exclude)
-                vcard = VisualizeAssembly(self.out_dir + 'salmon_out/All.genes.abundance.txt', self.mapping_file, self.category, annotation_file=self.out_dir +
-                                          'salmon_out/genes_card.f6', prefix='AMR_', out_dir=self.amr_dir, adjust_func=False)
             else:
                 for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog', 'cazy'], ['1-KEGG', '5-EC', '4-GO', '3-EggNOG', '6-CAZy']):
                     VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
@@ -161,25 +158,17 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
 
             self.map_ko_annotation()
 
-            if base_on_assembly:
-                self.mi.mapping(self.amr_dir + 'All.AMR.abundance_unstratified.tsv', [self.FMAP_data + '/aro.csv'],
-                                pattern="ARO[^\|]+",
-                                # first_pattern="[^\|]+$",
-                                first_pattern="ARO[^\|]+",
-                                # add_sid_to_info=True,
-                                add_sid_to_info=False,
-                                map_column=-1)
-                vcard.visualize(exclude)
-            else:
-                self.mi.mapping(self.out_dir + 'FMAP/All.AMR.abundance_unstratified.tsv', [self.FMAP_data + '/aro.csv'],
-                                pattern="ARO[^\|]+",
-                                # first_pattern="[^\|]+$",
-                                first_pattern="ARO[^\|]+",
-                                # add_sid_to_info=True,
-                                add_sid_to_info=False,
-                                map_column=-1)
-                VisualizeFunction(self.out_dir + 'FMAP/All.AMR.abundance_unstratified.tsv',
-                                  self.mapping_file, self.category, out_dir=self.amr_dir).visualize(exclude)
+            amr_home = self.salmon_out if base_on_assembly else self.out_dir + 'FMAP/'
+
+            self.mi.mapping(amr_home + 'All.AMR.abundance_unstratified.tsv', [self.FMAP_data + '/aro.csv'],
+                            pattern=r"ARO[^\|]+",
+                            # first_pattern="[^\|]+$",
+                            first_pattern=r"ARO[^\|]+",
+                            # add_sid_to_info=True,
+                            add_sid_to_info=False,
+                            map_column=-1)
+            VisualizeFunction(amr_home + 'All.AMR.abundance_unstratified.tsv',
+                              self.mapping_file, self.category, out_dir=self.amr_dir).visualize(exclude)
 
             for abundance_table in [self.kegg_dir + f for f in (
                 # 'All.KO.abundance_unstratified.tsv',
@@ -214,14 +203,7 @@ cpfirst "{function_dir}/5-EC/4-SignificanceAnalysis/LEfSe/SignificantFeatures/.p
 cpfirst "{function_dir}/1-KEGG/4-SignificanceAnalysis/LEfSe/SignificantFeatures/.pdf"   Figure5-4.pdf
             """.format(**self.context)
 
-            asem_spec = """
-# cp -rp {base_dir}/Report_assembly/src {report_dir}
-# cp {base_dir}/Report_assembly/结题报告.html {categroy_dir}
-mkdir -p {out_dir}/Sub_Result
-mv {root_dir}/*/2-FuctionAnalysis/*/map_*_to_genes.xls {root_dir}/*/*/map_*_to_genes.xls \
- {root_dir}/01-Assembly/All.genes.abundance.xls {root_dir}/01-Assembly/NR.nucleotide.fa \
- {out_dir}/Sub_Result -f
-            """.format(**self.context)
+            asem_spec = ""
 
             self.system("""
 cd {report_dir}
