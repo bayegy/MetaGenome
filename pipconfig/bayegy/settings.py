@@ -34,7 +34,7 @@ path = {
     "emapper_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/emapper.py",
     "fastqc_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
     "python3_path": "/usr/bin/python3",
-    "R_path": "/usr/bin/Rscript",
+    "R_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/Rscript",
     "perl_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/perl",
     "qiime2_home": "/home/bayegy/pipelines/metagenome/miniconda2/envs/qiime2-2019.10",
     "lefse_pylib_home": "/home/bayegy/pipelines/metagenome/miniconda2/share/lefse-1.0.8.post1-1",
@@ -46,6 +46,7 @@ path = {
     # do not use conda to install salmon, it's too old
     # sudo apt-get install mpich #cd-hit nedd this
     # humann2 installed by bioconda is too old!
+    # sudo apt-get install libopenblas-dev # to solve 'libopenblas.so.0: cannot open shared object file'
 
 }
 
@@ -86,7 +87,7 @@ max_workers = {
     "cdhit": 80,
     "diamond_cazy": 10,
     "diamond_card": 10,
-    "emapper": 10,
+    "emapper": 20,
 }
 
 

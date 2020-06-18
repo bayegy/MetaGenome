@@ -56,9 +56,10 @@ class VisualizeFunction(Visualize):
                                     "{}\t-\t\t\t-\n".format(line.split()[0]))
 
             for el in exclude_list:
-                prefix = self.prefix if el == 'none' else self.prefix + \
-                    re.sub('\(|\)|%|\\|\/', "",
-                           el.replace(',', '_')) + '_excluded_'
+                el, *aprefix = el.split(":") + [""]
+                # info = re.sub(r'\(|\)|%|\\|\/', "", el.replace(',', '_')) + '_excluded_'
+                # info = info if info < 50 else hash(info)
+                prefix = self.prefix + "".join(aprefix)
                 self.system('''
 if [ ! -f {out_dir}5-CorrelationAnalysis/CorrelationHeatmap/{prefix}spearman_rank_correlation_matrix.txt ]; then {R_path} {bayegy_home}/cor_heatmap.R -i {abundance_table} -o {out_dir}5-CorrelationAnalysis/CorrelationHeatmap -n 25 -m {mapping_file} -e {eld} -p "{prefix}";fi;
 {R_path} {bayegy_home}/RDA.R -i {abundance_table} -m {mapping_file} -c {category} -o {out_dir}5-CorrelationAnalysis/RDA -n 25 -e {eld} -p "{prefix}";

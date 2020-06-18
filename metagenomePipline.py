@@ -30,6 +30,15 @@ def all_path_exists(paths):
     return True
 
 
+def keep_only(path):
+    directory, file = os.path.split(path)
+    for fl in os.listdir(directory):
+        if not file == fl:
+            cmd = "rm -r {}".format(os.path.join(directory, fl))
+            print(cmd)
+            os.system(cmd)
+
+
 def sge_parallel(func):
     def wfunc(self, fa, out_dir, cat_file=None, first_check=10, max_workers=10, tmp_dir=None, remove_tmp=False, **kwargs):
         if max_workers == 1:
@@ -48,12 +57,18 @@ def sge_parallel(func):
         print("######################Running " + str(func))
         start_time = time.time()
 
+        if not len(os.listdir(tmp_dir)) == max_workers:
+            raise Exception(
+                "Number of trunk is not equal to the number of workers,\
+                 change max_workers or remove tmp_dir and try again.")
+
         for i in range(max_workers):
             trunk_out = os.path.join(tmp_dir, "{basename}.trunk{i}".format(**locals()))
             fa_trunk = os.path.join(trunk_out, basename)
             if not os.path.exists(fa_trunk):
                 raise Exception("Looks like the tmp_dir is not correct, remove tmp_dir and try again.")
             if not os.path.exists(os.path.join(trunk_out, "done")):
+                keep_only(fa_trunk)
                 func(self, fa=fa_trunk, out_dir=trunk_out, **kwargs)
 
         wait_sge(first_check)
@@ -483,7 +498,7 @@ echo 'mkdir -p {tmp_dir}/{sample}/bowtie2_db&&{megahit_path} --k-list 21,29,39,5
  --un {assembly_out}/{sample}/{sample}_R2_unassembled.fastq && \
 rm -r {assembly_out}/{sample}/intermediate_contigs {tmp_dir}/{sample} && \
 {base_dir}/merge_se_to_pe.py -1 {assembly_out}/{sample}/{sample}_R1_unassembled.fastq -2 {assembly_out}/{sample}/{sample}_R2_unassembled.fastq \
--o {assembly_out}/{sample}/{sample}_R%s_unassembled_merged.fq  --removeinput && \
+-o {assembly_out}/{sample}/{sample}_R%s_unassembled_merged.fq  --replaceinput && \
 gzip {assembly_out}/{sample}/{sample}_R*_unassembled_merged.fq && \
 echo {sample}_done > {assembly_out}/{sample}/all_done' | \
  qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N {sample} -o {assembly_out} -e {assembly_out}
@@ -626,7 +641,7 @@ echo '{diamond_home}/diamond blastp --db {fmap_home}/FMAP_data/protein_fasta_pro
         del args['self']
         self.system("""
 echo '{emapper_path} --no_file_comments -m diamond --seed_ortholog_evalue 0.00001 \
-  --data_dir {emapper_database} --cpu {threads} \
+  --data_dir {emapper_database} --cpu {threads} --temp_dir {out_dir} \
   -i {fa} -o {out_dir}/genes --usemem --override && touch {out_dir}/done' \
 | qsub -l h_vmem={mem}G -pe {sge_pe} {threads} -q {sge_queue} -V -N emapper -o {out_dir} -e {out_dir}
             """, **args, escape_sge=self.escape_sge)

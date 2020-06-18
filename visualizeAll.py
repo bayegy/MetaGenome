@@ -48,10 +48,11 @@ class VisualizeAll(VisualizeSpecies):
 
     def map_func_definition(self):
         FMAP_data = self.FMAP_data
+        map_level_map = self.base_dir + "/FMAP_data/"
         FMAP = self.kegg_dir
         mi = self.mi
         asem = self.base_on_assembly
-        mi.mapping(FMAP + 'All.KEGG.Pathway.txt', [FMAP_data + f for f in ['KEGG_Pathway2Level1.txt', 'KEGG_Pathway2Level2.txt', 'KEGG_pathway.txt']],
+        mi.mapping(FMAP + 'All.KEGG.Pathway.txt', [map_level_map + f for f in ['KEGG_Pathway2Level1.txt', 'KEGG_Pathway2Level2.txt', 'KEGG_pathway.txt']],
                    out_file=FMAP + 'All.KEGG.Pathway.mapping.txt', mapped_headers=["Level1", "Level2", "Level3"])
         mi.mapping(FMAP + 'All.KO.abundance_unstratified.tsv', [FMAP_data + 'KEGG_orthology.txt'],
                    out_file=FMAP + 'All.KO.mapping.txt', adjust_func=mi.ajust_ko_info, mapped_headers=['Gene_name\tEnzyme_number\tDefinition'])
@@ -276,3 +277,7 @@ if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do
             "{base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
         self.system(
             "{base_dir}/change_suffix.py {root_dir} -o tsv -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
+        self.system(
+            "echo visualize-function is finished")
+        self.system(
+            "date")

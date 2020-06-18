@@ -23,7 +23,11 @@ class GroupGene(object):
                     if not isinstance(annotation, list):
                         annotation = [annotation]
                     for anno in annotation:
-                        ft_map.setdefault(anno, []).append(li[0])
+                        # use set to avoid duplicates
+                        ft_map.setdefault(anno, set()).add(li[0])
+        # list eat less memery than set
+        for k, v in ft_map.items():
+            ft_map[k] = list(v)
         self.annotation = ft_map
 
     def group(self, gene_abundance, out_file, column=3, header=True):

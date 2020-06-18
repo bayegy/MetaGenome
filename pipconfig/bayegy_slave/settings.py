@@ -33,7 +33,7 @@ path = {
     "emapper_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/emapper.py",
     "fastqc_home": "/home/bayegy/pipelines/metagenome/miniconda2/bin/",
     "python3_path": "/usr/bin/python3",
-    "R_path": "/usr/bin/Rscript",
+    "R_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/Rscript",
     "perl_path": "/home/bayegy/pipelines/metagenome/miniconda2/bin/perl",
     "qiime2_home": "/home/bayegy/pipelines/metagenome/miniconda2/envs/qiime2-2019.10",
     "lefse_pylib_home": "/home/bayegy/pipelines/metagenome/miniconda2/share/lefse-1.0.8.post1-1",
@@ -51,7 +51,7 @@ memery_needs = {
     "kraken2": 200,
     "humann2": 45,
     "fmap": 30,
-    "salmon": 500,
+    "salmon": 200,
     "megahit": 200,
     "prodigal": 50,
     "cdhit": 400,
@@ -60,9 +60,9 @@ memery_needs = {
     "emapper": 400,
 }
 
-memery = 1000
+memery = 500
 
-threads = 98
+threads = 63
 
 hosts = 1
 
@@ -73,13 +73,13 @@ sge_pe = "smp"
 sge_queue = "metagqueue"
 
 max_workers = {
-    "kneaddata": 5,
+    "kneaddata": 3,
     "kraken2": 6,
     "humann2": 5,
     "fmap": 10,
     "salmon": 2,
     "megahit": 3,
-    "prodigal": 10,
+    "prodigal": 1,
     "cdhit": 1,
     "diamond_cazy": 1,
     "diamond_card": 1,
@@ -87,7 +87,7 @@ max_workers = {
 }
 
 each = {
-    "prodigal": 30,
+    "prodigal": 6,
     "cdhit": 6,
     "diamond_cazy": 2,
     "diamond_card": 2,

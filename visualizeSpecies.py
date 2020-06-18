@@ -125,13 +125,9 @@ class VisualizeSpecies(Visualize):
         echo "##############################################################\nCorrelation heatmap analysis"
         for nrda in $not_rda;
             do echo $nrda;
-            prefix=${{nrda//,/_}}_excluded_;
-            prefix=${{prefix//none_excluded_/}};
-            prefix=${{prefix//\//-}};
-            prefix=${{prefix//\\/-}};
-            prefix=${{prefix//\(/}};
-            prefix=${{prefix//\)/}};
-            prefix=${{prefix//\%/}};
+            arr=(${{nrda//:/ }});
+            nrda=${{arr[0]}};
+            prefix=${{arr[1]}};
             for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
                 do echo $n7;
                 {R_path} {bayegy_home}/cor_heatmap.R -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/CorrelationAnalysis/CorrelationHeatmap/${{n7}}/ -n 25 -m {mapping_file} -e $nrda -p "$prefix";
