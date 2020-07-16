@@ -26,7 +26,7 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
             p_prefix = os.path.splitext(os.path.basename(abundance_table))[0]
             for r in ['pathabundance', 'abundance', 'KeepID', 'Humann2', "unstratified", 'All']:
                 p_prefix = p_prefix.replace(r, '')
-            p_prefix = re.sub('\.+', '.', p_prefix.strip('.|_'))
+            p_prefix = re.sub(r'\.+', '.', p_prefix.strip('.|_'))
             p_prefix = p_prefix + '_'
         # self.running_bash = self.out_dir + 'visualize_function.sh'
 
@@ -107,20 +107,33 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
     def __visualize_without_group__():
         pass
 
-    def visualize(self, exclude='none'):
+    def visualize(self, exclude='none', **kwargs):
         print("Visualizing abundance table: {}".format(self.abundance_table))
         if self.categories and self.mapping_file:
             print("Visualize using group info...")
-            self.__visualize_with_group__(exclude)
+            self.__visualize_with_group__(exclude, **kwargs)
         else:
             print("No group info detected, visualize without group info")
-            self.__visualize_without_group__()
+            self.__visualize_without_group__(**kwargs)
         result_abundance = self.out_dir + \
             os.path.basename(self.abundance_table)
         if not os.path.exists(result_abundance) and hasattr(self, "abundance_df"):
             self.abundance_df.to_csv(result_abundance, sep='\t', index=True)
         if os.path.exists(self.tmp_dir):
             shutil.rmtree(self.tmp_dir)
+
+    def set_colors(self, colors=False):
+        if colors:
+            colors_list = '\n'.join([colors[k] for k in sorted(colors.keys(), key=str.lower)])
+            colors_list_file = os.path.join(self.out_dir, 'group_color.list')
+            with open(colors_list_file, 'w') as f:
+                f.write(colors_list)
+        else:
+            colors_list_file = "{bayegy_home}/piputils/group_color.list".format(**self.context)
+        self.system(
+            "{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} \
+            -p {colors_list_file} -o {out_dir}/colors_plan.json", colors_list_file=colors_list_file)
+        os.environ['COLORS_PLAN_PATH'] = os.path.join(self.out_dir, 'colors_plan.json')
 
     @staticmethod
     def iterfind(a, b):

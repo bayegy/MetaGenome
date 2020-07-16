@@ -17,7 +17,33 @@ class VisualizeSpecies(Visualize):
             # exclude_species=exclude_species
         )
 
-    def __visualize_with_group__(self, exclude='none'):
+    def __visualize_with_group__(self, exclude='none', run_ancom=True, frequency=1000):
+
+        ancom_spec = """
+    echo -e "\n############################################Converting qzv files to html"
+    for f in $(find {tmp_dir}/ -type f -name "*.qzv"); do echo $f; base=$(basename $f .qzv); dir=$(dirname $f); new=${{dir}}/${{base}}; qiime tools export --input-path $f --output-path ${{new}}; done
+    for f in $(find {tmp_dir}/ -type f -name "index.html") ; do echo $f; base=$(basename $f .html); dir=$(dirname $f); new=${{dir}}/Summary_请点此文件查看.html; mv $f $new; done
+        """.format(**self.context) if not run_ancom else """
+    echo "ANCOM analaysis for differential OTU"
+    mkdir {tmp_dir}/ANCOM
+    for n2 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
+        do echo $n2;
+        for category_1 in {category_set};
+            do echo $category_1;
+                {R_path} {bayegy_home}/clean_na_of_inputs.R -m {mapping_file} --group $category_1 -t {tmp_dir}/collapsed/{sample_name}-${{n2}}.qza -o {tmp_dir}
+                qiime composition add-pseudocount   --i-table {tmp_dir}/filtered_feature_table.qza  --o-composition-table {tmp_dir}/ANCOM/composition.${{n2}}.qza;
+                qiime composition ancom  --i-table {tmp_dir}/ANCOM/composition.${{n2}}.qza --m-metadata-file {tmp_dir}/cleaned_map.txt --m-metadata-column $category_1 --o-visualization {tmp_dir}/ANCOM/${{category_1}}-ANCOM-${{n2}}.qzv;
+            done;
+            #qiime composition ancom  --i-table {tmp_dir}/ANCOM/composition.${{n2}}.qza --m-metadata-file {mapping_file} --m-metadata-column $category_2 --o-visualization {tmp_dir}/ANCOM/SecondaryGroup/ANCOM.${{n2}}.qzv;
+    done;
+    echo -e "\n############################################Converting qzv files to html"
+    for f in $(find {tmp_dir}/ -type f -name "*.qzv"); do echo $f; base=$(basename $f .qzv); dir=$(dirname $f); new=${{dir}}/${{base}}; qiime tools export --input-path $f --output-path ${{new}}; done
+    for f in $(find {tmp_dir}/ -type f -name "index.html") ; do echo $f; base=$(basename $f .html); dir=$(dirname $f); new=${{dir}}/Summary_请点此文件查看.html; mv $f $new; done
+
+    mkdir -p {out_dir}/2-AbundanceComparison/ANCOM;
+    mv {tmp_dir}/ANCOM/*ANCOM* {out_dir}/2-AbundanceComparison/ANCOM/
+        """.format(**self.context, category_set=self.categories.replace(',', ' '))
+
         with OSEnv(path=self.qiime2_home + 'bin/', pythonpath=self.qiime2_home + 'lib/python3.6/site-packages/'):
             self.system("""
     echo "Check wheather your categories are the following:"
@@ -70,25 +96,7 @@ class VisualizeSpecies(Visualize):
     done;
 
 
-    echo "ANCOM analaysis for differential OTU"
-    mkdir {tmp_dir}/ANCOM
-    for n2 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
-        do echo $n2;
-        for category_1 in {category_set};
-            do echo $category_1;
-                {R_path} {bayegy_home}/clean_na_of_inputs.R -m {mapping_file} --group $category_1 -t {tmp_dir}/collapsed/{sample_name}-${{n2}}.qza -o {tmp_dir}
-                qiime composition add-pseudocount   --i-table {tmp_dir}/filtered_feature_table.qza  --o-composition-table {tmp_dir}/ANCOM/composition.${{n2}}.qza;
-                qiime composition ancom  --i-table {tmp_dir}/ANCOM/composition.${{n2}}.qza --m-metadata-file {tmp_dir}/cleaned_map.txt --m-metadata-column $category_1 --o-visualization {tmp_dir}/ANCOM/${{category_1}}-ANCOM-${{n2}}.qzv;
-            done;
-            #qiime composition ancom  --i-table {tmp_dir}/ANCOM/composition.${{n2}}.qza --m-metadata-file {mapping_file} --m-metadata-column $category_2 --o-visualization {tmp_dir}/ANCOM/SecondaryGroup/ANCOM.${{n2}}.qzv;
-    done;
-
-
-    echo -e "\n############################################Converting qzv files to html"
-    for f in $(find {tmp_dir}/ -type f -name "*.qzv"); do echo $f; base=$(basename $f .qzv); dir=$(dirname $f); new=${{dir}}/${{base}}; qiime tools export --input-path $f --output-path ${{new}}.qzv.exported; done
-    for f in $(find {tmp_dir}/ -type d -name "*qzv.exported"); do echo $f; base=$(basename $f .qzv.exported); dir=$(dirname $f); mv $f ${{dir}}/${{base}}; done
-    for f in $(find {tmp_dir}/ -type f -name "index.html") ; do echo $f; base=$(basename $f .html); dir=$(dirname $f); new=${{dir}}/Summary_请点此文件查看.html; mv $f $new; done
-
+{ancom_spec}
 
 
     mv {tmp_dir}/Relative/otu_table.p.relative.mat {tmp_dir}/Relative/otu_table.Phylum.relative.txt
@@ -154,7 +162,7 @@ class VisualizeSpecies(Visualize):
             do echo $n7;
             {R_path} {bayegy_home}/abundance_barplot.R -n 20 -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/Taxa-bar-plots-top20/ -p ${{n7}}_${{category_1}}_ -b F;
             {R_path} {bayegy_home}/abundance_barplot.R -n 20 -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/Barplot-of-Group-Mean/ -p ${{category_1}}_${{n7}}_mean_ -b T;
-            {R_path} {bayegy_home}/Function_DunnTest.r -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/DunnTest/ -p ${{n7}}_;
+            {R_path} {bayegy_home}/Function_DunnTest.r -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/DunnTest/ -p ${{n7}}_ > /dev/null;
             {R_path} {bayegy_home}/write_data_for_lefse.R -i  {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -m  {mapping_file} -c  $category_1 -o  {tmp_dir}/Lefse/${{n7}}/${{category_1}}_${{n7}}_lefse.txt -u l;
         done;
     done;
@@ -168,7 +176,8 @@ class VisualizeSpecies(Visualize):
         {R_path} {bayegy_home}/venn_and_flower_plot.R -s F  -i {abundance_table} -m {mapping_file} -c $category_1 -o {tmp_dir}/VennAndFlower;
         {R_path} {bayegy_home}/pcoa_and_nmds.R  -i {tmp_dir}/feature-table.ConsensusLineage.txt -m $map -c $category_1 -o {tmp_dir}/PCoA-NMDS;
         done;
-        """, frequency=1000, category_set=self.categories.replace(',', ' '), exclude=exclude.replace(';', ' '))
+
+        """, ancom_spec=ancom_spec, frequency=frequency, category_set=self.categories.replace(',', ' '), exclude=exclude.replace(';', ' '))
 
         with OSEnv(pythonpath=self.lefse_pylib_home, path=self.lefse_py_home, r_libs=self.lefse_rlib_home):
             self.system("""
@@ -190,24 +199,21 @@ class VisualizeSpecies(Visualize):
         {out_dir}/1-AbundanceSummary/2-Barplots \
         {out_dir}/1-AbundanceSummary/3-Heatmaps \
         {out_dir}/2-AbundanceComparison/VennAndFlower \
-        {out_dir}/2-AbundanceComparison/ANCOM \
-        {out_dir}/2-AbundanceComparison \
         {out_dir}/2-AbundanceComparison/LEfSe \
         {out_dir}/3-DiversityAnalysis \
 
     mv {tmp_dir}/Relative/Classified_stat_relative.png {out_dir}/1-AbundanceSummary/
     mv {tmp_dir}/Relative/*relative.txt {out_dir}/1-AbundanceSummary/1-RelativeAbundance/
-    mv {tmp_dir}/All.Taxa.OTU.taxa-bar-plots {tmp_dir}/All.Taxa.OTU.taxa-bar-plots.1000  {tmp_dir}/Barplot-of-Group-Mean {tmp_dir}/Taxa-bar-plots-top20  {out_dir}/1-AbundanceSummary/2-Barplots/
+    mv {tmp_dir}/{sample_name}.taxa-bar-plots {tmp_dir}/{sample_name}.taxa-bar-plots.{frequency}  {tmp_dir}/Barplot-of-Group-Mean {tmp_dir}/Taxa-bar-plots-top20  {out_dir}/1-AbundanceSummary/2-Barplots/
     mv {tmp_dir}/Heatmap/* {out_dir}/1-AbundanceSummary/3-Heatmaps/
-    mv {tmp_dir}/ANCOM/*ANCOM* {out_dir}/2-AbundanceComparison/ANCOM/
     mv {tmp_dir}/Lefse/* {out_dir}/2-AbundanceComparison/LEfSe/
     mv {tmp_dir}/DunnTest {out_dir}/2-AbundanceComparison/
     mv {tmp_dir}/VennAndFlower/*  {out_dir}/2-AbundanceComparison/VennAndFlower/
     mv {tmp_dir}/core-metrics/bray_curtis_emperor {tmp_dir}/PCoA-NMDS/* {out_dir}/3-DiversityAnalysis/
     mv {tmp_dir}/CorrelationAnalysis {out_dir}/4-CorrelationAnalysis
-                """, category_set=self.categories.replace(',', ' '))
+                """, frequency=frequency, category_set=self.categories.replace(',', ' '))
 
-    def __visualize_without_group__(self):
+    def __visualize_without_group__(self, run_ancom=True, frequency=1000):
         os.system("bash {}visualize_otu_table_without_group.sh {} {} none {} {} {} {}".format(
             self._base_dir, self.abundance_table, self.mapping_file, self.prefix, "NONE", self.path[
                 'bayegy_home'], self.tmp_dir

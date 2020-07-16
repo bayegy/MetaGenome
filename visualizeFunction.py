@@ -30,7 +30,7 @@ class VisualizeFunction(Visualize):
 {R_path} {bayegy_home}/abundance_heatmap.R -m {mapping_file} -c {category}  -n 20 -i {abundance_table} -o {out_dir}2-Heatmaps -p {prefix}{category}_clustered_ -l F -t F -u T;
 {R_path} {bayegy_home}/abundance_heatmap.R  -m {mapping_file} -c {category} -n 20 -i {abundance_table} -o {out_dir}2-Heatmaps -p {prefix}{category}_groupMean_ -l F -t T -b T;
 {R_path} {bayegy_home}/write_data_for_lefse.R -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {out_dir}4-SignificanceAnalysis/LEfSe/{prefix}{category}_lefse.txt -u f;
-{R_path} {bayegy_home}/Function_DunnTest.r -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {out_dir}4-SignificanceAnalysis/DunnTest -p {prefix};
+{R_path} {bayegy_home}/Function_DunnTest.r -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {out_dir}4-SignificanceAnalysis/DunnTest -p {prefix} > /dev/null;
             ''', category=g)
 
             with OSEnv(pythonpath=self.lefse_pylib_home, path=self.lefse_py_home, r_libs=self.lefse_rlib_home):

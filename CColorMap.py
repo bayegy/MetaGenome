@@ -57,13 +57,13 @@ class ColorMap(object):
 
     """
 
-    def __init__(self, feature_list_path, map_conf_path=False, colors=False, column=0, ko_abundance_table=False, prefix="", out_dir='./'):
+    def __init__(self, feature_list_path, map_conf_path=False, sep=",", colors=False, column=0, ko_abundance_table=False, prefix="", out_dir='./'):
         self.out_dir = os.path.abspath(out_dir) + '/'
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
         self.out_dir += prefix
         self._base_dir = os.path.dirname(__file__) + '/'
-        user_kos = pd.read_csv(feature_list_path, sep=',', header=0, index_col=0)
+        user_kos = pd.read_csv(feature_list_path, sep=sep, header=0, index_col=0)
         # pdb.set_trace()
         self.user_kos = user_kos.iloc[:, column] if isinstance(column, int) else user_kos.loc[:, column]
         is_compound = [i.startswith('C') for i in self.user_kos.index]
@@ -317,6 +317,8 @@ if __name__ == '__main__':
         description="This script is used to plot RDA of species. The numeric enviroment factors must be encluded in maping file. The categories will be filterd before RDA")
     p.add_argument('-i', '--input', dest='input', metavar='<path>',
                    help='Feature list file path')
+    p.add_argument('-s', '--sep', dest='sep', metavar='<str>',
+                   help='file sep, , or \t', default=",")
     p.add_argument('-m', '--mapid', dest='mapid', metavar='<str>',
                    help='Map id')
     p.add_argument('-d', '--database', dest='database', metavar='<path>', default="/home/cheng/Databases/map",
@@ -331,5 +333,5 @@ if __name__ == '__main__':
                    help='The prefix of output files, default if null')
     options = p.parse_args()
     c = ColorMap(feature_list_path=options.input, map_conf_path=options.database, column=options.column,
-                 out_dir=options.output, prefix=options.prefix, colors=options.colors)
+                 out_dir=options.output, prefix=options.prefix, colors=options.colors, sep=options.sep)
     c.plot_map(options.mapid)

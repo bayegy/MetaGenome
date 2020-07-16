@@ -99,10 +99,12 @@ class VisualizeAll(VisualizeSpecies):
                       cazy_dir=self.function_dir + ('4-CAZy/' if asem else '6-CAZy/'),
                       )
 
-    def visualize(self, exclude='none', base_on_assembly=False):
+    def visualize(self, exclude='none', base_on_assembly=False, unify_colors=True):
         self.base_on_assembly = base_on_assembly
-        self.system("{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} -p {bayegy_home}/piputils/group_color.list -o {out_dir}colors_plan.json")
-        os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
+        # self.system("{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} -p {bayegy_home}/piputils/group_color.list -o {out_dir}colors_plan.json")
+        # os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
+        if unify_colors:
+            self.set_colors()
 
         if base_on_assembly:
             self.set_path(force=True, asem_dir=self.root_dir + '01-Assembly')

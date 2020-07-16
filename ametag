@@ -20,8 +20,8 @@ p.add_argument('-r', '--reverse-file-pattern', dest='rp', default=r'_2\.fq', met
                help='The regular expression representing reverse sequence in file names,Supply this parameter together with -i -s -f.')
 p.add_argument('-e', '--exclude', dest='exclude', default='none', metavar='<str>',
                help='The variables excluded from RDA and correlation heatmap analysis, if more than one variable is expected, you should use comma as delimeters. if more than one run is expected, use semicolon as delimeters. example: "Var1,Var2;Var1,Var3". default is none, meaning no variable will be excluded.')
-p.add_argument('-k', '--filter', dest='filter', default="none", metavar='<str>',
-               help='Taxon to be filtered. use "keep:taxon1,taxon2" to keep noly taxon1, taxon2. or use "exclude:taxon1,taxon2" to filter taxon1, taxon2. For multi-strategies, use ";" as delimeters: "keep:taxon1,taxon2;exclude:taxon1,taxon2" ')
+p.add_argument('-k', '--filter', dest='filter', default="keep:Archaea;keep:Bacteria;keep:Fungi;keep:Viruses", metavar='<str>',
+               help='Taxon to be filtered. use "keep:taxon1,taxon2" to keep noly taxon1, taxon2. or use "exclude:taxon1,taxon2" to filter taxon1, taxon2. For multi-strategies, use ";" as delimeters: "keep:taxon1,taxon2;exclude:taxon1,taxon2". If set to none, no filter rules will be used.')
 p.add_argument('-t', '--host-db', dest='host', default="/home/cheng/Databases/hg38/hg38", metavar='<str>',
                help='Comma seprated path to the host genome bowtie2 database.')
 p.add_argument('-a', '--assembly', dest='assembly', default="no", metavar='<str>',
@@ -30,6 +30,10 @@ p.add_argument('-x', '--mix-assembly', dest='mix', default="yes", metavar='<str>
                help='Mixed assembly strategy. yes (use mixed assembly) or no. Default is yes. Set this to no will save you a lot time and computer source with a decline of sensitivity for genes.')
 p.add_argument('-z', '--zip-clean-data', dest='zip', default="yes", metavar='<str>',
                help='Set this to no to skip  the step of zip clean data, this will save you some time, but will take much more disk space. Default is yes')
+p.add_argument('-u', '--unify-colors', dest='colors', default="yes", metavar='<str>',
+               help='Unify group colors. yes or no. Default is yes')
+p.add_argument('-p', '--parse-raw', dest='parse_raw', default="yes", metavar='<str>',
+               help='Parse raw fastq file. yes or no. Default is yes')
 p.add_argument('-o', '--outdir', dest='outdir', metavar='<directory>', default='./',
                help='specify the output directory')
 
@@ -38,6 +42,7 @@ m = MetagenomePipline(raw_fqs_dir=options.input, pre_mapping_file=options.map, c
                       forward_regex=options.fp, reverse_regex=options.rp, out_dir=options.outdir, base_on_assembly=True if options.assembly == 'yes' else False, exclude=options.exclude,
                       filter_species=False if options.filter == "none" else options.filter,
                       zip_kneaddata=True if options.zip == 'yes' else False,
-                      mix_asem=True if options.mix == 'yes' else False)
+                      mix_asem=True if options.mix == 'yes' else False,
+                      parse_raw=options.parse_raw=="yes")
 
-m.run()
+m.run(unify_colors=options.colors == "yes")

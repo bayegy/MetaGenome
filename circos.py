@@ -43,6 +43,8 @@ class Circos(object):
     def __init_data__(self, table, mapping_file, category, by_group_mean):
         otu = self.read_tsv(table)
         otu = otu if not otu.dtypes[-1] == np.dtype("O") else otu.drop(otu.columns[-1], axis=1)
+
+        otu = otu if otu.max().max() > 1 else otu * 1000000
         # pdb.set_trace()
         otu.index = [i.replace(' ', '_').replace(';', '_').replace(
             "'", '').replace('(', '_').replace(')', '_').replace(':', '_') for i in otu.index]

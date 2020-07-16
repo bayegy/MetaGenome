@@ -213,7 +213,7 @@ class MetagenomePipline(SystemMixin):
     m.run()
     """
 
-    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex=r"(.+)_.*_[12]\.fq\.?g?z?", forward_regex=r"_1\.fq\.?g?z?$", reverse_regex=r"_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True, mix_asem=True):
+    def __init__(self, raw_fqs_dir, pre_mapping_file, categories=False, host_db="/home/cheng/Databases/hg38/hg38", sample_regex=r"(.+)_.*_[12]\.fq\.?g?z?", forward_regex=r"_1\.fq\.?g?z?$", reverse_regex=r"_2\.fq\.?g?z?$", out_dir='./', base_on_assembly=False, exclude='none', filter_species=False, zip_kneaddata=True, mix_asem=True, parse_raw=True):
         self.context = dict()
 
         self.set_path(force=True,
@@ -251,7 +251,7 @@ class MetagenomePipline(SystemMixin):
 
         self.set_path(force=False, **self.path)
         self.parsed_map = parse_premap(
-            raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex)
+            raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex, parse=parse_raw)
         self.fq_info = self.parsed_map['fastq'].values
         self.new_ids = list(self.parsed_map['map']['#SampleID'].values)
         self.new_ids.sort()
@@ -778,7 +778,8 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         adjust_funcs = {
             "KO": lambda x: x.split(','),
             "GO": lambda x: x.split(','),
-            "EGGNOG": lambda x: ['ENOG41' + c if not c.startswith('COG') else c for c in re.findall('([^,]+)@NOG', x)],
+            # "EGGNOG": lambda x: ['ENOG41' + c if not c.startswith('COG') else c for c in re.findall('([^,]+)@NOG', x)],
+            "EGGNOG": lambda x: [c for c in re.findall('([^,]+)@NOG', x) if c.startswith('COG')],
             "CAZY": lambda x: [c.split("_")[0] for c in x.split("|")[1:] if re.search("^[A-Z]", c)],
             "AMR": False
         }
@@ -792,28 +793,31 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
         gg = GroupGene(annotation_file=annotation_files[db],
                        by=columns[db],
                        adjust_func=adjust_funcs[db])
-        executor = ProcessPoolExecutor(max_workers=processors)
+        # executor = ProcessPoolExecutor(max_workers=processors)
         # futures = []
+        in_out_dict = {}
         for sample_id in self.new_ids:
             gene_abundance = self.salmon_quant_pattern.format(sample_id=sample_id)
             out_file = os.path.join(self.salmon_out, "{}_{}_abundance.txt".format(sample_id, db))
-            executor.submit(gg.group, gene_abundance, out_file)
+            in_out_dict[gene_abundance] = out_file
+            # executor.submit(gg.group, gene_abundance, out_file)
             # futures.append(future)
-        executor.shutdown(True)
+        # executor.shutdown(True)
+        gg.map(in_out_dict, processors=processors)
         self.system("""
 {humann2_home}/humann2_join_tables -i {salmon_out}/ -o {salmon_out}/All.{db}.abundance_unstratified.tsv --file_name _{db}_abundance.txt
             """, db=db)
         self.clean_header(os.path.join(self.salmon_out,
                                        "All.{}.abundance_unstratified.tsv".format(db)))
 
-    def visualize(self):
+    def visualize(self, **kwargs):
         VisualizeAll(self.mapping_file, self.categories, out_dir=self.out_dir, filter_species=self.filter_species).visualize(
-            self.exclude, self.base_on_assembly)
+            self.exclude, self.base_on_assembly, **kwargs)
 
     # def clean(self):
     #     self.system("rm -r {tmp_dir}")
 
-    def run(self):
+    def run(self, **kwargs):
         """
         电脑内存：250G
 
@@ -862,8 +866,19 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.run_diamond_card()
             self.run_diamond_cazy()
             self.run_emapper()
-            for db in ["KO", "GO", "EGGNOG", "CAZY", "AMR"]:
-                self.group_gene(db, processors=10)
+
+            for num, db in enumerate([
+                    "AMR",
+                    "CAZY",
+                    "EGGNOG",
+                    "KO",
+                    "GO"
+            ]):
+                if num == 0:
+                    # first run will require lots of IO, less processors are appropriate
+                    self.group_gene(db, processors=3)
+                else:
+                    self.group_gene(db, processors=10)
         else:
             self.run_humann2(
                 self.clean_r1_list, callback=False,
@@ -875,4 +890,4 @@ sed -i '1 i Name\teggNOG\tEvalue\tScore\tGeneName\tGO\tKO\tBiGG\tTax\tOG\tBestOG
             self.fmap_wrapper(self.clean_r1_list,
                               run_type="AMR", **self.alloc_src("fmap"))
 
-        self.visualize()
+        self.visualize(**kwargs)

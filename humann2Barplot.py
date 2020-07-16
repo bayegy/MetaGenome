@@ -64,6 +64,11 @@ def get_args():
                         metavar="<input table>",
                         required=True,
                         help="HUMAnN2 table with optional metadata", )
+    parser.add_argument("--colors",
+                        metavar="<color,color>",
+                        default=False,
+                        help="Comma seprated group colors", )
+
     parser.add_argument("-f", "--focal-feature",
                         metavar="<feature id>",
                         help="Feature ID of interest (give ID not full name)", )
@@ -465,8 +470,8 @@ def main():
             # unique = sorted(set(table.metarow))
             # mcdict = {v: c for v, c in zip(unique, get_colors(args.meta_colormap, len(unique)))}
             unique = sorted(set(table.metarow), key=str.lower)
-            mcdict = {v: c for v, c in zip(unique, get_colors1(args.focal_metadatum)
-                                           or get_colors(args.meta_colormap, len(unique)))}
+            mcdict = {v: c for v, c in zip(unique, (args.colors and args.colors.split(",")) or get_colors1(
+                args.focal_metadatum) or get_colors(args.meta_colormap, len(unique)))}
 
     # plot metadata?
     if table.metarow is not None:

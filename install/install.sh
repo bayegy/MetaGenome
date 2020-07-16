@@ -1,3 +1,4 @@
+python3 ./get-pip.py
 sudo apt-get install python3-tk
 sudo apt-get install ttf-mscorefonts-installer
 # /etc/ImageMagick-6/policy.xml replace the value of PDF rights to "read|write"
