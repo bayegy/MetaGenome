@@ -11,6 +11,7 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
     """docstring for Visualize"""
 
     def __init__(self, abundance_table, mapping_file=False, categories=False, prefix=False, out_dir=False, filter_abc_description=False, normalize_abc_description=False):
+        self.valid = True
         out_dir = out_dir if out_dir else os.path.dirname(
             mapping_file or abundance_table)
         self.set_path(force=True,
@@ -76,6 +77,10 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
                 if normalize_abc_description:
                     self.abundance_df.iloc[:, -1] = list(map(lambda x: x.replace("; ", ";").replace(" ", "_"),
                                                              self.abundance_df.iloc[:, -1]))
+            nrow, ncol = self.abundance_df.shape
+            if nrow < 2:
+                print("Warning: features number is less than 2")
+                self.valid = False
 
             abundance_table = self.tmp_dir + os.path.basename(abundance_table)
             mapping_file = self.tmp_dir + os.path.basename(mapping_file)
@@ -108,6 +113,9 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
         pass
 
     def visualize(self, exclude='none', **kwargs):
+        if not self.valid:
+            print("Warning: visualize function was passed!")
+            return
         print("Visualizing abundance table: {}".format(self.abundance_table))
         if self.categories and self.mapping_file:
             print("Visualize using group info...")
