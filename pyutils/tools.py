@@ -124,8 +124,8 @@ def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sa
                     sam_id = li[-1]
                     li[0] = sam_id
                     map_list.append(li)
-                    fq_list.append("fake_path", sam_id, "R1")
-                    fq_list.append("fake_path", sam_id, "R2")
+                    fq_list.append(["fake_path", sam_id, "R1"])
+                    fq_list.append(["fake_path", sam_id, "R2"])
         matched_fq_info = pd.DataFrame(fq_list, columns=["Fastq_path", "New_SampleID", "Direction"])
         matched_map = pd.DataFrame(map_list, columns=map_columns)
 
