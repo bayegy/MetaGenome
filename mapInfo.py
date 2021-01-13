@@ -42,12 +42,14 @@ class MapInfo(object):
         # gene_name = re.sub('EC?[\.\d]+', '', info[0])
         # gene_name = re.sub('K\d{5}', '', gene_name).strip(' |,')
         gene_name = info[0].strip()
-        ez = re.search('\[(E.*)\] *$', info[1])
+        ez = re.search(r'\[(E.*)\] *$', info[1])
         enzyme_number = ez.group(1) if ez else ""
-        definition = re.sub(' *\[E.*\] *$', '', info[1]).strip()
+        definition = re.sub(r' *\[E.*\] *$', '', info[1]).strip()
         return '\t'.join([gene_name, enzyme_number, definition])
 
-    def map_data(self, data, pattern=False, first_pattern=False, add_sid_to_info: bool=False, mapped_header: str=False, out_file=False):
+    def map_data(self, data, pattern=False, first_pattern=False,
+                 add_sid_to_info: bool = False,
+                 mapped_header: str = False, out_file=False):
         out = ""
         with open(data, 'r') as f:
             for number, line in enumerate(f):
@@ -62,14 +64,17 @@ class MapInfo(object):
                     try:
                         mdef = ', '.join(self.map[sid])
                         li.append("{}; {}\n".format(sid, mdef) if add_sid_to_info else mdef + '\n')
-                    except Exception as e:
+                    except Exception:
                         li.append("{}; {}\n".format(sid, "")
                                   if add_sid_to_info else "" + '\n')
                     out += '\t'.join(li)
         with open(out_file or data, 'w') as f:
             f.write(out)
 
-    def mapping(self, data, mapping_source_list: list, pattern=False, first_pattern=False, add_sid_to_info=False, header: bool=False, adjust_func=False, mapped_headers: list=False, out_file=False, add: bool=False, map_column=False):
+    def mapping(self, data, mapping_source_list: list, pattern=False,
+                first_pattern=False, add_sid_to_info=False, header: bool = False,
+                adjust_func=False, mapped_headers: list = False, out_file=False,
+                add: bool = False, map_column=False):
         """
         用来合并几个表格或者给一个表格匹配信息，默认所有表格第一列为匹配的id所在，匹配的表格的id可以不唯一
 
@@ -99,7 +104,8 @@ class MapInfo(object):
 
 
         """
-
+        if not isinstance(mapping_source_list, list):
+            mapping_source_list = [mapping_source_list]
         df = pd.read_csv(data, sep='\t')
         if df.dtypes[-1] == dtype("O") and (not add) and (not out_file):
             print("Last column is string object, MapInfo will treat it as definition, and won't override.")

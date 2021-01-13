@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 
 import os
-import sys
-import re
-from multiprocessing import process
 import pandas as pd
+import argparse
+
 
 class PEmap(object):
     """docstring for PEmap"""
@@ -24,7 +23,7 @@ class PEmap(object):
 
     def diamond(self, identity=50, evalue=0.001, processor=7):
 
-        cmd=f'''
+        cmd = f'''
 diamond blastx --query {self.read1} --db {self.database} --out {self.read1_out} --outfmt 6 --evalue {evalue} --id {identity} --max-target-seqs 1 --threads {processor} --block-size 200 --index-chunks 1 --tmpdir /dev/shm/
 diamond blastx --query {self.read2} --db {self.database} --out {self.read2_out} --outfmt 6 --evalue {evalue} --id {identity} --max-target-seqs 1 --threads {processor} --block-size 200 --index-chunks 1 --tmpdir /dev/shm/
 '''
@@ -65,8 +64,8 @@ diamond blastx --query {self.read2} --db {self.database} --out {self.read2_out} 
                 g2len = gene_length[r2sub]
                 abdc.append([r2sub, r2len / g2len])
         abdc = pd.DataFrame(abdc)
-        abdc.columns = ["Orthology","CPM"]
-        abdc['count']=1
+        abdc.columns = ["Orthology", "CPM"]
+        abdc['count'] = 1
         abdc = abdc.groupby("Orthology").sum()
         total_raw = int(list(os.popen(f'zcat {self.read1} | grep "@" | wc -l'))[0])
         abdc = (abdc * 1000000) / total_raw
@@ -78,7 +77,6 @@ diamond blastx --query {self.read2} --db {self.database} --out {self.read2_out} 
 
 
 if __name__ == '__main__':
-    import argparse
     parser = argparse.ArgumentParser(
         description="Paired end reads map and quantification tool",
         formatter_class=argparse.RawTextHelpFormatter,

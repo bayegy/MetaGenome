@@ -1,18 +1,16 @@
 import sys
 import os
-import json
 import seaborn as sns
 import pandas as pd
 import numpy as np
 import re
 from PIL import Image, ImageFont, ImageDraw
-from pyutils.colors import rgb2hex, hex2color
-from pyutils.tools import dupply, time_counter
-from pyutils.read import read_abundance
-from mapInfo import MapInfo
-from pyutils.read import update_html_properties
-from pipconfig import settings
-import pdb
+from MetaGenome.pyutils.colors import rgb2hex, hex2color
+from MetaGenome.pyutils.tools import dupply, time_counter
+from MetaGenome.pyutils.read import read_abundance
+from MetaGenome.pyutils.read import update_html_properties
+from MetaGenome.pipconfig import settings
+from Bayegy.getColors import get_lefse_colors
 
 
 class ColorMap(object):
@@ -58,7 +56,6 @@ class ColorMap(object):
         self._base_dir = os.path.dirname(__file__) + '/'
         self.path = settings.path
         sys.path.append(self.path['bayegy_home'])
-        from getColors import get_lefse_colors
         self.user_kos = pd.read_csv(ko_lefse_lda, sep='\t', header=None, index_col=0)[2]
         self.annoted_kos = self.user_kos[self.user_kos.notna()]
         self.gps_colors = get_lefse_colors(category, mapping_file, ko_lefse_lda, return_dict=True) if (
@@ -99,9 +96,9 @@ class ColorMap(object):
             for line in f:
                 if line.startswith('rect'):
                     li = line.split('\t')
-                    coordinate = [int(d) for d in re.findall('\d+', li[0])]
-                    p_kos = re.findall('[^\(]*(K\d+)[^\)]*', li[2])
-                    p_gene_names = re.findall('\(([^\(\)]+)\)', li[2])
+                    coordinate = [int(d) for d in re.findall(r'\d+', li[0])]
+                    p_kos = re.findall(r'[^\(]*(K\d+)[^\)]*', li[2])
+                    p_gene_names = re.findall(r'\(([^\(\)]+)\)', li[2])
                     kos, gene_names = [], []
                     for ko, name in zip(p_kos, p_gene_names):
                         if ko in self.user_kos.index:
@@ -109,7 +106,7 @@ class ColorMap(object):
                             gene_names.append(name)
                     if not len(kos) == 0:
                         enzyme = [i.strip() for i in re.findall(',([^,]+),[^,]*$', li[2])]
-                        reaction = re.findall('(R\d+) *$', li[2])
+                        reaction = re.findall(r'(R\d+) *$', li[2])
                         self.coord_enzyme.append([coordinate, enzyme])
                         self.coord_reaction.append([coordinate, reaction])
                         self.coord_kos.append([coordinate, kos])
@@ -303,8 +300,8 @@ The following KOs were found in your samples[KO number(Group of feature)]:
                 for num, line in enumerate(level_file):
                     if num:
                         li = line.strip().split('\t')
-                        levels = [re.sub(' |,|\(|\)|\+|\-|\:|\/|\\\\', '_', l) for l in li[-3:]]
-                        levels = [re.sub('_+', '_', l) for l in levels]
+                        levels = [re.sub(r' |,|\(|\)|\+|\-|\:|\/|\\\\', '_', lv) for lv in li[-3:]]
+                        levels = [re.sub('_+', '_', lv) for lv in levels]
                         self.map_level[li[0]] = levels
         else:
             print("map level mapping file is needed")

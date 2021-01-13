@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from pyutils.read import update_html_properties
+from MetaGenome.pyutils.read import update_html_properties
 
 
 map_html_dir = sys.argv[1]
@@ -12,12 +12,12 @@ for map_html in map_html_list:
     print(map_html)
     with open(map_html) as f:
         f = f.read()
-    tb = re.search('(<table[\S\s]*</table>)[\S\s]*(<table[\S\s]*</table>)[\S\s]*<table[\S\s]*</table>', f)
+    tb = re.search(r'(<table[\S\s]*</table>)[\S\s]*(<table[\S\s]*</table>)[\S\s]*<table[\S\s]*</table>', f)
     if tb:
         d = tb.group(1)
         m = tb.group(2)
     else:
-        tb = re.search('(<table[\S\s]*</table>)[\S\s]*<table[\S\s]*</table>', f)
+        tb = re.search(r'(<table[\S\s]*</table>)[\S\s]*<table[\S\s]*</table>', f)
         if tb:
             d = tb.group(1)
             m = ''
@@ -25,9 +25,9 @@ for map_html in map_html_list:
             print(map_html + ' is not a regular report. ignore it')
             continue
 
-    fo = re.sub('<table[\S\s]*</table>', d + m, f)
-    fo = re.sub('display: *none;', '', fo)
-    fo = re.sub("window.open\('/", "window.open('https://www.kegg.jp/", fo)
+    fo = re.sub(r'<table[\S\s]*</table>', d + m, f)
+    fo = re.sub(r'display: *none;', '', fo)
+    fo = re.sub(r"window.open\('/", "window.open('https://www.kegg.jp/", fo)
     with open(map_html, 'w') as o:
         o.write(fo)
 

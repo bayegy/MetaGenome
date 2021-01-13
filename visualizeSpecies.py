@@ -1,6 +1,6 @@
 import os
-from visualize import Visualize
-from osEnv import OSEnv
+from .visualize import Visualize
+from Bayegy.ampliconLibs.libShell import qiime2, lefse
 
 
 class VisualizeSpecies(Visualize):
@@ -17,7 +17,7 @@ class VisualizeSpecies(Visualize):
             # exclude_species=exclude_species
         )
 
-    def __visualize_with_group__(self, exclude='none', run_ancom=True, frequency=1000):
+    def __visualize_with_group__(self, exclude='none', run_ancom=True, frequency=1000, orders=[]):
 
         ancom_spec = """
     echo -e "\n############################################Converting qzv files to html"
@@ -44,15 +44,10 @@ class VisualizeSpecies(Visualize):
     mv {tmp_dir}/ANCOM/*ANCOM* {out_dir}/2-AbundanceComparison/ANCOM/
         """.format(**self.context, category_set=self.categories.replace(',', ' '))
 
-        with OSEnv(path=self.qiime2_home + 'bin/', pythonpath=self.qiime2_home + 'lib/python3.6/site-packages/'):
+        with qiime2():
             self.system("""
     echo "Check wheather your categories are the following:"
     for i in {category_set};do echo $i;done
-
-    not_rda='{exclude}'
-    echo "Check CorrelationAnalysis config:"
-    for i in $not_rda;do echo $i;done
-
     tax_levels["1"]="Kingdom"
     tax_levels["2"]="Phylum"
     tax_levels["3"]="Class"
@@ -94,11 +89,7 @@ class VisualizeSpecies(Visualize):
     for n2 in 2 3 4 5 6 7;
         do echo $n2; qiime taxa collapse   --i-table {tmp_dir}/{sample_name}.count.filtered.qza  --i-taxonomy {tmp_dir}/{sample_name}.taxonomy.qza  --p-level $n2  --o-collapsed-table {tmp_dir}/collapsed/{sample_name}-${{tax_levels[${{n2}}]}}.qza;
     done;
-
-
 {ancom_spec}
-
-
     mv {tmp_dir}/Relative/otu_table.p.relative.mat {tmp_dir}/Relative/otu_table.Phylum.relative.txt
     mv {tmp_dir}/Relative/otu_table.c.relative.mat {tmp_dir}/Relative/otu_table.Class.relative.txt
     mv {tmp_dir}/Relative/otu_table.o.relative.mat {tmp_dir}/Relative/otu_table.Order.relative.txt
@@ -112,10 +103,12 @@ class VisualizeSpecies(Visualize):
     mv {tmp_dir}/Absolute/otu_table.f.absolute.mat {tmp_dir}/Absolute/otu_table.Family.absolute.txt
     mv {tmp_dir}/Absolute/otu_table.g.absolute.mat {tmp_dir}/Absolute/otu_table.Genus.absolute.txt
     mv {tmp_dir}/Absolute/otu_table.s.absolute.mat {tmp_dir}/Absolute/otu_table.Species.absolute.txt
+        """, ancom_spec=ancom_spec, frequency=frequency, category_set=self.categories.replace(',', ' '))
 
-    # source {base_dir}/path/deactivate_qiime2.sh
-
-
+        self.system("""
+    not_rda='{exclude}'
+    echo "Check CorrelationAnalysis config:"
+    for i in $not_rda;do echo $i;done
     for n in "Phylum" "Class" "Order" "Family" "Genus" "Species";
         do echo $n;
         for category_1 in {category_set};
@@ -123,11 +116,13 @@ class VisualizeSpecies(Visualize):
             {R_path} {bayegy_home}/abundance_heatmap.R  -m {mapping_file} -c $category_1 -n 20 -i {tmp_dir}/Absolute/otu_table.${{n}}.absolute.txt -o {tmp_dir}/Heatmap/Heatmap_top20/${{n}}/ -l T -t F -p "${{category_1}}_";
             {R_path} {bayegy_home}/abundance_heatmap.R -m {mapping_file} -c $category_1  -n 20 -i {tmp_dir}/Absolute/otu_table.${{n}}.absolute.txt -o {tmp_dir}/Heatmap/Heatmap_top20_clustered/${{n}}/ -l T -t F -u T -p "${{category_1}}_";
             {R_path} {bayegy_home}/abundance_heatmap.R  -m {mapping_file} -c $category_1 -n 20 -i {tmp_dir}/Absolute/otu_table.${{n}}.absolute.txt -o {tmp_dir}/Heatmap/Heatmap_top20/${{n}}/ -b T -l T -p "${{category_1}}_group_mean_" -t T;
+            for order in {orders};
+                do {R_path} {bayegy_home}/abundance_heatmap.R  -m {mapping_file} -c $category_1 -n 20 \
+                -i {tmp_dir}/Absolute/otu_table.${{n}}.absolute.txt -o {tmp_dir}/Heatmap/Heatmap_top20/${{n}}/ \
+                -l T -t F -p "${{category_1}}_in_${{order}}_" -O $order;
+            done;
         done;
     done;
-
-
-
     test=${{not_rda// */}}
     if [ ! $test == "all" ];then
         echo "##############################################################\nCorrelation heatmap analysis"
@@ -143,8 +138,6 @@ class VisualizeSpecies(Visualize):
             done;
         done;
     fi;
-
-
     echo "##############################################################\n#Barplot according to group mean"
     for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
         do echo $n7;
@@ -152,18 +145,20 @@ class VisualizeSpecies(Visualize):
         {perl_path} {bayegy_home}/get_table_head2.pl {tmp_dir}/Relative/otu_table.${{n7}}.relative.lastcolumn.txt 20 -trantab > {tmp_dir}/Relative/otu_table.${{n7}}.relative.lastcolumn.trans;
         {perl_path} {bayegy_home}/bar_diagram.pl -table {tmp_dir}/Relative/otu_table.${{n7}}.relative.lastcolumn.trans -style 1 -x_title "Sample Name" -y_title "Sequence Number Percent (%)" -right -textup -rotate='-45' --y_mun 0.2,5 --micro_scale --percentage > {tmp_dir}/Relative/otu_table.${{n7}}.relative.svg
     done;
-
     for svg_file in {tmp_dir}/Relative/*svg; do echo $svg_file; n=$(basename "$svg_file" .svg); echo $n; convert $svg_file {tmp_dir}/Relative/${{n}}.png; done;
-
-
     for category_1 in {category_set};
-    do echo $category_1;
+        do echo $category_1;
         for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
             do echo $n7;
             {R_path} {bayegy_home}/abundance_barplot.R -n 20 -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/Taxa-bar-plots-top20/ -p ${{n7}}_${{category_1}}_ -b F;
             {R_path} {bayegy_home}/abundance_barplot.R -n 20 -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/Barplot-of-Group-Mean/ -p ${{category_1}}_${{n7}}_mean_ -b T;
             {R_path} {bayegy_home}/Function_DunnTest.r -m {mapping_file} -c $category_1 -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/DunnTest/ -p ${{n7}}_ > /dev/null;
             {R_path} {bayegy_home}/write_data_for_lefse.R -i  {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -m  {mapping_file} -c  $category_1 -o  {tmp_dir}/Lefse/${{n7}}/${{category_1}}_${{n7}}_lefse.txt -u l;
+            for order in {orders};
+                do {R_path} {bayegy_home}/abundance_barplot.R -n 20 -m {mapping_file} -c $category_1 \
+                -i {tmp_dir}/Relative/otu_table.${{n7}}.relative.txt -o {tmp_dir}/Taxa-bar-plots-top20/ \
+                -p ${{n7}}_${{category_1}}_in_${{order}}_ -b F -O $order;
+            done;
         done;
     done;
 
@@ -176,10 +171,9 @@ class VisualizeSpecies(Visualize):
         {R_path} {bayegy_home}/venn_and_flower_plot.R -s F  -i {abundance_table} -m {mapping_file} -c $category_1 -o {tmp_dir}/VennAndFlower;
         {R_path} {bayegy_home}/pcoa_and_nmds.R  -i {tmp_dir}/feature-table.ConsensusLineage.txt -m $map -c $category_1 -o {tmp_dir}/PCoA-NMDS;
         done;
+    """, category_set=self.categories.replace(',', ' '), exclude=exclude.replace(';', ' '), orders=" ".join(orders))
 
-        """, ancom_spec=ancom_spec, frequency=frequency, category_set=self.categories.replace(',', ' '), exclude=exclude.replace(';', ' '))
-
-        with OSEnv(pythonpath=self.lefse_pylib_home, path=self.lefse_py_home, r_libs=self.lefse_rlib_home):
+        with lefse():
             self.system("""
     echo "#####################Run Lefse for taxa abundance";
     for n7 in "Phylum" "Class" "Order" "Family" "Genus" "Species";
@@ -190,7 +184,7 @@ class VisualizeSpecies(Visualize):
                     {bayegy_home}/mod_lefse-plot_res.py --category $category_1 --map {mapping_file} --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${{base}}.LDA.txt ${{base}}.pdf; {bayegy_home}/mod_lefse-plot_cladogram.py ${{base}}.LDA.txt --category $category_1 --map {mapping_file} --dpi 300 ${{base}}.cladogram.pdf --format pdf;
                     base4="{tmp_dir}/Lefse/${{n7}}/${{category_1}}_${{n7}}_lefse_LDA4";
                     # lefse-format_input.py ${{category_1}}_${{n7}}_lefse.txt ${{base}}.lefseinput.txt -c 2 -u 1 -o 1000000; run_lefse.py ${{base}}.lefseinput.txt ${{base}}.LDA.txt -l 4;
-                    {base_dir}/lda22ldamt.py ${{base}}.LDA.txt ${{base4}}.LDA.txt 4;
+                    {python3_path} {base_dir}/lda22ldamt.py ${{base}}.LDA.txt ${{base4}}.LDA.txt 4;
                     {bayegy_home}/mod_lefse-plot_res.py --category $category_1 --map {mapping_file}  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 ${{base4}}.LDA.txt ${{base4}}.pdf; {bayegy_home}/mod_lefse-plot_cladogram.py ${{base4}}.LDA.txt --category $category_1 --map {mapping_file} --dpi 300 ${{base4}}.cladogram.pdf --format pdf;
                 done;
         done;

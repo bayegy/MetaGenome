@@ -1,13 +1,12 @@
 import os
 import re
-from visualizeSpecies import VisualizeSpecies
-from visualizeFunction import VisualizeFunction
-from visualizeHumann import VisualizeHumann
-from visualizeAssembly import VisualizeAssembly
-from pyutils.read import read_to_html_table, get_kingdom_ratio, format_file
-from colorMap import ColorMap
-from mapInfo import MapInfo
-from reportConfig import *
+from .visualizeSpecies import VisualizeSpecies
+from .visualizeFunction import VisualizeFunction
+from .visualizeHumann import VisualizeHumann
+from .pyutils.read import read_to_html_table, get_kingdom_ratio, format_file
+from .colorMap import ColorMap
+from .mapInfo import MapInfo
+from .reportConfig import *
 
 
 class VisualizeAll(VisualizeSpecies):
@@ -17,7 +16,7 @@ class VisualizeAll(VisualizeSpecies):
         VisualizeAll("/home/cheng/Projects/rll_testdir/mapping_file.txt","Group1").visualize()
     """
 
-    def __init__(self, mapping_file, categories=False, out_dir=False, filter_species=False):
+    def __init__(self, mapping_file, categories=False, out_dir=False, filter_species="keep:Archaea;keep:Bacteria;keep:Fungi;keep:Viruses"):
         super(VisualizeAll, self).__init__("multi_table", mapping_file,
                                            categories, out_dir=out_dir)
         root_dir = self.out_dir + 'Result/'
@@ -99,7 +98,7 @@ class VisualizeAll(VisualizeSpecies):
                       cazy_dir=self.function_dir + ('4-CAZy/' if asem else '6-CAZy/'),
                       )
 
-    def visualize(self, exclude='none', base_on_assembly=False, unify_colors=True):
+    def visualize(self, exclude='none', base_on_assembly=False, unify_colors=True, transcriptome=False, orders=[]):
         self.base_on_assembly = base_on_assembly
         # self.system("{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} -p {bayegy_home}/piputils/group_color.list -o {out_dir}colors_plan.json")
         # os.environ['COLORS_PLAN_PATH'] = self.out_dir + 'colors_plan.json'
@@ -131,9 +130,8 @@ cp {out_dir}Kraken2/All.Taxa.OTU.txt  {table_dir}/All.Kraken2.taxa.txt
         self.system("""
 mkdir -p {qc_dir}/1-QC_report_Rawfastq/ {qc_dir}/2-QC_report_Filtered/
 cp {mapping_file} {root_dir}
-cp {out_dir}/kneaddata_out/fastqc/*html {qc_dir}/1-QC_report_Rawfastq/
-rm {qc_dir}/1-QC_report_Rawfastq/*unmatched*
-mv {qc_dir}/1-QC_report_Rawfastq/*kneaddata* {qc_dir}/2-QC_report_Filtered/
+cp {out_dir}/fastqc_out/*/*html {qc_dir}/1-QC_report_Rawfastq/
+cp {out_dir}/kneaddata_out/*/fastqc/*kneaddata*html {qc_dir}/2-QC_report_Filtered/
 cp {out_dir}Report/reads_summary.txt {qc_dir}/
 {spec}
             """, spec=spec)
@@ -150,14 +148,14 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                 for db, func_out in out_dir_dict.items():
                     VisualizeFunction(self.salmon_out + 'All.{}.abundance_unstratified.tsv'.format(db),
                                       self.mapping_file, self.category,
-                                      out_dir=func_out).visualize(exclude)
+                                      out_dir=func_out).visualize(exclude, orders=orders)
 
             else:
                 for group, out_dir in zip(['ko', 'level4ec', 'go', 'eggnog', 'cazy'], ['1-KEGG', '5-EC', '4-GO', '3-EggNOG', '6-CAZy']):
                     VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.UniRef90.genefamilies.tsv', self.mapping_file,
-                                    self.category, custom_to=group, out_dir=self.function_dir + out_dir).visualize(exclude)
+                                    self.category, custom_to=group, out_dir=self.function_dir + out_dir).visualize(exclude, orders=orders)
                 VisualizeHumann(self.out_dir + 'Metagenome/Humann/All.Metacyc.pathabundance.tsv',
-                                self.mapping_file, self.category, id_with_name=True, out_dir=self.function_dir + '2-Metacyc').visualize(exclude)
+                                self.mapping_file, self.category, id_with_name=True, out_dir=self.function_dir + '2-Metacyc').visualize(exclude, orders=orders)
 
             self.map_ko_annotation()
 
@@ -171,7 +169,7 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                             add_sid_to_info=False,
                             map_column=-1)
             VisualizeFunction(amr_home + 'All.AMR.abundance_unstratified.tsv',
-                              self.mapping_file, self.category, out_dir=self.amr_dir).visualize(exclude)
+                              self.mapping_file, self.category, out_dir=self.amr_dir).visualize(exclude, orders=orders)
 
             for abundance_table in [self.kegg_dir + f for f in (
                 # 'All.KO.abundance_unstratified.tsv',
@@ -181,10 +179,10 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                 'All.KEGG.Pathway.Level2.txt'
             )]:
                 VisualizeFunction(abundance_table, self.mapping_file, self.category,
-                                  out_dir=self.function_dir + '1-KEGG').visualize(exclude)
+                                  out_dir=self.function_dir + '1-KEGG').visualize(exclude, orders=orders)
 
             VisualizeSpecies(self.out_dir + 'Kraken2/All.Taxa.OTU.txt', self.mapping_file,
-                             self.category, out_dir=self.taxa_dir, tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude)
+                             self.category, out_dir=self.taxa_dir, tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude, orders=orders)
             if self.filter_species:
                 for filter_object in self.filter_species.split(';'):
                     if filter_object.startswith('exclude'):
@@ -193,12 +191,13 @@ cp {out_dir}Report/reads_summary.txt {qc_dir}/
                                      self.category, filter_species=filter_object,
                                      out_dir=os.path.join(self.taxa_dir, re.sub(
                                          '[,:]', '_', filter_object)),
-                                     tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude)
+                                     tmp_dir=self.out_dir + '/TMP_DIR').visualize(exclude, orders=orders)
 
             self.map_func_definition()
-
-            ColorMap(ko_lefse_lda=self.function_dir + '1-KEGG/4-SignificanceAnalysis/LEfSe/KO_{}_lefse_LDA2.LDA.txt'.format(g),
-                     ko_abundance_table=self.function_dir + '1-KEGG/All.KO.abundance_unstratified.tsv', mapping_file=self.mapping_file, category=g, out_dir=self.function_dir + '1-KEGG/5-ColoredMaps/').plot_all(map_level=self.function_dir + '1-KEGG/All.KEGG.Pathway.mapping.txt')
+            ko_lefse_lda = self.function_dir + '1-KEGG/4-SignificanceAnalysis/LEfSe/KO_{}_lefse_LDA2.LDA.txt'.format(g)
+            if os.path.exists(ko_lefse_lda):
+                ColorMap(ko_lefse_lda=ko_lefse_lda,
+                         ko_abundance_table=self.function_dir + '1-KEGG/All.KO.abundance_unstratified.tsv', mapping_file=self.mapping_file, category=g, out_dir=self.function_dir + '1-KEGG/5-ColoredMaps/').plot_all(map_level=self.function_dir + '1-KEGG/All.KEGG.Pathway.mapping.txt')
 
             reads_spec = """
 cp {function_dir}/2-Metacyc/1-Barplots/Metacyc_{category}_barplot.pdf  Figure5-5.pdf
@@ -242,7 +241,7 @@ if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do
                     species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category,
                     nav5=nav5_asem,
                     nav3=nav3_asem,
-                    sum_steps=sum_steps_asem,
+                    sum_steps=sum_steps_asem if not transcriptome else sum_steps_asem_trans,
                     find_gene=find_gene_asem,
                     func_steps=func_steps_asem,
                     func_source=func_source_asem,
@@ -254,6 +253,10 @@ if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do
                     ec_doc="",
                     cazy_od="4",
                     cazy_fig="图5-6",
+                    reads_type="宏转录组" if transcriptome else "宏基因组",
+                    flowchart="2-2_trans" if transcriptome else "2-2",
+                    summary=summary_trans if transcriptome else summary_gene,
+                    remove_rna="去rRNA污染（SortMeRNA软件），" if transcriptome else ""
                 )
             else:
                 format_file(page, page, table1=read_to_html_table(
@@ -261,7 +264,7 @@ if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do
                     species_ratio=get_kingdom_ratio(self.out_dir + 'Kraken2/All.Taxa.OTU.txt'), report_category=self.category,
                     nav3="",
                     nav5=nav5_reads,
-                    sum_steps=sum_steps_reads,
+                    sum_steps=sum_steps_reads if not transcriptome else sum_steps_reads_trans,
                     find_gene="",
                     func_steps=func_steps_reads,
                     func_source=func_source_reads,
@@ -273,12 +276,16 @@ if [ -f Figure4-2.pdf ];then echo "Converting pdf to png"; for pdfs in *.pdf; do
                     ec_doc=ec_doc_reads,
                     cazy_od="6",
                     cazy_fig="图5-9",
+                    reads_type="宏转录组" if transcriptome else "宏基因组",
+                    flowchart="2-2_trans" if transcriptome else "2-2",
+                    summary=summary_trans if transcriptome else summary_gene,
+                    remove_rna="去rRNA污染（SortMeRNA软件），" if transcriptome else ""
                 )
 
         self.system(
-            "{base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
+            "{python3_path} {base_dir}/change_suffix.py {root_dir} -o txt -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
         self.system(
-            "{base_dir}/change_suffix.py {root_dir} -o tsv -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
+            "{python3_path} {base_dir}/change_suffix.py {root_dir} -o tsv -s 'All.Taxa.OTU.taxa-bar-plots,bray_curtis_emperor' ")
         self.system(
             "echo visualize-function is finished")
         self.system(

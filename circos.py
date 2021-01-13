@@ -1,13 +1,12 @@
-
-import json
 import numpy as np
 import pandas as pd
 import re
 import os
 import shutil
-from pyutils.tools import generate_span
-from pipconfig import settings
+from MetaGenome.pyutils.tools import generate_span
+from MetaGenome.pipconfig import settings
 # import pdb
+import argparse
 
 
 class Circos(object):
@@ -137,7 +136,6 @@ class Circos(object):
 
 
 if __name__ == '__main__':
-    import argparse
     p = argparse.ArgumentParser(
         description="This script is used to plot RDA of species. The numeric enviroment factors must be encluded in maping file. The categories will be filterd before RDA")
     p.add_argument('-i', '--input', dest='input', metavar='<path>',

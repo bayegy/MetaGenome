@@ -1,20 +1,18 @@
-#!/usr/bin/env python3
-import sys
+#!/usr/bin/env python3.8
 import os
-import json
 import seaborn as sns
 import pandas as pd
 import numpy as np
 import re
 import cv2 as cv
 from PIL import Image, ImageFont, ImageDraw
-from pyutils.colors import rgb2hex, hex2color
-from pyutils.tools import dupply, time_counter
-from pyutils.read import read_abundance
-from mapInfo import MapInfo
-from pyutils.read import update_html_properties
+from MetaGenome.pyutils.colors import rgb2hex, hex2color
+from MetaGenome.pyutils.tools import dupply, time_counter
+from MetaGenome.pyutils.read import read_abundance
+from MetaGenome.pyutils.read import update_html_properties
+import argparse
 try:
-    from pipconfig import settings
+    from MetaGenome.pipconfig import settings
 except ImportError:
     pass
 
@@ -103,9 +101,9 @@ class ColorMap(object):
                 for line in f:
                     if line.startswith("circ"):
                         li = line.strip().split("\t")
-                        ko = re.findall('^C\d+', li[2].strip())
+                        ko = re.findall(r'^C\d+', li[2].strip())
                         if ko and ko[0] in self.user_kos.index:
-                            coordinate = [int(d) for d in re.findall('\d+', li[0])]
+                            coordinate = [int(d) for d in re.findall(r'\d+', li[0])]
                             coordinate = coordinate[:2]
                             self.coord_kos.append([coordinate, ko])
             else:
@@ -113,9 +111,9 @@ class ColorMap(object):
                 for line in f:
                     if line.startswith('rect'):
                         li = line.split('\t')
-                        coordinate = [int(d) for d in re.findall('\d+', li[0])]
-                        p_kos = re.findall('[^\(]*(K\d+)[^\)]*', li[2])
-                        p_gene_names = re.findall('\(([^\(\)]+)\)', li[2])
+                        coordinate = [int(d) for d in re.findall(r'\d+', li[0])]
+                        p_kos = re.findall(r'[^\(]*(K\d+)[^\)]*', li[2])
+                        p_gene_names = re.findall(r'\(([^\(\)]+)\)', li[2])
                         kos, gene_names = [], []
                         for ko, name in zip(p_kos, p_gene_names):
                             if ko in self.user_kos.index:
@@ -123,7 +121,7 @@ class ColorMap(object):
                                 gene_names.append(name)
                         if not len(kos) == 0:
                             enzyme = [i.strip() for i in re.findall(',([^,]+),[^,]*$', li[2])]
-                            reaction = re.findall('(R\d+) *$', li[2])
+                            reaction = re.findall(r'(R\d+) *$', li[2])
                             self.coord_enzyme.append([coordinate, enzyme])
                             self.coord_reaction.append([coordinate, reaction])
                             self.coord_kos.append([coordinate, kos])
@@ -312,7 +310,6 @@ The following KOs were found in your samples[KO number(Group of feature)]:
 
 
 if __name__ == '__main__':
-    import argparse
     p = argparse.ArgumentParser(
         description="This script is used to plot RDA of species. The numeric enviroment factors must be encluded in maping file. The categories will be filterd before RDA")
     p.add_argument('-i', '--input', dest='input', metavar='<path>',
@@ -321,7 +318,7 @@ if __name__ == '__main__':
                    help='file sep, , or \t', default=",")
     p.add_argument('-m', '--mapid', dest='mapid', metavar='<str>',
                    help='Map id')
-    p.add_argument('-d', '--database', dest='database', metavar='<path>', default="/home/cheng/Databases/map",
+    p.add_argument('-d', '--database', dest='database', metavar='<path>', default="/home/bayegy/Databases/colormap",
                    help='Database path')
     p.add_argument('-o', '--output', dest='output', metavar='<directory>', default='./',
                    help='Output directory')

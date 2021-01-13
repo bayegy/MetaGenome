@@ -1,0 +1,618 @@
+<html>
+	<head>
+		<title>宏基因组分箱</title>
+		<link href="image/BIN.png" rel="icon">
+		<style>
+			.btn-block
+			{
+				position: fixed;
+				border: 1px solid #555555;
+				background-color: #33A1C9;
+				color: white;
+				text-align: center;
+				font-size: 20px;
+				font-weight: bold;
+				height: 60px;
+				width: 60px;
+			}
+			ul{
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: auto;
+				position: fixed;
+				width: 19%;
+				height: 93%;
+				border: 1px solid #555
+			}
+			li a
+			{
+				display: block;
+				padding: 8px 16px;
+				text-decoration: none;
+				text-align: left;
+				border-bottom: 1px solid #555;
+			}
+			li a.active  /*目录*/
+			{
+				background-color: #33A1C9;
+				color: white;
+				text-align: center;
+				font-size: 20px;
+				font-weight: bold;
+			}
+			li a.active2  /*目录下面*/
+			{
+				background-color: #17a2b8;
+				color: white;
+				text-align: left;
+			}
+			
+			
+			li a:hover:not(.active)  /*悬停，排斥active*/
+			{
+				background-color: green;
+				color: white
+			}
+			
+			table, table tr th, table tr td {solid border-color: #ccc}  
+			table{line-height: 17px; border-collapse: collapse}
+			h1{color: #191970; background-color: white}
+			h2{color: purple; background-color: white}
+			h3{color: green; background-color: white}
+			h4{color: green; background-color: white}
+			h5{color: green; background-color: white}
+			a:link{color: blue}
+			a:visited{color: blue}  /*访问后颜色*/
+			a{text-decoration: none}
+			a:hover{text-decoration: none}  /*悬停显示下划线*/
+		</style>
+		<script type="text/javascript">
+			function display(p_content)
+			{
+				var list=document.getElementById(p_content);
+				var main=document.getElementById("main_size");
+				if(list.style.display=="none")
+				{
+					list.style.display="";
+					main.style.marginLeft="23%";
+				}
+				else
+				{
+					list.style.display="none";
+					main.style.marginLeft="5%";
+				}
+			}
+		</script>
+	</head>
+			
+	<body>
+		<button type="button" class="btn-block" onclick="display('content')">
+			展示目录
+		</button>
+		<div id="content" style="display: ">
+			<ul>
+				<li><a class="active" onclick="display('content')">隐藏目录</a></li>
+				<li><a class="active2" href="#a">一、介绍</a></li>
+				<li><a class="active2" href="#b">二、流程</a></li>
+				<li><a class="active2" href="#c">三、结果</a></li>
+				<li><a class="active2" href="#c0">00-Raw数据质检</a></li>
+				<li><a class="active2" href="#c1">01-Clean数据质检</a></li>
+				<li><a class="active2" href="#c2">02-Bin和Bin质检</a></li>
+				<li><a class="active2" href="#c3">03-Bin可视化</a></li>
+				<li><a class="active2" href="#c4">04-Bin丰度分析</a></li>
+				<li><a class="active2" href="#c5">05-Bin注释：EC COG RNA</a></li>
+				<li><a class="active2" href="#c6">06-Bin_KEGG数据库注释</a></li>
+				<li><a class="active2" href="#c7">07-Bin_GO数据库注释</a></li>
+				<li><a class="active2" href="#c8">08-Bin_CAZyme数据库注释</a></li>
+				<li><a class="active2" href="#c9">09-Bin进化分析</a></li>
+				<li><a class="active2" href="#c10">10-Bin_Circos圈图</a></li>
+				<li><a class="active2" href="#d">四、常见问题</a></li>
+				<li><a class="active2" href="#e">五、参考文献</a></li>
+				<li><a class="active2" href="#f">六、联系我们</a></li>
+			</ul>
+		</div>
+		<div id="main_size" style="margin-left: 23%">
+			<div id="head" class="anchor"></div>
+			<h1 align="center">微生太_宏基因组分箱_结题报告</h1>
+			<hr>
+			<div id="a" class="anchor"></div>
+			<h2>一、介绍</h2>
+			<p>
+				宏基因组分箱（Binning）是将宏基因组测序得到的混合了不同微生物的序列reads或序列组装得到的contigs或scaffolds按物种分开归类的过程。这些分开归类的序列被称为宏基因组组装基因组（metagenome-assembled genomes，MAGs)。传统的单物种全基因组序列都是经纯培养之后，再进行全基因组de novo测序才获得的，但是环境中存在着大量的不可培养微生物（uncultured candidate bacterial species，未培养候选菌种），而宏基因组分箱及相关技术不仅有助于获得不可培养微生物的基因组序列，还有以下诸多功能：（1）发现新物种，预测新物种基因，利用现有数据库分析新物种的功能；（2）扩充微生物基因组数据库，增加微生物多样性，提高宏基因组数据reads mapping率（检出率）；（3）有助于宏基因组技术开发；（4）助力“感兴趣”微生物群结构和功能的研究；（5）为菌群的分类和功能描述提供了更多的解决方案。早在2011年，science上的一篇文章就用了宏基因组Binning技术对来自牛瘤胃的样本进行了宏基因组测序研究。该研究从268 Gbp的宏基因数据中成功Binning出了15个不能培养的微生物的全基因组序列[1]。
+			</p>
+			<p>
+				从那以后，宏基因组Binning技术开始被更多的人关注和重视，也逐渐出现了很多宏基因组Binning相关的工具。Metabat是近几年所有分箱工具中最受欢迎的工具（引用达460+）。2019年发表在PeerJ上的新版Metabat2更是在完成度、效率等多方面均优于Metabat和同类工具 [2-3]。仅在2019年当年Metabat2就已经被Cell、Nature Biotechnology、Genome Biology等多篇高水平期刊引用 [4-6]。因此微生太从众多分箱工具中选择Metabat2进行分箱。不仅如此，微生太宏基因组分箱分析流程种使用的每一个软件都是根据效率、准确度等多个参数从众多同类软件中精挑出来的，例如序列组装工具Megahit，Bin质检工具Checkm，功能取预测工具Prokka，蛋白比对工具Diamond等等。
+			</p>
+			<div id="b" class="anchor"></div>
+			<h2>二、流程</h2>
+			<h3>2.1 实验流程</h3>
+			<p align="center">
+				<img src="image/实验流程.png" width="200">
+			</p>
+			<h3>2.2 分析流程</h3>
+			<p align="center">
+				<img src="image/流程图.png" width="700">
+			</p>
+			<h3>2.3 分析流程简介</h3>
+			<h3>（1）数据质控：</h3>
+			<p>
+				测序得到的原始数据会存在一定比例的低质量数据，为了保证后续信息分析结果的准确可靠，首先要对原始数据进行质控及宿主过滤，得到有效数据[7]。分析中将使用Kneaddata软件彻底清除原始数据中的Illumina接头序列、低质量的序列片段和较短序列。质控前和质控后，会用FastQC来检测质控的合理性和效果。
+			</p>
+			<h3>（2）去除宿主：</h3>
+			<p>
+				质控处理后的数据通过Bowtie2软件[9]比对到宿主的基因组，没有比对到的序列被保留下来做后续分析。
+			</p>
+			<h3>（3）分箱：</h3>
+			<p>
+				运用Megahit软件，将所有样本去宿主基因后的clean reads进行组装（megahit默认组装参数），得到contigs；运用Bowtie2进行建索引和序列比对获得clean reads在contigs中的比对信息；用Samtools软件[10]对比对结果进行格式转换和排序；用Metabat2自带的jgi_summarize_bam_contig_depths程序计算contig深度，然后用Metabat2进行分箱，最小contig长度设为1500。
+			</p>
+			<h3>（4）Bin质检：</h3>
+			<p>
+				使用Checkm软件[11]中的lineage_wf功能对分箱结果进行质量检查，获得每个箱子的完成度、污染度、物种分类等信息。筛选完成度大于70%，同时污染度小于10%的Bin用于后续分析。
+			</p>
+			<h3>（5）Bin可视化和丰度分析：</h3>
+			<p>
+				首先计算每个Bin中每条序列的GC含量，结合分箱过程中得到的contig depth数据进行Bin可视化，根据contig的GC含量和depth信息绘制二维散点图；在Metawrap环境中，使用Metawrap的quant_bins模块(Salmon算法)计算每个Bin的丰度。如果每组样品数大于等于3，接着用lefse进行差异丰度分析寻找组间差异Bin。
+			</p>
+			<h3>（6）Bin功能注释：</h3>
+			<p>
+				使用Prokka软件[13]对每个Bin进行功能注释，获得每个Bin中的rRNA、tRNA、tmRNA、基因、直系同源蛋白簇（COG）、EC注释信息。使用Kofamscan进行KEGG功能注释。使用eggnog-mapper进行GO注释。使用Diamond软件[15]和CAZy数据库对每个Bin进行碳水化合物酶注释，获取每个Bin中的碳水化合物酶信息。
+			</p>
+			<h3>（7）Bin进化分析：</h3>
+			<p>
+				基于Prokka的基因预测结果，使用Phylophlan软件[14]不仅可以分析Bin质检的进化关系，还可以分析Bin与已知微生物之间的进化关系。
+			</p>
+			<h3>（8）Bin圈图分析：</h3>
+			<p>
+				利用每个Bin（基于contig）的Prokka蛋白预测信息，功能区注释信息（含正负链、CDS、RNA类型等信息），CAZy数据库注释结果（GH、GT、CE、PL、CBM、AA），以及GC content、GC skew的统计结果绘制Circos圈图，直观展示整个Bin的功能注释信息。
+			</p>
+			<div id="c" class="anchor"></div>
+			<h2>三、结果</h2>
+			<div id="c0" class="anchor"></div>
+			<h3>00-Raw数据质检</h3>
+			<p>
+				<a href="00-RawDataQC">Illumina 原始数据fastqc质检结果</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--00-RawDataQC</h><br />
+				<h>| |--*_R1_fastqc.html    [fastq R1原始数据fastqc质检结果]</h><br />
+				<h>| |--*_R2_fastqc.html    [fastq R2原始数据fastqc质检结果]</h><br />
+				<h>| |--summary_rawdata.txt    [raw数据序列信息统计表]</h><br />
+			</p>
+			<!--table[4]-->
+			<p>
+				<table align="center" border="1">
+					table4
+				</table>
+			</p>
+			<p align="center"><strong>原始数据序列统计表</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>第一列：样品名</h><br />
+				<h>InsertSize：文库插入片段大小</h><br />
+				<h>SeqStrategy：采用PE150测序策略</h><br />
+				<h>Reads/Base/GC：序列数/碱基数/GC含量</h><br />
+				<h>MaxLength/MinLength：最大最小序列长度</h><br />
+			</p>
+			<br />
+			<div id="c1" class="anchor"></div>
+			<h3>01-Clean数据质检</h3>
+			<p><a href="01-CleanDataQC">Illumina Clean数据fastqc质检结果</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--01-CleanDataQC</h><br />
+				<h>| |--*_1_fastqc.html    [fastq R1 质控后数据fastqc质检结果]</h><br />
+				<h>| |--*_2_fastqc.html    [fastq R2 质控后数据fastqc质检结果]</h><br />
+				<h>| |--summary_cleandata.txt    [clean数据序列信息统计表]</h><br />
+			</p>
+			<!--table[5]-->
+			<p>
+				<table align="center" border="1">
+					table5
+				</table>
+			</p>
+			<p align="center"><strong>Clean数据序列统计表</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>第一列：样品名</h><br />
+				<h>InsertSize：文库插入片段大小</h><br />
+				<h>SeqStrategy：采用PE150测序策略</h><br />
+				<h>Reads/Base/GC：序列数/碱基数/GC含量</h><br />
+				<h>MaxLength/MinLength：最大最小序列长度</h><br />
+			</p>
+			<br />
+			<div id="c2" class="anchor"></div>
+			<h3>02-Bin和Bin质检</h3>
+			<p>
+				使用Megahit组装混合到一起的Clean测序数据，得到contigs。分别用Bowtie2和Samtools进行比对和格式转换。得到conitgs深度数据后，使用Metabat2进行宏基因组分箱。设置Metabat2参数“-m 1500”，即使用1500bp以上的conitgs进行分箱。使用Checkm对每个Bin进行质量检查，获得原始Bin的完成度和污染度信息。
+			</p>
+			<p><a href="02-Bin">分箱和质检结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--02-Bin</h><br />
+				<h>| |--Bin/    [合并样品分箱得到的所有Bin]</h><br />
+				<h>| |--Bin_pick/    [完成度大于70%，污染度小于10%的Bin]</h><br />
+				<h>| |--bin_summary    [统计：完成度、污染度、N50、N90、Size、GC含量]</h><br />
+				<h>| |--checkm_raw.txt    [所有Bin污染度、完整度]</h><br />
+				<h>| |--checkm_pick.txt    [完成度大于70%，污染度小于10%的Bin污染度、完整度]</h><br />
+			</p>
+			<!--table[1]-->
+			<p align="center">
+				<table align="center" border="1">
+					table1
+				</table>
+			</p>
+			<p align="center"><strong>完成度>=70%且污染度<=10%的Bin</strong></p>
+			<h>说明：</h><br />
+			<h>第一列：bin编号。</h><br />
+			<h>第二列：bin完成度（70%~100%）。</h><br />
+			<h>第三列：bin污染度（0%~10%）。</h><br />
+			<h>第四列：Contig N50是指将一个Bin的Contig按照从大到小的顺序依次相加，当相加的长度达到Contig总长度的一半时，最后一个加上的Contig长度。</h><br />
+			<h>第五列：Contig N90是指将一个Bin的Contig按照从大到小的顺序依次相加，当相加的长度达到Contig总长度的90%时，最后一个加上的Contig长度。</h><br />
+			<h>第六列：一个Bin的所有Contig长度之和，即该基因组草图的总长度。</h><br />
+			<h>第七列：GC含量是指一个Bin中GC碱基占总碱基的比例。</h><br />
+			<div id="c3" class="anchor"></div>
+			<h3>03-Bin可视化</h3>
+			<p>
+				利用可视化的方法直观展示Bin的由来和所含信息。宏基因组分箱的原理是根据序列（contig/scaffold）四核苷酸频率和序列丰度变化模式将序列分成一个个Bin。每个Bin的每个contig都会在此处理（metabat2分箱）的过程中有一个depth深度数据。另外我们利用自己的python脚本计算每个Bin的contig GC含量。有了contig GC含量和depth数据即可进行Bin可视化，绘制每个Bin中每个contig的散点图。MetaWrap中的blobology模块通过bin、contig、样品fastq三组序列数据进行megablast比对等工作也能够进行Bin可视化，但是这种方法非常耗费计算机运行时间。相较之下我们的方法效率非常高，省去大量的多余工作。
+			</p>
+			<p><a href="03-Bin_Plot">分箱可视化结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--Bin_Plot</h><br />
+				<h>| |--all_bin_gc_depth.txt    [可视化输入文件，含每个Bin的contig的GC含量和contig的深度信息]</h><br />
+				<h>| |--all_bin_gc_depth.png/pdf    [绘图结果，利用GC depth数据把每个Bin的contig plot到图中]</h><br />
+			</p>
+			<p align="center"><image src="03-Bin_plot/all_bin_gc_depth.png" width="800"></p>
+			<p align="center"><strong>Binned contigs可视化</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>横坐标是contig的GC含量；纵坐标是contig depth；一个点代表一个contig，相同颜色的contig来自同一个Bin。</h><br />
+			</p>
+			<br />
+			<div id="c4" class="anchor"></div>
+			<h3>04-Bin丰度分析</h3>
+			<p>
+				首先，用metawrap中的quant_bins模块（salmon算法），估计每个样品中每个scaffold的丰度，计算Bin平均丰度，获得样品-Bin丰度表。Bin丰度是“每百万序列基因组拷贝数”，是已经标准化的数据，类似RNAseq分析中的TPM（每百万转录本）。接着，用R语言pheatmap绘图函数绘制样品-Bin丰度热图。热图可以以色块颜色深浅的方式表达Bin丰度的大小，还可以进行Bin-Bin聚类和样品-样品聚类，相似的丰度模式会被聚到一起。然后，统计每个Bin的丰度总数，用ggplot geom_bar绘制柱形图并排序，展示整批数据中所有Bin的丰度情况。如果客户提供的样品分组>=2且每组样品在三个以上，那么还可以用lefse进行组间差异分析寻找与分组有关的Bin。
+			</p>
+			<p><a href="04-Bin_Abundance">分箱丰度统计结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--04-Bin_Abundance</h><br />
+				<h>| |--bin_abundance_table.txt    [每个样品的Bin丰度统计结果]</h><br />
+				<h>| |--bin_abundance_sum.txt    [Bin丰度合并结果]</h><br />
+				<h>| |--bin_abundance_bar.pdf/png    [Bin丰度合并结果绘制得到柱形图]</h><br />
+				<h>| |--bin_abundance_pheatmap.pdf/png    [每个样品的Bin丰度统计结果pheatmap图]</h><br />
+				<h>|--04-Bin_Abundance/lefse</h><br />
+				<h>| |--bin_group_abundance.txt    [bin分组丰度表]</h><br />
+				<h>| |--Category*/Category*_abundance.txt    [bin该分组丰度表]</h><br />
+				<h>| |--Category*/lefse.LDA.txt    [lefse分析结果表格]</h><br />
+				<h>| |--Category*/lefse.pdf/png    [lefse分析结果图]</h><br />
+			</p>
+			<p align="center"><image src="04-Bin_Abundance/bin_abundance_pheatmap.png" width="250"></p>
+			<p align="center"><strong>Bin丰度热图（各个样品）</strong></p>
+			<br />
+			<p align="center"><image src="04-Bin_Abundance/bin_abundance_bar.png" width="1000"></p>
+			<p align="center"><strong>Bin丰度柱状图（合并样品）</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>用R软件pheatmap函数（对样品进行均一化）对丰度数据进行可视化得到每个样品中的Bin丰度图，通过此图可比较相同样品中不同Bin的丰度差异，颜色越红丰度越高。经统计可获得样品合并后的Bin丰度，用R软件ggplot2绘制柱形图，柱子越高Bin丰度越高。</h><br />
+			</p>
+			<p align="center"><image src="image/example_Category1_lefse.png" width="1000"></p>
+			<p align="center"><strong>Bin丰度lefse分析结果图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h><strong>注意：没有分组或每组样品数少于3无法进行此分析，出不了结果图。</strong></h><br />
+				<h>LEfSe寻找每一个分组的特征Bin（默认为LDA>2），也就是相对于其他分组，在这个组中丰度较高的Bin。每一横向柱形体代表一个Bin，柱形体的长度对应LDA值，LDA值越高则差异越大。柱形的颜色对应该物种是那个分组的特征Bin。</h><br />
+			</p>
+			<div id="c5" class="anchor"></div>
+			<h3>05-Bin功能注释：COG、EC、RNA</h3>
+			<p>
+				<a href="https://www.ncbi.nlm.nih.gov/COG/">COG</a>，即Clusters of Orthologous Groups of proteins（同源蛋白簇），<a href="http://eggnogdb.embl.de/download/eggnog_4.5/data/NOG/NOG.annotations.tsv.gz">COG注释信息[官网]</a>。COG是由NCBI创建并维护的蛋白数据库，根据细菌、藻类和真核生物完整基因组的编码蛋白系统进化关系分类构建而成。COG分为两类，一类是原核生物的（一般称COG），另一类是真核生物（一般称KOG）。通过比对可以将某个蛋白序列注释到某一个COG中，每一簇COG由直系同源序列构成，从而可以推测该序列的功能。ENZYME收录了7大类酶的四级分类信息，<a href="https://www.qmul.ac.uk/sbcs/iubmb/enzyme/">EC注释信息[官网]</a>。EC编号或EC号是酶学委员会（Enzyme Commission）为酶所制作的一套编号分类法，每一个酶的编号都以字母“EC”起头，接着以四个号码来表示，这些号码代表逐步更细致的为酶作出分类。就如三肽胺基 蛋白酶的编号为EC3.4.11.4，当中的“EC3”是指水解酶（即以水来将分子分解的酶）；“EC3.4”是那些与肽键产生作用的水解酶；“EC3.4.11”是单指那些从多胜肽中分开胺基末端的水解酶；“EC3.4.11.4”则是从三肽中分开胺基末端的水解酶。
+			</p>
+			<p><a href="05-Bin_Function">分箱功能注释结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--05-Bin_Function</h><br />
+				<h>| |--prokka_out_table.txt    [每个Bin功能注释结果统计]</h><br />
+				<h>| |--prokka_out_table/bin.*.tsv    [每个Bin功能注释结果]</h><br />
+				<h>| |--cog/bin.*/bin.*_cog.txt    [该Bin中的COG信息]</h><br />
+				<h>| |--cog/bin.*/bin.*_cog_annotation.txt    [COG注释结果]</h><br />
+				<h>| |--cog/bin.*/bin.*_cog_sum.txt    [COG分类统计]</h><br />
+				<h>| |--cog/bin.*/bin.*_cog_sum_annotation.txt    [COG分类统计加注释]</h><br />
+				<h>| |--cog/bin.*/bin.*_cog_sum_annotation.pdf/png    [COG分类统计加注释，绘图结果]</h><br />
+			</p>
+			<!--table[2]-->
+			<p align="center">
+				<table align="center" border="1">
+					table2
+				</table>
+			</p>
+			<p align="center"><strong>Bin功能注释统计</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>其中每个方格内的数字表示某一个Bin中某一种基因/RNA/功能的总数，Total_sum表示预测得到的总功能区数量，即CDS和RNA总数量。<h><br />
+			</p>
+			<br />
+			<p align="center"><image src="image/example_cog.png" width="800"></p>
+			<p align="center"><strong>COG数据库分类注释统计图</strong></p>
+			<h>说明：</h><br />
+			<h>该图描述的是预测基因注释到不同分类水平COG数量情况；横坐标是COG level 2分类（字母表示，共26种分类，每个字母的意义如下表）；纵坐标是数量；颜色是COG level 1分类（四大类，分别是：细胞过程和信号传递、信息储存和加工、代谢和尚未明确）；柱子越长，属于该分类的预测基因越多。</h><br />
+			<br />
+			<h>COG level分类信息表：</h><br />
+			<p>
+				<table align="center" border="1">
+					<tr><th>Function</th><th>COG level_1</th><th>COG level_2</th></tr>
+					<tr><td>J</td><td>INFORMATION STORAGE AND PROCESSING</td><td>Translation, ribosomal structure and biogenesis</td><tr>
+					<tr><td>A</td><td>INFORMATION STORAGE AND PROCESSING</td><td>RNA processing and modification</td><tr>
+					<tr><td>K</td><td>INFORMATION STORAGE AND PROCESSING</td><td>Transcription</td><tr>
+					<tr><td>L</td><td>INFORMATION STORAGE AND PROCESSING</td><td>Replication, recombination and repair</td><tr>
+					<tr><td>B</td><td>INFORMATION STORAGE AND PROCESSING</td><td>Chromatin structure and dynamics</td><tr>
+					<tr><td>D</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Cell cycle control, cell division, chromosome partitioning</td><tr>
+					<tr><td>Y</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Nuclear structure</td><tr>
+					<tr><td>V</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Defense mechanisms</td><tr>
+					<tr><td>T</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Signal transduction mechanisms</td><tr>
+					<tr><td>M</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Cell wall/membrane/envelope biogenesis</td><tr>
+					<tr><td>N</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Cell motility</td><tr>
+					<tr><td>Z</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Cytoskeleton</td><tr>
+					<tr><td>W</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Extracellular structures</td><tr>
+					<tr><td>U</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Intracellular trafficking, secretion, and vesicular transport</td><tr>
+					<tr><td>O</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Posttranslational modification, protein turnover, chaperones</td><tr>
+					<tr><td>X</td><td>CELLULAR PROCESSES AND SIGNALING</td><td>Mobilome: prophages, transposons</td><tr>
+					<tr><td>C</td><td>METABOLISM</td><td>Energy production and conversion</td><tr>
+					<tr><td>G</td><td>METABOLISM</td><td>Carbohydrate transport and metabolism</td><tr>
+					<tr><td>E</td><td>METABOLISM</td><td>Amino acid transport and metabolism</td><tr>
+					<tr><td>F</td><td>METABOLISM</td><td>Nucleotide transport and metabolism</td><tr>
+					<tr><td>H</td><td>METABOLISM</td><td>Coenzyme transport and metabolism</td><tr>
+					<tr><td>I</td><td>METABOLISM</td><td>Lipid transport and metabolism</td><tr>
+					<tr><td>P</td><td>METABOLISM</td><td>Inorganic ion transport and metabolism</td><tr>
+					<tr><td>Q</td><td>METABOLISM</td><td>Secondary metabolites biosynthesis, transport and catabolism</td><tr>
+					<tr><td>R</td><td>POORLY CHARACTERIZED</td><td>General function prediction only</td><tr>
+					<tr><td>S</td><td>POORLY CHARACTERIZED</td><td>Function unknown</td><tr>
+				</table>
+			</p>
+			<div id="c6" class="anchor"></div>
+			<h3>06-Bin_KEGG数据库注释</h3>
+			<p>
+				<a href="https://www.kegg.jp/">KEGG数据库</a>于 1995 年由 Kanehisa Laboratories 推出 0.1 版，目前发展为一个综合性数据库，其中最核心的为 KEGG PATHWAY 和 KEGG ORTHOLOGY 数据库。在 KEGG ORTHOLOGY 数据库中，将行使相同功能的基因聚在一起，称为 Ortholog Groups (KO entries)，每个 KO 包含多个基因信息，并在一至多个 pathway 中发挥作用。而在 KEGG PATHWAY 数据库中，将生物代谢通路划分为 6 类，分别为：细胞过程（Cellular Processes）、环境信息处理（Environmental Information Processing）、遗传信息处理（Genetic Information Processing）、人类疾病（Human Diseases）、新陈代谢（Metabolism）、生物体系统（Organismal Systems），其中每类又被系统分类为二、三、四层。第二层目前包括有 57个种子 pathway；第三层即为其代谢通路图；第四层为每个代谢通路图的具体注释信息。
+			</p>
+			<p>
+				使用KEGG注释软件KofamScan和KOfam数据库对prokka预测基因的蛋白序列进行KEGG注释。接着利用KEGG提供的注释文件获得每个K_ID的生物学名称（*_kegg_annotation.txt文件），以及每个K_ID所属通路的信息（*_kegg_pathway_num_annotation.txt文件）。最后对通路注释统计结果进行可视化。
+			</p>
+			<p><a href="06-Bin_KEGG">KEGG数据库注释结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--06-Bin_KEGG/bin.*/</h><br />
+				<h>| |--*_kegg_raw.txt    [kofamscan比对结果，第一列是*_prokka.faa ID，第二列是K ID]</h><br />
+				<h>| |--*_kegg.txt    [*_kegg_raw.txt去除未注释部分]</h><br />
+				<h>| |--*_kegg_annotation.txt    [K ID注释信息]</h><br />
+				<h>| |--*_kegg_pathway.txt    [K ID所属KEGG pathway]</h><br />
+				<h>| |--*_kegg_pathway_num.txt/pdf/png    [KEGG pathway统计和可视化]</h><br />
+				<h>| |--Figure/    [该基因组注释得到的所有KEGG pathway图]</h><br />
+				<br />
+			</p>
+			<p align="center"><image src="image/example_kegg_bar.png" width="700"></p>
+			<p align="center"><strong>KEGG pathway level2数量可视化</strong></p>
+			<h>说明：</h><br />
+			<h>上图是按Bin文件夹字符排序得到的第一个Bin中的KEGG pathway level2数量可视化结果图，用于举例展示。可视化输入数据是*_kegg_pathway_num.txt的level_1列和level_2列。横坐标是KEGG level 2数量；纵坐标是KEGG level 2名称；颜色用于区分KEGG level 1的类型。</h><br />
+			<p align="center"><image src="image/example_kegg.png" width="533"></p>
+			<p align="center"><strong>KEGG pathway图</strong></p>
+			<h>说明：</h><br />
+			<h>上图是按Bin文件夹字符排序得到的第一个Bin Figure中的通路图，用于举例展示。长方型内的编号是国际酶学委员会统一规定的酶编号，即EC number；其他说明如下图所示：</h><br />
+			<p align="center">
+				<image src="image/map.png">
+			</p>
+			<br />
+			<div id="c7" class="anchor"></div>
+			<h3>07-Bin_GO数据库注释</h3>
+			<p>
+				<a href="http://geneontology.org/">GO数据库</a>是基因本体联合会(Gene Onotology Consortium)所建立的数据库，旨在建立一个适用于各种物种的，对基因和蛋白质功能进行限定和描述的，并能随着研究不断深入而更新的语言词汇标准。GO是多种生物本体语言中的一种，是OBO（Open BiomedicalOntologies）组织中的一员，GO提供了一系列的语义（terms）用于描绘基因、基因产物的特点，这些语义通过三个概念维度展开：细胞学组件（Cellular Component）用于描述某个节点的亚细胞结构、位置和大分子复合物，如外部封装结构（external encapsulating structure）等；分子功能（molecular function），用于描述基因以及基因产物的功能，比如蛋白质结合转录因子活性（protein binding transcription factor activity）；生物学途径（biological process）指的是分子功能的有序组合以实现更复杂的生物功能，例如树突状细胞的抗原处理和提呈（dendritic cell antigen processing and presentation）。
+			</p>
+			<p>
+				使用eggnog-mapper功能注释软件和eggNOG数据库进行GO注释。该方法除了获得GO的注释信息还能获得KEGG、COG等信息。获得GO结果后统计注释到每个GO中的基因数量，然后进一步注释获得GO的category分类信息和GO term（*_go_annotation.txt文件）。最后通过R语言对该数据进行柱形图绘制。
+			</p>
+			<p><a href="07-Bin_GO">GO数据库注释结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--07-Bin_GO/</h><br />
+				<h>| |--*_go_map.txt    [emapper比对结果，第一列是*_prokka.faa蛋白ID，第二列是蛋白所属GO ID]</h><br />
+				<h>| |--*_go.txt    [*_go_map.txt中提取、去重计数的GO ID]</h><br />
+				<h>| |--*_go_annotation.txt    [GO ID注释信息，含GO Category和GO Term信息]</h><br />
+				<h>| |--*_go_annotation.png/pdf    [GO ID注释信息统计绘图]</h><br />
+				<br />
+			</p>
+			<p align="center"><image src="image/example_go.png" width="533"></p>
+			<p align="center"><strong>GO注释统计图</strong></p>
+			<h>说明：</h><br />
+			<h>该图说明的是预测基因所属GO的情况；横坐标是数量；纵坐标是GO；颜色是GO分类；柱子越高，该GO中包含的预测基因越多。</h><br />
+			<br />
+			<div id="c8" class="anchor"></div>
+			<h3>08-Bin_CAZyme数据库注释</h3>
+			<p>
+				碳水化合物酶（<a href="http://www.cazy.org/">CAZy</a>）数据库是关于能够合成或者分解复杂碳水化合物和糖复合物的酶类的数据库。CAZy数据库基于蛋白质结构域中的氨基酸序列相似性将碳水化合物活性酶类归入不同蛋白质家族。CAZy数据库提供了酶分子序列的家族信息，物种来源，基因序列，蛋白序列，三维结构，EC分类，相关数据库链接。此数据库可以将酶分子的序列、结构、催化机制关联起来。CAZy有三个level，第一个level是六大功能类，即GH GT AA CE PL CBM；第二个level是CAZy family；第三个是有EC编号的具体酶信息，如EC2.4.1.129。
+			</p>
+			<p>
+				利用蛋白比对工具diamond将prokka预测得到的所有功能区与CAZy数据库进行比对可获取基因组CAZyme family注释信息。
+			</p>
+			<p><a href="08-Bin_CAZyme">CAZyme数据库注释结果文件夹</a></p>
+			<p>
+			    <h>文件说明：</h><br />
+				<h>|--08-Bin_CAZyme/</h><br />
+				<h>| |--Data/bin.*.raw    [diamond比对结果，第一列是*_prokka.faa ID，第二列是CAZyme信息]</h><br />
+				<h>| |--Data/bin.*.clean    [raw中提取的cazyme信息]</h><br />
+				<h>| |--Data/bin.*.sum    [对clean中的cazyme信息分组统计]</h><br />
+				<h>| |--cazy_group.txt    [每个Bin cazyme level one数量统计]</h><br />
+				<h>| |--cazy_all.txt    [每个Bin cazyme level two数量统计]</h><br />
+				<h>| |--cazy_group_boxplot.pdf/png    [cazyme level one数量统计箱图]</h><br />
+				<h>| |--cazy_group_pheatmap.pdf/png    [cazyme level one数量统计热图]</h><br />
+				<h>| |--cazy_group_stack.pdf/png    [cazyme level one数量统计堆叠图]</h><br />
+				<h>| |--cazy_group_pie    [cazyme level one数量统计饼图]</h><br />
+				<h>| |--cazy_all_pie    [cazyme level two数量统计饼图]</h><br />
+			</p>
+			<h4>8.1 CAZyme level one分析结果</h4>
+			<h5>（1）箱图分析</h5>
+			<p align="center"><image src="08-Bin_CAZyme/cazy_group_boxplot.png" width="533"></p>
+			<p align="center"><strong>level one CAZyme数量统计箱图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>横坐标是level1 CAZy的六大类，纵坐标是CAZy数据库注释Bin得到的每一类CAZy的数量，每个箱子的高度表示CAZy数量的变化幅度，箱子的首和尾是极值，中间的横线是中位数，图中的点是离群值。</h><br />
+			</p>
+			<h5>（2）热图分析</h5>
+			<p align="center"><image src="08-Bin_CAZyme/cazy_group_pheatmap.png" width="800"></p>
+			<p align="center"><strong>level one CAZyme数量统计热图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>pheatmap热图可以展示每个Bin的CAZy丰度，不同Bin之间的相似度（横向）和不同CAZy之间的相似度（纵向），颜色越红表示相对丰度越高。图中每一个色块表示一个Bin中的一类CAZy的丰度，颜色越蓝表示丰度越低，越红表示丰度越高。</h><br />
+			</p>
+			<h5>（3）堆叠图分析</h5>
+			<p align="center"><image src="08-Bin_CAZyme/cazy_group_stack.png" width="800"></p>
+			<p align="center"><strong>level one CAZyme数量统计堆叠图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>根据每个Bin的level1 CAZy的总数对Bin进行从大到小的排序，CAZy注释结果总数多的在左边，少的在右边；一种颜色表示一类CAZy；色柱的高度表示该CAZy的丰度。</h><br />
+			</p>
+			<h5>（4）饼图分析</h5>
+			<p align="center"><image src="image/example_group_pie.png" width="800"></p>
+			<p align="center"><strong>level one CAZyme数量统计饼图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>以按名称排序后的第一个饼图举例展示。饼图可以展示每个Bin中的每一个CAZy数量与该Bin中总CAZy数量的比例。以其中一个Bin的饼图结果为例展示。</h><br />
+			</p>
+			<h4>8.2 CAZyme level two分析结果</h4>
+			<p align="center"><image src="image/example_all_pie.png" width="800"></p>
+			<p align="center"><strong>level two CAZyme数量统计饼图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>以按名称排序后的第一个饼图举例展示。用R语言pie绘图函数绘制每个level two cazyme在不同Bin中的丰度的饼图，图中只展示cazyme丰度排序top 10的Bin。</h><br />
+			</p>
+			<br />
+			<div id="c9" class="anchor"></div>
+			<h3>09-Bin进化分析</h3>
+			<h4>9.1 分类学注释</h4>
+			<p>
+				PhyloPhlAn是发表在Nature Communications上的一个用于分析微生物之间进化关系的软件。PhyloPhlAn能通过分析400种通用微生物蛋白展示微生物之间的进化关系。软件本身自带3000+种已知微生物的进化关系信息，因此PhyloPhlAn也常用于研究新发现的微生物与已知微生物进化关系
+			</p>
+			<p><a href="09-Bin_Taxonomy">分类注释进化分析结果文件夹</a></p>
+			<p>
+				<h>文件说明：</h><br />
+				<h>|--09-Bin_Taxonomy/</h><br />
+				<h>| |--bin_taxonomy.txt    [Bin分类学注释结果]</h><br />
+				<h>| |--map.txt    [Bin门信息，用于绘图着色]</h><br />
+				<h>| |--tree_bins.pdf/png    [Bin进化关系图]</h><br />
+				<h>| |--*.denovo.tree.nwk    [tree文件，ggtree绘图使用]</h><br />
+				<br />
+			</p>
+			<p>
+				利用PhyloPhlAn可以获得每个Bin的系统发生信息。内容如下表，其中部分Bin可以精确到物种水平，也就是说这些Bin是已知微生物，而很多Bin无法精确注释到物种水平，这可能是因为Bin不够完整，或是因为这些Bin是未知物种。
+			</p>
+			<!--table[3]-->
+			<p align="center">
+				<table align="center" border="1">
+					table3
+				</table>
+			</p>
+			<p align="center"><strong>Bin物种分类信息表</strong></p>
+			<h4>9.2 进化分析</h4>
+			<p>
+				使用PhyloPhlAn可以给物种或者Bin进行De novo进化关系分析，利用基因组数据分析某些物种或者Bin之间的进化关系。下图是Bin之间的进化关系树状图。树状图由R语言ggplot2和ggtree绘制。
+			</p>
+			<p align="center"><image src="09-Bin_Taxonomy/tree_bins.png" width="800"></p>
+			<p align="center"><strong>Bin之间的进化关系树状图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>树状图中距离越近的Bin的进化关系也越相近。</h><br />
+			</p>
+			<div id="c10" class="anchor"></div>
+			<h3>10-Bin_Circos圈图</h3>
+			<p>
+				<a href="http://circos.ca/">Circos</a>是由加拿大生物信息学科学家Martin Krzywinski利用Perl语言开发的一款可以用于描述关系型数据和多维数据的基因组圈图可视化软件。2009年Circos发表在Genome research。Circos不仅能将一个物种的整个基因组呈现在一张图片中，还可以给基因组添加丰富的注释信息，如功能注释信息，差异统计信息等等。
+			</p>
+			<p>
+				利用每个Bin（基于contig）的Prokka蛋白预测信息，功能区注释信息（含正负链、CDS、RNA类型等信息），CAZy数据库注释结果（GH、GT、CE、PL、CBM、AA），以及GC content、GC skew的统计结果绘制Circos圈图。
+			</p>
+			<p align="center"><image src="image/example_circos.png" width="800"></p>
+			<p align="center"><strong>Bin基因组圈图</strong></p>
+			<p>
+				<h>说明：</h><br />
+				<h>以文件名排序第一个Bin圈图进行举例展示。</h><br />
+				<h>利用宏基因组分箱的方法分析宏基因组二代测序数据可以得到细菌基因组草图（Bin），但还是得不到细菌基因组精细图的（精细图一般需要对分离得到的单菌同时进行二代和三代测序组装分析才能获得），因此本次分析的Circos图是基于Bin的contig数据绘制得到的。</h><br />
+			</p>
+			<p>从外到内</p>
+			<p>
+				<h>第一圈：</h><br />
+				<h>按编号排列的contig；</h><br />
+			</p>
+			<p>
+				<h>第二圈：</h><br />
+				<h>红色高亮表示正链中的CDS区；</h><br />
+				<h>黑色高亮表示负链中的CDS区；</h><br />
+			</p>
+			<p>
+				<h>第三圈：</h><br />
+				<h>蓝色三角表示tRNA；</h><br />
+				<h>紫色三角表示rRNA；</h><br />
+				<h>灰色三角表示tmRNA；</h><br />
+			</p>
+			<p>
+				<h>第四圈：</h><br />
+				<h>青色方块表示GH；</h><br />
+				<h>绿色方块表示GT；</h><br />
+				<h>棕色方块表示CE；</h><br />
+				<h>粉红方块表示PL；</h><br />
+				<h>黄色方块表示CBM；</h><br />
+				<h>橙色方块表示AA；</h><br />
+				<h>（方块较大，相邻区域会有重叠，但是完全可以直观的表现不同CAZy的数量差异）</h><br />
+			</p>
+			<p>
+				<h>第五圈；</h><br />
+				<h>直方图表示contig的GC content，即(G+C)/(A+G+C+T)，高度表示GC content的值的大小，宽度表示contig的宽度；</h><br />
+				<h>红色直方图，方向朝外表示该contig的GC content的值大于整个Bin总contig的GC content的值；</h><br />
+				<h>蓝色直方图，方向朝内表示该contig的GC content的值小于整个Bin总contig的GC content的值；</h><br />
+			</p>
+			<p>
+				<h>第六圈：</h><br />
+				<h>直方图表示contig的GC skew(偏移)，GC偏移=(G-C)/(G+C)这个式子用来衡量G和C的相对含量，如果G>C则GC skew的值为正值，G<C则为负值。在大多数细菌基因组中，前导链(leading strand)和滞后链(lagging strand)在碱基组成上有明显的不同——前导链富含G和T，但是滞后链中的A和C则更多一些。打破A=T和C=G的碱基频率发生的偏移，被称之为“AT(AT-skew)”和“GC(GC-skew)”。由于通常GC偏移比AT偏移发生的更明显，所以习惯上更多地只考虑GC偏移。</h><br />
+				<h>橙色直方图表示contig的GC skew>0，高度表示绝对值大小；</h><br />
+				<h>绿色的直方图表示contig的GC skew<0，高度表示绝对值大小；</h><br />
+			</p>
+			<div id="d" class="anchor"></div>
+			<h2>四、常见问题</h2>
+			<h3>1. 为什么大多数Bin注释不到种水平？</h3>
+			<h>&nbsp;&nbsp;&nbsp;&nbsp;宏基因组物种注释基于短序列k-mer比对，容易比对到物种数据库，因此可以产生大量的种水平注释结果。但是，Bin是以兆为长度单位的细菌基因组草图，序列更长，比对更加困难，因此很难完美的比对到物种数据库。而且，数据库中的细菌往往与我们的细菌来源不同，很可能存在一些变异，这样也会影响物种注释。</h>
+			<h3>2. 宏基因组分析得到的优势菌为何无法binning？</h3>
+			<h>&nbsp;&nbsp;&nbsp;&nbsp;这是分析方法不同引起的正常现象。宏基因组分析和宏基因组分箱分析用的是两种完全不同的分析方法。宏基因组物种丰度计算基于数据库比对和测序深度（Depth），而binning基于序列组装、分箱和测序覆盖度（Coverage）。举个简单的例子：一条reads通过宏基因组分析可能匹配到某个细菌，使这个细菌的丰度加1，但是一条reads无法做binning，同样，没有cover整个基因组的100条reads通过宏基因组分析匹配到某个细菌，使这个细菌的丰度加100，但是仍无法做binning。换言之，cover不了整个基因组的reads再多也bin不成一个bin，但是，某基因组测序depth仅为1但coverage为100%一定能bin成一个bin。</h><br />
+			<div id="e" class="anchor"></div>
+			<h2>五、参考文献</h2>
+			<p>
+				<h>[1] Metagenomic discovery of biomass-degrading genes and genomes from cow rumen. Science 2011</h><br />
+				<h>[2] MetaBAT 2: an adaptive binning algorithm for robust and efficient genome reconstruction from metagenome assemblies. PeerJ. 2019</h><br />
+				<h>[3] AMBER: Assessment of Metagenome BinnERs. Gigascience. 2018</h><br />
+				<h>[4] Extensive Unexplored Human Microbiome Diversity Revealed by Over 150,000 Genomes from Metagenomes Spanning Age, Geography, and Lifestyle. Cell. 2019</h><br />
+				<h>[5] Compendium of 4,941 rumen metagenome-assembled genomes for rumen microbiome biology and enzyme discovery. Nature Biotechnology 2019</h><br />
+				<h>[6] Assignment of virus and antimicrobial resistance genes to microbial hosts in a complex microbial community by combined long-read assembly and proximity ligation. Genome Biol. 2019</h><br />
+				<h>[7] Quality control and preprocessing of metagenomic datasets. Bioinformatics 2011</h><br />
+				<h>[8] Cutadapt Removes Adapter Sequences From High-Throughput Sequencing Reads. Bioinformatics 2011</h><br />
+				<h>[9] Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012</h><br />
+				<h>[10] The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009</h><br />
+				<h>[11] CheckM: assessing the quality of microbial genomes recovered from isolates, single cells, and metagenomes. Genome Res. 2015</h><br />
+				<h>[12] Blobology: exploring raw genome data for contaminants, symbionts and parasites using taxon-annotated GC-coverage plots. Front Genet. 2013</h><br />
+				<h>[13] Prokka: rapid prokaryotic genome annotation. Bioinformatics. 2014</h><br />
+				<h>[14] PhyloPhlAn is a new method for improved phylogenetic and taxonomic placement of microbes. Nature Communications 2013</h><br />
+				<h>[15] Fast and sensitive protein alignment using DIAMOND. Nat Methods. 2015</h><br />
+				<h>[16] Trimmomatic: A flexible trimmer for Illumina Sequence Data. Bioinformatics 2014</h><br />
+				<h>[17] eggNOG 5.0: a hierarchical, functionally and phylogenetically annotated orthology resource based on 5090 organisms and 2502 viruses. Nucleic Acids Res. 2019</h><br />
+				<h>[18] The Carbohydrate-Active EnZymes database (CAZy): an expert resource for glycogenomics. Nucleic acids research, 2009</h><br />
+				<h>[19] KofamKOALA: KEGG ortholog assignment based on profile HMM and adaptive score threshold. Bioinformatics. 2019</h><br />
+				<h>[20] Circos: An information aesthetic for comparative genomics. Genome Research 2009</h><br />	
+				<h>[21] KEGG: new perspectives on genomes, pathways, diseases and drugs.  Nucleic Acids Res. 2017</h><br />
+				<h>[22] The COG database: a tool for genome-scale analysis of protein functions and evolution. Nucleic Acids Res. 2000</h><br />
+				<h>[23] Metagenomic Biomarker Discovery and Explanation. Genome Biology. 2011</h><br />
+			</p>
+			<div id="f" class="anchor"></div>
+			<h2>六、联系我们</h2>
+			<p>地址：广东省深圳市南山区留仙大道1201号大学城创客小镇</p>
+			<p>邮编：518055</p>
+		</div>
+	</body>
+</html>

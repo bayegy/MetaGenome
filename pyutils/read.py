@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import re
-import pdb
 from bs4 import BeautifulSoup
 import gzip
 import os
@@ -24,7 +23,7 @@ def read_abundance(file_path, index_col=0, return_sum=-1, return_mean=-1):
 
 
 def read_to_html_table(file_path, table_class=False, thead_class=False):
-    file_type = re.search('[^\.]+$', file_path).group()
+    file_type = re.search(r'[^\.]+$', file_path).group()
     if file_type == 'txt' or file_type == 'csv':
         out_df = pd.read_csv(file_path, sep='\t')
     elif file_type == "html":
@@ -84,8 +83,8 @@ def update_html_properties(html_fp, format_dict, out_fp, filter_function=False, 
         if use_selector:
             label_list = sp.select(k)
         else:
-            tag = re.search('^[^\[]+', k).group()
-            attrs = re.search('\[(.+)\]', k)
+            tag = re.search(r'^[^\[]+', k).group()
+            attrs = re.search(r'\[(.+)\]', k)
             attrs = dict([attr.split('=')
                           for attr in attrs.group(1).split('&')]) if attrs else {}
             label_list = sp.findAll(tag, attrs=attrs)

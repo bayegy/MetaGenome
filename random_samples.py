@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 import random
 import sys
 import numpy as np
-import pdb
 
 abundance_table = sys.argv[1]
 group_size = int(sys.argv[2])

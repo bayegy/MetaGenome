@@ -2,3 +2,4 @@ seaborn
 lxml
 bs4
 Pillow
+opencv-python

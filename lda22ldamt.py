@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 import sys
 
 sp, lda2, lda4, thresh = sys.argv

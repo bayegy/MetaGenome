@@ -11,7 +11,7 @@ import sys
 import csv
 import argparse
 import math
-
+from Bayegy.getColors import get_colors as get_colors1
 try:
     import matplotlib
     matplotlib.use("Agg")
@@ -456,7 +456,7 @@ def main():
 
     # setup: meta colors
     # modfied by guoxing, to uniform the color of groups
-    from getColors import get_colors as get_colors1
+
     if table.metarow is not None:
         if os.path.exists(args.meta_colormap):
             sys.stderr.write(

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 import re
 import sys
@@ -21,5 +21,5 @@ for file in infiles:
 
 print("entries\tgroup\tcount")
 for k, v in cazys.items():
-    g = re.search('^\D+', k).group()
+    g = re.search(r'^\D+', k).group()
     print("{}\t{}\t{}".format(k, g, v))

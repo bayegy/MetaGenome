@@ -1,9 +1,9 @@
 #!usr/bin/python3
 import os
-from circos import Circos
-from visualize import Visualize
+from .circos import Circos
+from .visualize import Visualize
 import re
-from osEnv import OSEnv
+from Bayegy.ampliconLibs.libShell import lefse
 # import pdb
 
 
@@ -14,13 +14,16 @@ class VisualizeFunction(Visualize):
         v=VisualizeFunction('test/otu_table.Genus.absolute.txt','test/mapping_file.txt','Group1')
     """
 
-    def __visualize_with_group__(self, exclude='all'):
+    def __visualize_with_group__(self, exclude='all', orders=[]):
         categories = [g.strip() for g in re.split(',', self.categories)]
         exclude_list = [] if exclude == "all" else exclude.split(';')
         for g in categories:
             print(g)
-            Circos(self.abundance_table, mapping_file=self.mapping_file, category=g, by_group_mean=False,
-                   prefix=self.prefix + g + '_', out_dir=self.out_dir + '3-Circos').visualize()
+            try:
+                Circos(self.abundance_table, mapping_file=self.mapping_file, category=g, by_group_mean=False,
+                       prefix=self.prefix + g + '_', out_dir=self.out_dir + '3-Circos').visualize()
+            except Exception as e:
+                print(e)
             # Circos(self.abundance_table, mapping_file=self.mapping_file, category=g, by_group_mean=True,
             #        prefix=self.prefix + g + '_groupMean_', out_dir=self.out_dir + 'Circos').visualize()
             self.system('''
@@ -32,8 +35,15 @@ class VisualizeFunction(Visualize):
 {R_path} {bayegy_home}/write_data_for_lefse.R -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {out_dir}4-SignificanceAnalysis/LEfSe/{prefix}{category}_lefse.txt -u f;
 {R_path} {bayegy_home}/Function_DunnTest.r -i  {abundance_table} -m  {mapping_file} -c  {category} -o  {out_dir}4-SignificanceAnalysis/DunnTest -p {prefix} > /dev/null;
             ''', category=g)
+            for order in orders:
+                self.system("""
+{R_path} {bayegy_home}/abundance_barplot.R -n 20 -m {mapping_file} -c {category} \
+ -i {abundance_table} -o {out_dir}1-Barplots/ -p {prefix}in_{order}_ -b F -O {order};
+{R_path} {bayegy_home}/abundance_heatmap.R  -m {mapping_file} -c {category} -n 20 \
+ -i {abundance_table} -o {out_dir}2-Heatmaps \
+ -p {prefix}in_{order}_ -l F -t F -O {order};""", category=g, order=order)
 
-            with OSEnv(pythonpath=self.lefse_pylib_home, path=self.lefse_py_home, r_libs=self.lefse_rlib_home):
+            with lefse():
                 lefse_base = '{}4-SignificanceAnalysis/LEfSe/{}{}_lefse_LDA'.format(
                     self.out_dir, self.prefix, g)
                 self.system("""
@@ -45,7 +55,7 @@ class VisualizeFunction(Visualize):
                 if os.path.exists(lda2_result):
                     self.system("""
 {bayegy_home}/mod_lefse-plot_res.py --map {mapping_file} --category {category}  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 {base}2.LDA.txt {base}2.pdf;
-{base_dir}/lda22ldamt.py {base}2.LDA.txt {base}4.LDA.txt 4
+{python3_path} {base_dir}/lda22ldamt.py {base}2.LDA.txt {base}4.LDA.txt 4
 {bayegy_home}/mod_lefse-plot_res.py --map {mapping_file} --category {category}  --max_feature_len 200 --orientation h --format pdf --left_space 0.3 --dpi 300 {base}4.LDA.txt {base}4.pdf;
                 """, base=lefse_base, category=g)
                 else:

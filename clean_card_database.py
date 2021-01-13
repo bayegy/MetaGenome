@@ -2,16 +2,16 @@ import os
 import re
 import sys
 db_path = sys.argv[1]
-base_name = re.sub('\.[^\.]+$', '', os.path.basename(db_path))
+base_name = re.sub(r'\.[^\.]+$', '', os.path.basename(db_path))
 out_path = './' + base_name + '_cleaned.fasta'
 
 with open(db_path, 'r') as db, open(out_path, 'w') as odb:
     line_drop = []
     for num, line in enumerate(db):
-        if re.search('^>',line):
+        if re.search(r'^>', line):
             header = re.search('^ *[^ ]+', line).group()
-            header = re.sub("[^\|]+$", '', header)
-            tail = re.search('\[.+\]', line).group()
+            header = re.sub(r"[^\|]+$", '', header)
+            tail = re.search(r'\[.+\]', line).group()
             body = line.replace(tail, '').replace(header, '')
             header = header.strip()
             tail = tail.strip()
@@ -19,7 +19,7 @@ with open(db_path, 'r') as db, open(out_path, 'w') as odb:
             if body.find(' ') == -1:
                 odb.write(line)
             else:
-                gene1 = re.search('[A-Za-z\-0-9]+[A-Z][A-Za-z\-0-9]*', body)
+                gene1 = re.search(r'[A-Za-z\-0-9]+[A-Z][A-Za-z\-0-9]*', body)
                 gene2 = re.search('[A-Za-z]+[0-9]+[A-Za-z]*', body)
 
                 gene_hint = ""
@@ -39,7 +39,7 @@ with open(db_path, 'r') as db, open(out_path, 'w') as odb:
                 elif not ipt == 'n':
                     gene = ipt
 
-                gene=gene.strip()
+                gene = gene.strip()
                 if gene:
                     odb.write(header + gene + ' ' + tail + '\n')
                 else:

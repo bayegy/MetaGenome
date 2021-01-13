@@ -37,11 +37,11 @@ def split_list(init_list, each=5):
     rem = [rem] if rem else []
     num_list = ([each] * int(np.floor(ll / each))) + rem
     index = generate_span(num_list)
-    return [init_list[l[0]:l[1]] for l in index]
+    return [init_list[idx[0]:idx[1]] for idx in index]
 
 
-def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex, parse=True) -> dict:
-    if parse:
+def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sample_regex) -> dict:
+    if raw_fqs_dir:
         # get the mapping relation of id to description
         print("Assert no duplicated sample names: please make sure no duplicated sample names and did not use capital and small letter to distinguish samples if error happened\n")
         id_map = {}
@@ -87,7 +87,7 @@ def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sa
             map_failed_id = 0
             for line_number, line in enumerate(mapping):
                 li = re.split('\t', line.strip())
-                li = [l.strip() for l in li]
+                li = [i.strip() for i in li]
                 fc = len(li) - 1
                 if line_number == 0:
                     li[0] = "#SampleID"
@@ -116,7 +116,7 @@ def parse_premap(raw_fqs_dir, pre_mapping_file, forward_regex, reverse_regex, sa
             for num, line in enumerate(mapping):
                 li = line.strip().split("\t")
                 li = [i.strip() for i in li]
-                if num==0:
+                if num == 0:
                     li[0] = "#SampleID"
                     li[-1] = "Description"
                     map_columns = li

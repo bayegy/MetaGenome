@@ -7,7 +7,7 @@ import sys
 # sys.path=['/home/cheng/softwares/miniconda2/envs/lefse/lib/python2.7/site-packages/']+sys.path
 # print 'Where to look for module: ', sys.path
 # sys.path.insert(0, '/home/cheng/softwares/miniconda2/envs/lefse/lib/python2.7/site-packages')
-from humann2Barplot import main
+from MetaGenome.humann2Barplot import main
 
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])

@@ -1,8 +1,8 @@
-from visualizeFunction import VisualizeFunction
+from .visualizeFunction import VisualizeFunction
 import os
 import pandas as pd
 import re
-from osEnv import OSEnv
+from Bayegy.ampliconLibs.libShell import lefse
 # import pdb
 
 
@@ -32,6 +32,10 @@ class VisualizeHumann(VisualizeFunction):
         self.set_path(force=False, abundance_table="{}{}_unstratified.tsv".format(
             self.out_dir, self.get_file_name(self.pre_abundance_table)))
         df = pd.read_csv(self.abundance_table, sep='\t')
+        nrow, ncol = df.shape
+        if nrow < 2:
+            print("Warning: features number is less than 2")
+            self.valid = False
         if id_with_name:
             df['Description'] = df.iloc[:, 0]
         df = df.loc[(i not in ['UNMAPPED', 'UNINTEGRATED',
@@ -46,6 +50,9 @@ class VisualizeHumann(VisualizeFunction):
         return os.path.splitext(os.path.basename(path))[0]
 
     def __visualize_with_group__(self, *args, **kwargs):
+        if not self.valid:
+            print("Warning: visualize function was passed!")
+            return
         super(VisualizeHumann, self).__visualize_with_group__(*args, **kwargs)
         categories = [g.strip() for g in re.split(',', self.categories)]
 
@@ -66,11 +73,11 @@ class VisualizeHumann(VisualizeFunction):
             self.set_attr(bar_table=bar_table)
             self.system("{R_path} {bayegy_home}/write_data_for_lefse.R -i  {pre_abundance_table} -m  {mapping_file} -c  {category} -o  {bar_table} -u f -j F -e {isenzyme} -n {save_colon}",
                         category=g, isenzyme=("T" if (self.custom_to == 'level4ec' or self.regroup == 'uniref90_level4ec') else "F"))
-            features = [re.search('^[^:\|]*', f).group().strip()
+            features = [re.search(r'^[^:\|]*', f).group().strip()
                         for f in pd.read_csv(self.bar_table, sep='\t', index_col=0).index if not f.find('|') == -1]
             features = list(set(features))
 
-            with OSEnv(path=self.lefse_py_home, pythonpath=self.lefse_pylib_home):
+            with lefse():
                 # pdb.set_trace()
                 for f in df.index:
                     print(f)

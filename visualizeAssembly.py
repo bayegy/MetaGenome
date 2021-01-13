@@ -1,6 +1,5 @@
-from visualizeFunction import VisualizeFunction
-import pandas as pd
-from numpy import nan
+from .visualizeFunction import VisualizeFunction
+
 # import pdb
 
 
@@ -27,7 +26,6 @@ class VisualizeAssembly(VisualizeFunction):
                 fout.write("{}\t{}\n".format(k, '\t'.join(v)))
 
         pre_abundance_table = self.abundance_table
-        self.set_attr(abundance_table=self.out_dir +
-                      "All.{}.abundance_unstratified.tsv".format(prefix.strip('_')))
+        self.set_attr(abundance_table=self.out_dir + "All.{}.abundance_unstratified.tsv".format(prefix.strip('_')))
         self.system("{humann2_home}/humann2_regroup_table --input {pre_abundance_table} --custom {tmp_map} --ungrouped N --output {abundance_table}",
                     pre_abundance_table=pre_abundance_table)

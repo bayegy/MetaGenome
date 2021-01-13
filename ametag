@@ -1,17 +1,19 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
-from metagenomePipline import MetagenomePipline
+from MetaGenome.metagenomePipline import MetagenomePipline
 import argparse
 
 p = argparse.ArgumentParser(
     description="This script is used for the analysis of metagenome sequencing.")
 p.add_argument('-i', '--input', dest='input', metavar='<directory>', default=False,
-               help='Directory of raw fastq files. Sub-directory is allowed when storing fastq files.')
+               help='Directory of raw fastq files. Sub-directory is allowed when storing fastq files. If not passed, the step of raw fastq files check will be skipped, this is used when you have run the raw fastq filter step before, the clean data is in the result directory already.')
 p.add_argument('-m', '--map', dest='map', metavar='<path>', default=False,
                help='Sample metadata file. The sample ID must in first and last column.')
 p.add_argument('-c', '--category', dest='category', metavar='<str>', default='auto',
                help='column name of categories in metadata. You may specify more than one category, and the categories must be seprated by commas')
+p.add_argument('-O', '--orders', dest='orders', metavar='<str>', default=False,
+               help='Column names of metadata seprated by commas, which are orders sequence used to reorder samples. If not specified, orders must starts with Order')
 p.add_argument('-s', '--sample-id-patern', dest='sp', default=r'(.+)_.*_[12]\.fq', metavar='<regular expression>',
                help="The regular expression of sample ID in file names. You must use () to contain sample ID expression, and to prevent unexpected error, using '' to contain the expression is necessary. Supply this parameter together with -i -f -r.")
 p.add_argument('-f', '--forward-file-pattern', dest='fp', default=r'_1\.fq', metavar='<regular expression>',
@@ -19,30 +21,41 @@ p.add_argument('-f', '--forward-file-pattern', dest='fp', default=r'_1\.fq', met
 p.add_argument('-r', '--reverse-file-pattern', dest='rp', default=r'_2\.fq', metavar='<regular expression>',
                help='The regular expression representing reverse sequence in file names,Supply this parameter together with -i -s -f.')
 p.add_argument('-e', '--exclude', dest='exclude', default='none', metavar='<str>',
-               help='The variables excluded from RDA and correlation heatmap analysis, if more than one variable is expected, you should use comma as delimeters. if more than one run is expected, use semicolon as delimeters. example: "Var1,Var2;Var1,Var3". default is none, meaning no variable will be excluded.')
+               help='The strategy for RDA and correlation heatmap analysis in the formation of "[keep|exclude]>Var1,Var2:FileNamePrefix1;[keep|exclude]>Var3,Var4:FileNamePrefix2;none" ; "exclude>" is the default mode, if set to none, all variavles will be used in analysis, if set to all, none variavles will be used.')
 p.add_argument('-k', '--filter', dest='filter', default="keep:Archaea;keep:Bacteria;keep:Fungi;keep:Viruses", metavar='<str>',
                help='Taxon to be filtered. use "keep:taxon1,taxon2" to keep noly taxon1, taxon2. or use "exclude:taxon1,taxon2" to filter taxon1, taxon2. For multi-strategies, use ";" as delimeters: "keep:taxon1,taxon2;exclude:taxon1,taxon2". If set to none, no filter rules will be used.')
-p.add_argument('-t', '--host-db', dest='host', default="/home/cheng/Databases/hg38/hg38", metavar='<str>',
+p.add_argument('-t', '--host-db', dest='host', default="/home/bayegy/Databases/host_genome/hg38/hg38", metavar='<str>',
                help='Comma seprated path to the host genome bowtie2 database.')
 p.add_argument('-a', '--assembly', dest='assembly', default="no", metavar='<str>',
                help='Analyze base on assembly. yes (use assembly) or no. Default is no')
-p.add_argument('-x', '--mix-assembly', dest='mix', default="yes", metavar='<str>',
-               help='Mixed assembly strategy. yes (use mixed assembly) or no. Default is yes. Set this to no will save you a lot time and computer source with a decline of sensitivity for genes.')
+p.add_argument('-x', '--mix-assembly', dest='mix', default="no", metavar='<str>',
+               help='Mixed assembly strategy. yes (use mixed assembly) or not. Default is yes. Set this to no will save you a lot time and computer source with a decline of sensitivity for genes.')
 p.add_argument('-z', '--zip-clean-data', dest='zip', default="yes", metavar='<str>',
                help='Set this to no to skip  the step of zip clean data, this will save you some time, but will take much more disk space. Default is yes')
 p.add_argument('-u', '--unify-colors', dest='colors', default="yes", metavar='<str>',
                help='Unify group colors. yes or no. Default is yes')
-p.add_argument('-p', '--parse-raw', dest='parse_raw', default="yes", metavar='<str>',
-               help='Parse raw fastq file. yes or no. Default is yes')
+p.add_argument('--transcriptome', dest='transcriptome', action='store_true',
+               help="Pass this flag to use transcriptome mode")
+p.add_argument('-b', '--binning', dest='binning', default="no", metavar='<no,only,yes>',
+               help="Whether to bin the metagenome, yes(binning and metagenome analysis), no(metagenome analysis only), only(binning only). default: no")
 p.add_argument('-o', '--outdir', dest='outdir', metavar='<directory>', default='./',
                help='specify the output directory')
 
 options = p.parse_args()
-m = MetagenomePipline(raw_fqs_dir=options.input, pre_mapping_file=options.map, categories=False if options.category == 'auto' else options.category, host_db=options.host, sample_regex=options.sp,
-                      forward_regex=options.fp, reverse_regex=options.rp, out_dir=options.outdir, base_on_assembly=True if options.assembly == 'yes' else False, exclude=options.exclude,
-                      filter_species=False if options.filter == "none" else options.filter,
-                      zip_kneaddata=True if options.zip == 'yes' else False,
-                      mix_asem=True if options.mix == 'yes' else False,
-                      parse_raw=options.parse_raw=="yes")
+m = MetagenomePipline(
+    raw_fqs_dir=options.input, pre_mapping_file=options.map,
+    categories=False if options.category == 'auto' else options.category,
+    host_db=options.host, sample_regex=options.sp,
+    forward_regex=options.fp, reverse_regex=options.rp,
+    out_dir=options.outdir,
+    base_on_assembly=options.assembly == 'yes',
+    exclude=options.exclude,
+    filter_species=False if options.filter == "none" else options.filter,
+    zip_kneaddata=options.zip == 'yes',
+    mix_asem=options.mix == 'yes',
+    transcriptome=options.transcriptome,
+    orders=options.orders,
+    if_binning=options.binning
+)
 
 m.run(unify_colors=options.colors == "yes")

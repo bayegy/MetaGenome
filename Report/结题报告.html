@@ -4,7 +4,7 @@
 
 <html>
 	<head>
-		<title>宏基因组_微生太_结题报告</title>
+		<title>{{reads_type}}_微生太_结题报告</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -138,7 +138,7 @@
 			}
 
 			img {
-				max-width: 1000px;
+				max-width: 800px;
 				height:auto;
 			}
 			th, td {text-align:center; font-size: 80%}
@@ -177,7 +177,7 @@
 
 		<div class="header noprint">
 			<div class="title noprint"></div>
-			<div class="head_right noprint"><font color="#336699">宏基因组数据分析结题报告</font></div>
+			<div class="head_right noprint"><font color="#336699">{{reads_type}}数据分析结题报告</font></div>
 			<div class="cutline noprint"></div>
 		</div>
 
@@ -312,7 +312,7 @@
 		<div id="section">
 			<h1 class="noprint" style="font-size:100%; color:red"; align="center">温馨提示：请使用火狐或者Chrome的网页浏览器来查看报告</h1>
 			<h1 align="center">
-				<strong>微生太宏基因组数据分析结题报告</strong>
+				<strong>微生太{{reads_type}}数据分析结题报告</strong>
 			</h1>
 
 			<!-- blockquote style="line-height:28px" -->
@@ -324,9 +324,7 @@
 			<p >
 				微生物世界是分子多样性最大的天然资源库，基于菌株水平的传统分离培养技术为人们认识微生物多样性提供了可能，但是据估计自然界中超过99%的微生物不能通过传统的分离培养技术获得其纯培养，从而导致环境微生物中的多样性基因资源难以被发现。许多重要的微生物我们还不能识别，随着微生物活性产物的广泛研究和深入开发利用，从环境微生物中筛选到新活性物质的几率将逐步下降。而如何开拓利用环境微生物新资源是微生物研究的重要课题。为此研究者们开发了多种以特定环境微生物为研究对象的高通量测序方法。<sup>[1-3]</sup>
 			</p>
-			<p >
-				宏基因组学(Metagenomics)，是一种直接对微生物群体中包含的全部基因组信息进行研究的手段。宏基因组学绕过对微生物个体进行分离培养，应用基因组学技术对自然环境中的微生物群落进行研究的一门学科。它规避了对样品中的微生物进行分离培养，提供了一种对不可分离培养的微生物进行研究的途径，更真实的反应样本中微生物组成、互作情况，同时在分子水平对其代谢通路、基因功能进行研究。近年来，随着测序技术和信息技术的快速发展，利用新一代测序技术(Next Generation Sequencing)研究 Metagenomics，能快速准确的得到大量微生物基因数据和丰富的微生物研究信息，从而成为研究微生物多样性和群落特征的重要手段。细菌基因组相对较小，通常仅有一条环状DNA和质粒，通过高通量测序，可以了解其全部遗传信息。这也已经成为微生物研究的重要手段之一，为细菌的遗传进化、疾病预防与治疗、疫苗与抗生素的开发等提供重要的信息。如致力于研究微生物与人类疾病健康关系的人体微生物组计划(HMP, Human Microbiome Project, http://www.hmpdacc.org/ )，研究全球微生物组成和分布的全球微生物组计划(EMP, Earth Microbiome Project, http://www.earthmicrobiome.org/ )都主要利用高通量测序技术进行研究。<sup>[4-6]</sup>
-			</p>
+{{summary}}
 
 			<hr>
 			<div id="a2" class="anchor"></div>
@@ -353,7 +351,7 @@
 
 {{sum_steps}}
 
-			<p align="center"><img src="FiguresTablesForReport/src/image/2-2.png" width="649" height="800"></p>
+			<p align="center"><img src="FiguresTablesForReport/src/image/{{flowchart}}.png" width="649" height="800"></p>
 			<p align="center"><strong>图2-2 信息分析流程图 </strong></p>
 
 			<hr>
@@ -372,7 +370,7 @@
 				本项目采用Illumina Novaseq平台对测序样本进行双端测序。基于FASTQ格式的测序文件是一种存储序列信息的特定文件，推荐用Notepad++等文本编辑器或者在电脑终端中打开。FASTQ文件每四行对应一条测序Read：第一行以符号“@”起始，对应于序列ID和相应的描述信息；第二行为实际测得的碱基序列；第三行以符号“+”起始；而第四行的字符串则记录了第二行序列中每个碱基所对应的测序质量（详见<a href="https://en.wikipedia.org/wiki/Fastq"> https://en.wikipedia.org/wiki/Fastq</a>）。
 			</p>
 			<p >
-				采用 Illumina测序平台测序获得的原始数据(Raw Data)存在一定比例低质量数据，为了保证后续分析的结果准确可靠，需要对原始的测序数据进行预处理，包括质控（Trimmomatic<sup>[7]</sup> 参数：ILLUMINACLIP:adapters_path:2:30:10 SLIDINGWINDOW:4:20 MINLEN:50），和去宿主序列（Bowtie2<sup>[8]</sup>参数：--very-sensitive），获取用于后续分析的有效序列（clean data）。测序数据预处理统计结果见表 3-1。序列质控步骤关键参数解释如下：<br></p>
+				采用 Illumina测序平台测序获得的原始数据(Raw Data)存在一定比例低质量数据，为了保证后续分析的结果准确可靠，需要对原始的测序数据进行预处理，包括质控（Trimmomatic<sup>[7]</sup> 参数：ILLUMINACLIP:adapters_path:2:30:10 SLIDINGWINDOW:4:20 MINLEN:50），{{remove_rna}}和去宿主序列（Bowtie2<sup>[8]</sup>参数：--very-sensitive），获取用于后续分析的有效序列（clean data）。测序数据预处理统计结果见表 3-1。序列质控步骤关键参数解释如下：<br></p>
 
 			<p >1) 去除接头序列 (参数ILLUMINACLIP:adapters_path:2:30:10)；<br></p>
 			<p >2) 扫描序列（4bp滑窗大小），如果平均质量分低于20（99%正确率），切除后续序列（参数SLIDINGWINDOW:4:20）；<br></p>
@@ -399,7 +397,7 @@
 			</h3>
 
 			<p >
-				为了研究样品物种组成及多样性信息，我们用Kraken2<sup>[9]</sup>（参数为--confidence 0.2）对所有样品的全部的有效序列进行注释分类。Kraken2 是基于Kraken1后研发的的最新版本（2018）。Kraken系列软件是一种使用精确k-mer匹配的分类系统，可实现高精度和快速分类速度。该分类器将查询序列中的每个k聚体与包含给定k聚体的所有基因组的最低共同祖先（LCA）匹配。 Kraken2在Kraken1的基础上提供了重大改进，达到了数据库构建时间更短，数据库大小更小和分类速度更快的效果。在使用完Kraken对宏基因组测序数据进行分类。我们继续用Bracken<sup>[10]</sup>（默认参数）对Kraken2得到的分类结果进行分类后贝叶斯重新估算丰度来估算宏基因组样本的物种水平或属级丰度。<sup>[29,30]</sup> 
+				为了研究样品物种组成及多样性信息，我们用Kraken2<sup>[9]</sup>（参数为--confidence 0.2）对所有样品的全部的有效序列进行注释分类。Kraken2 是基于Kraken1后研发的的最新版本（2018）。Kraken系列软件是一种使用精确k-mer匹配的分类系统，可实现高精度和快速分类速度。该分类器将查询序列中的每个k聚体与包含给定k聚体的所有基因组的最低共同祖先（LCA）匹配。 Kraken2在Kraken1的基础上提供了重大改进，达到了数据库构建时间更短，数据库大小更小和分类速度更快的效果。在使用完Kraken对{{reads_type}}测序数据进行分类。我们继续用Bracken<sup>[10]</sup>（默认参数）对Kraken2得到的分类结果进行分类后贝叶斯重新估算丰度来估算{{reads_type}}样本的物种水平或属级丰度。<sup>[29,30]</sup> 
 			</p>
 			<p >
 				基于Bracken结果的绝对丰度及注释信息，对每个样品在一共7个分类水平界门纲目科属种(Kingdom,Phylum,Class,Order,Family,Genus,Species)上的序列数目占总序列数的比例进行统计，可以有效的评估样本的物种注释分辨率（注释到属/种的比例越高表示样本的注释效果越好），图4-1展示了每个样本中在各分类水平注释的相对程度:

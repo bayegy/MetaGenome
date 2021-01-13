@@ -3,8 +3,8 @@ import re
 from abc import ABCMeta, abstractmethod
 import pandas as pd
 import shutil
-from pipconfig import settings
-from systemMixin import SystemMixin
+from .pipconfig import settings
+from Bayegy.ampliconLibs.systemMixin import SystemMixin
 
 
 class Visualize(SystemMixin, metaclass=ABCMeta):
@@ -139,7 +139,7 @@ class Visualize(SystemMixin, metaclass=ABCMeta):
         else:
             colors_list_file = "{bayegy_home}/piputils/group_color.list".format(**self.context)
         self.system(
-            "{bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} \
+            "{python3_path} {bayegy_home}/piputils/write_colors_plan.py -i {mapping_file} -c {categories} \
             -p {colors_list_file} -o {out_dir}/colors_plan.json", colors_list_file=colors_list_file)
         os.environ['COLORS_PLAN_PATH'] = os.path.join(self.out_dir, 'colors_plan.json')
 

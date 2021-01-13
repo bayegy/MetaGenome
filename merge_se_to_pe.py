@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.8
 import os
 # import io
 import argparse
-from pyutils.read import read_file_n_lines
+from MetaGenome.pyutils.read import read_file_n_lines
 
 p = argparse.ArgumentParser(
     description="merge the unpaired reads(eg. bowtie2 output) to paired reads")
